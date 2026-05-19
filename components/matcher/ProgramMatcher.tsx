@@ -209,15 +209,15 @@ function StepCard({
       style={
         selected
           ? {
-              background: "linear-gradient(135deg, rgba(75,29,255,0.35), rgba(124,58,237,0.25))",
-              border: "1px solid rgba(139,92,246,0.45)",
-              color: "rgba(224,214,255,0.97)",
-              boxShadow: "0 0 24px rgba(75,29,255,0.15)",
+              background: "linear-gradient(135deg, rgba(124,58,237,0.18), rgba(107,63,192,0.12))",
+              border: "1px solid rgba(124,58,237,0.45)",
+              color: "#3D2878",
+              boxShadow: "0 0 24px rgba(124,58,237,0.10)",
             }
           : {
-              background: "rgba(14,10,28,0.55)",
-              border: "1px solid rgba(139,92,246,0.11)",
-              color: "rgba(196,181,253,0.65)",
+              background: "rgba(255,255,255,0.6)",
+              border: "1px solid rgba(124,58,237,0.12)",
+              color: "#3D2878",
             }
       }
     >
@@ -246,9 +246,9 @@ function ResultCard({ program, index }: { program: Program; index: number }) {
       transition={{ delay: index * 0.12, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="rounded-2xl p-5 flex flex-col"
       style={{
-        background: "rgba(12,8,26,0.7)",
-        border: `1px solid rgba(139,92,246,0.14)`,
-        boxShadow: `0 0 30px ${program.accent}10`,
+        background: "rgba(255,255,255,0.75)",
+        border: `1px solid rgba(124,58,237,0.14)`,
+        boxShadow: `0 4px 24px rgba(124,58,237,0.06)`,
       }}
     >
       <div
@@ -257,10 +257,10 @@ function ResultCard({ program, index }: { program: Program; index: number }) {
       >
         {program.tag}
       </div>
-      <h4 className="text-[0.86rem] font-semibold leading-snug mb-2.5" style={{ color: "rgba(218,208,255,0.97)" }}>
+      <h4 className="text-[0.86rem] font-semibold leading-snug mb-2.5" style={{ color: "#12082C" }}>
         {program.title}
       </h4>
-      <p className="text-[0.75rem] leading-relaxed flex-1 mb-4" style={{ color: "rgba(196,181,253,0.58)" }}>
+      <p className="text-[0.75rem] leading-relaxed flex-1 mb-4" style={{ color: "#6B58A2" }}>
         {program.desc}
       </p>
       <div className="flex items-center gap-3 mb-4">
@@ -323,10 +323,10 @@ export function ProgramMatcher() {
   }, []);
 
   return (
-    <section className="relative py-24 overflow-hidden" style={{ backgroundColor: "#020104" }}>
+    <section className="relative py-24 overflow-hidden" style={{ backgroundColor: "#F5F1FF" }}>
       {/* Ambient glow */}
       <div className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(75,29,255,0.07) 0%, transparent 70%)" }} />
+        style={{ background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(124,58,237,0.06) 0%, transparent 70%)" }} />
 
       <div className="max-w-3xl mx-auto px-6">
         {/* Heading */}
@@ -336,16 +336,16 @@ export function ProgramMatcher() {
           className="text-center mb-12"
         >
           <div className="inline-flex items-center gap-2 text-[0.62rem] font-semibold tracking-[0.28em] uppercase mb-5 px-4 py-1.5 rounded-full"
-            style={{ background: "rgba(75,29,255,0.1)", border: "1px solid rgba(139,92,246,0.2)", color: "rgba(196,181,253,0.72)" }}>
+            style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", color: "#6B3FC0" }}>
             <Sparkles size={10} />
             AI Program Matcher
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4"
-            style={{ color: "rgba(240,235,255,0.97)", letterSpacing: "-0.02em" }}>
+            style={{ color: "#12082C", letterSpacing: "-0.02em" }}>
             Find Your Pathway
           </h2>
           <p className="max-w-md mx-auto text-[0.88rem] leading-relaxed"
-            style={{ color: "rgba(196,181,253,0.5)" }}>
+            style={{ color: "#6B58A2" }}>
             Answer four questions and receive a personalized educational pathway curated for your specialty and goals.
           </p>
         </motion.div>
@@ -354,11 +354,11 @@ export function ProgramMatcher() {
         <div
           className="relative rounded-3xl overflow-hidden"
           style={{
-            background: "rgba(8,5,18,0.85)",
-            border: "1px solid rgba(139,92,246,0.14)",
+            background: "rgba(255,255,255,0.88)",
+            border: "1px solid rgba(124,58,237,0.14)",
             backdropFilter: "blur(40px)",
             WebkitBackdropFilter: "blur(40px)",
-            boxShadow: "0 0 80px rgba(75,29,255,0.08)",
+            boxShadow: "0 0 80px rgba(124,58,237,0.06), 0 8px 40px rgba(124,58,237,0.05)",
           }}
         >
           {/* Progress bar */}
@@ -400,10 +400,10 @@ export function ProgramMatcher() {
                     </div>
                   </div>
                   <div className="text-center">
-                    <div className="text-[0.86rem] font-semibold mb-1.5" style={{ color: "rgba(218,208,255,0.9)" }}>
+                    <div className="text-[0.86rem] font-semibold mb-1.5" style={{ color: "#12082C" }}>
                       Analyzing your profile
                     </div>
-                    <div className="text-[0.74rem]" style={{ color: "rgba(139,92,246,0.55)" }}>
+                    <div className="text-[0.74rem]" style={{ color: "#6B58A2" }}>
                       Generating your recommended educational pathway…
                     </div>
                   </div>
@@ -426,10 +426,10 @@ export function ProgramMatcher() {
                   <div className="flex items-center justify-between mb-6">
                     <div>
                       <div className="inline-flex items-center gap-2 text-[0.62rem] tracking-[0.2em] uppercase mb-1.5"
-                        style={{ color: "rgba(139,92,246,0.55)" }}>
+                        style={{ color: "#6B3FC0" }}>
                         <Sparkles size={9} /> Your Pathway
                       </div>
-                      <h3 className="text-[1.1rem] font-bold" style={{ color: "rgba(218,208,255,0.97)" }}>
+                      <h3 className="text-[1.1rem] font-bold" style={{ color: "#12082C" }}>
                         Recommended Programs
                       </h3>
                     </div>
@@ -464,13 +464,13 @@ export function ProgramMatcher() {
                   transition={{ duration: 0.36, ease: [0.22,1,0.36,1] }}
                 >
                   <div className="mb-1 text-[0.62rem] tracking-[0.24em] uppercase"
-                    style={{ color: "rgba(139,92,246,0.45)" }}>
+                    style={{ color: "#6B3FC0" }}>
                     Step {stepIdx + 1} of {STEPS.length}
                   </div>
-                  <h3 className="text-[1.2rem] font-bold mb-2" style={{ color: "rgba(218,208,255,0.97)" }}>
+                  <h3 className="text-[1.2rem] font-bold mb-2" style={{ color: "#12082C" }}>
                     {currentStep.question}
                   </h3>
-                  <p className="text-[0.77rem] mb-7" style={{ color: "rgba(196,181,253,0.5)" }}>
+                  <p className="text-[0.77rem] mb-7" style={{ color: "#6B58A2" }}>
                     {currentStep.sub}
                   </p>
                   <div className="grid gap-2.5 sm:grid-cols-2">

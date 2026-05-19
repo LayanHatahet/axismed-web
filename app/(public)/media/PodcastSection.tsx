@@ -3,12 +3,13 @@
 import { motion } from "framer-motion";
 import { Mic, Play, ArrowRight } from "lucide-react";
 import { SectionReveal } from "@/components/ui/SectionReveal";
-import { getMediaByType } from "@/lib/data/media";
 import { formatDateShort } from "@/lib/utils/formatDate";
+import type { MediaItem } from "@/lib/types";
 import Link from "next/link";
 
-export function PodcastSection() {
-  const podcasts = getMediaByType("podcast");
+interface Props { podcasts: MediaItem[] }
+
+export function PodcastSection({ podcasts }: Props) {
 
   return (
     <section className="relative py-28 section-white" id="podcast">

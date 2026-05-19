@@ -85,7 +85,7 @@ function TypingDots() {
       </div>
       <div
         className="px-4 py-3 rounded-2xl rounded-tl-sm flex items-center gap-1.5"
-        style={{ background: "rgba(18,14,32,0.9)", border: "1px solid rgba(139,92,246,0.12)" }}
+        style={{ background: "rgba(237,232,255,0.8)", border: "1px solid rgba(124,58,237,0.14)" }}
       >
         {[0, 1, 2].map((i) => (
           <motion.div
@@ -129,9 +129,9 @@ function Bubble({ msg }: { msg: Msg }) {
         style={
           isAI
             ? {
-                background: "rgba(16,12,30,0.95)",
-                border: "1px solid rgba(139,92,246,0.13)",
-                color: "rgba(214,204,255,0.9)",
+                background: "rgba(237,232,255,0.75)",
+                border: "1px solid rgba(124,58,237,0.14)",
+                color: "#3D2878",
               }
             : {
                 background: "linear-gradient(140deg, rgba(75,29,255,0.52), rgba(124,58,237,0.4))",
@@ -164,9 +164,9 @@ function HandoffCard({ waUrl }: { waUrl: string }) {
       transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
       className="mb-5 rounded-2xl overflow-hidden"
       style={{
-        background: "rgba(14,10,28,0.96)",
-        border: "1px solid rgba(139,92,246,0.22)",
-        boxShadow: "0 0 40px rgba(75,29,255,0.10)",
+        background: "rgba(255,255,255,0.96)",
+        border: "1px solid rgba(124,58,237,0.22)",
+        boxShadow: "0 0 40px rgba(124,58,237,0.07)",
       }}
     >
       {/* Top accent line */}
@@ -183,16 +183,16 @@ function HandoffCard({ waUrl }: { waUrl: string }) {
             <Users size={12} color="#9B5CF6" />
           </div>
           <div>
-            <div className="text-[0.75rem] font-semibold" style={{ color: "rgba(218,208,255,0.95)" }}>
+            <div className="text-[0.75rem] font-semibold" style={{ color: "#12082C" }}>
               Connecting to our Team
             </div>
-            <div className="text-[0.62rem] tracking-widest uppercase mt-0.5" style={{ color: "rgba(139,92,246,0.55)" }}>
+            <div className="text-[0.62rem] tracking-widest uppercase mt-0.5" style={{ color: "#6B3FC0" }}>
               Seamless Handover
             </div>
           </div>
         </div>
 
-        <p className="text-[0.75rem] leading-relaxed mb-4" style={{ color: "rgba(196,181,253,0.72)" }}>
+        <p className="text-[0.75rem] leading-relaxed mb-4" style={{ color: "#6B58A2" }}>
           Our concierge team can continue assisting you directly. Your conversation and context have been preserved for a seamless handover.
         </p>
 
@@ -248,7 +248,7 @@ function LeadBadge({ lead }: { lead: Lead }) {
       <span className="text-[0.60rem] tracking-widest uppercase" style={{ color: "rgba(139,92,246,0.5)" }}>
         Concierge remembers:
       </span>
-      <span className="text-[0.63rem] font-medium" style={{ color: "rgba(196,181,253,0.65)" }}>
+      <span className="text-[0.63rem] font-medium" style={{ color: "#6B58A2" }}>
         {parts.join(" · ")}
       </span>
     </motion.div>
@@ -296,13 +296,13 @@ function Panel({
         right: 24,
         width: "min(400px, calc(100vw - 48px))",
         height: "min(620px, calc(100dvh - 140px))",
-        background: "rgba(5,5,8,0.95)",
-        border: "1px solid rgba(139,92,246,0.17)",
+        background: "rgba(255,255,255,0.97)",
+        border: "1px solid rgba(124,58,237,0.17)",
         borderRadius: 24,
         backdropFilter: "blur(56px)",
         WebkitBackdropFilter: "blur(56px)",
         boxShadow:
-          "0 0 0 1px rgba(255,255,255,0.02), 0 32px 100px rgba(0,0,0,0.75), 0 0 80px rgba(75,29,255,0.09)",
+          "0 0 0 1px rgba(124,58,237,0.04), 0 32px 100px rgba(124,58,237,0.12), 0 0 80px rgba(124,58,237,0.06)",
       }}
     >
       {/* Top ambient glow */}
@@ -326,7 +326,7 @@ function Panel({
       {/* ── Header ── */}
       <div
         className="relative z-10 flex items-center justify-between px-5 py-4 flex-shrink-0"
-        style={{ borderBottom: "1px solid rgba(139,92,246,0.09)" }}
+        style={{ borderBottom: "1px solid rgba(124,58,237,0.10)" }}
       >
         <div className="flex items-center gap-3">
           <div
@@ -340,7 +340,7 @@ function Panel({
             <Sparkles size={15} color="#9B5CF6" />
           </div>
           <div>
-            <div className="text-[0.8rem] font-semibold tracking-wide" style={{ color: "rgba(218,208,255,0.97)" }}>
+            <div className="text-[0.8rem] font-semibold tracking-wide" style={{ color: "#12082C" }}>
               AxisMed Concierge AI
             </div>
             <div className="flex items-center gap-1.5 mt-0.5">
@@ -350,7 +350,7 @@ function Panel({
                 animate={{ opacity: [0.5, 1, 0.5], scale: [0.9, 1.1, 0.9] }}
                 transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
               />
-              <span className="text-[0.62rem] tracking-widest uppercase" style={{ color: "rgba(139,92,246,0.55)" }}>
+              <span className="text-[0.62rem] tracking-widest uppercase" style={{ color: "#6B3FC0" }}>
                 Healthcare Intelligence
               </span>
             </div>
@@ -428,19 +428,19 @@ function Panel({
                 onClick={() => onQuick(q.msg)}
                 className="text-left px-4 py-3 rounded-xl text-[0.74rem] font-medium tracking-wide flex items-center justify-between gap-3 transition-all duration-200"
                 style={{
-                  background: "rgba(75,29,255,0.05)",
-                  border: "1px solid rgba(139,92,246,0.13)",
-                  color: "rgba(196,181,253,0.68)",
+                  background: "rgba(124,58,237,0.05)",
+                  border: "1px solid rgba(124,58,237,0.14)",
+                  color: "#3D2878",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(75,29,255,0.13)";
-                  e.currentTarget.style.borderColor = "rgba(139,92,246,0.3)";
-                  e.currentTarget.style.color = "rgba(218,208,255,0.96)";
+                  e.currentTarget.style.background = "rgba(124,58,237,0.10)";
+                  e.currentTarget.style.borderColor = "rgba(124,58,237,0.3)";
+                  e.currentTarget.style.color = "#12082C";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(75,29,255,0.05)";
-                  e.currentTarget.style.borderColor = "rgba(139,92,246,0.13)";
-                  e.currentTarget.style.color = "rgba(196,181,253,0.68)";
+                  e.currentTarget.style.background = "rgba(124,58,237,0.05)";
+                  e.currentTarget.style.borderColor = "rgba(124,58,237,0.14)";
+                  e.currentTarget.style.color = "#3D2878";
                 }}
               >
                 <span>{q.label}</span>
@@ -480,8 +480,8 @@ function Panel({
           <div
             className="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200"
             style={{
-              background: "rgba(10,7,22,0.88)",
-              border: "1px solid rgba(139,92,246,0.15)",
+              background: "rgba(237,232,255,0.5)",
+              border: "1px solid rgba(124,58,237,0.15)",
             }}
           >
             <input
@@ -489,8 +489,8 @@ function Panel({
               onChange={(e) => onInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && onSend()}
               placeholder="Message the concierge…"
-              className="flex-1 bg-transparent outline-none text-[0.79rem] placeholder:text-purple-900/40 caret-purple-400"
-              style={{ color: "rgba(210,200,255,0.92)" }}
+              className="flex-1 bg-transparent outline-none text-[0.79rem] placeholder:text-purple-400/50 caret-purple-600"
+              style={{ color: "#12082C" }}
             />
             <motion.button
               onClick={onSend}

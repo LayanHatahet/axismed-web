@@ -263,7 +263,7 @@ export default function AdminConcierge() {
                 {interests.map((interest) => (
                   <button
                     key={interest}
-                    onClick={() => setFilterInterest(interest)}
+                    onClick={() => interest && setFilterInterest(interest)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${
                       filterInterest === interest
                         ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"

@@ -298,9 +298,9 @@ export function GlobalMap() {
   ];
 
   return (
-    <section className="relative py-24 overflow-hidden" style={{ backgroundColor: "#020104" }}>
+    <section className="relative py-24 overflow-hidden" style={{ backgroundColor: "#EDE8FF" }}>
       <div className="absolute top-0 inset-x-0 h-32 pointer-events-none"
-        style={{ background: "linear-gradient(to bottom, #020104, transparent)" }} />
+        style={{ background: "linear-gradient(to bottom, rgba(237,232,255,0.8), transparent)" }} />
 
       <div className="max-w-6xl mx-auto px-6">
         {/* Heading */}
@@ -310,15 +310,15 @@ export function GlobalMap() {
           className="text-center mb-12"
         >
           <div className="inline-block text-[0.62rem] font-semibold tracking-[0.28em] uppercase mb-5 px-4 py-1.5 rounded-full"
-            style={{ background: "rgba(75,29,255,0.1)", border: "1px solid rgba(139,92,246,0.2)", color: "rgba(196,181,253,0.72)" }}>
+            style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", color: "#6B3FC0" }}>
             Global Reach
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4"
-            style={{ color: "rgba(240,235,255,0.97)", letterSpacing: "-0.02em" }}>
+            style={{ color: "#12082C", letterSpacing: "-0.02em" }}>
             The AxisMed Network
           </h2>
           <p className="max-w-lg mx-auto text-[0.88rem] leading-relaxed"
-            style={{ color: "rgba(196,181,253,0.5)" }}>
+            style={{ color: "#6B58A2" }}>
             A living ecosystem of surgical education, healthcare innovation, and global medical collaboration spanning 15 countries.
           </p>
         </motion.div>
@@ -370,10 +370,10 @@ export function GlobalMap() {
         >
           {STATS.map(({ Icon, val, label }) => (
             <div key={label} className="flex flex-col items-center py-5 rounded-2xl"
-              style={{ background: "rgba(12,8,26,0.55)", border: "1px solid rgba(139,92,246,0.09)" }}>
-              <Icon size={15} color="rgba(139,92,246,0.5)" className="mb-2" />
-              <div className="text-[1.65rem] font-bold tracking-tight" style={{ color: "rgba(218,208,255,0.97)" }}>{val}</div>
-              <div className="text-[0.63rem] tracking-widest uppercase mt-0.5" style={{ color: "rgba(139,92,246,0.42)" }}>{label}</div>
+              style={{ background: "rgba(255,255,255,0.7)", border: "1px solid rgba(124,58,237,0.12)" }}>
+              <Icon size={15} color="rgba(124,58,237,0.6)" className="mb-2" />
+              <div className="text-[1.65rem] font-bold tracking-tight" style={{ color: "#12082C" }}>{val}</div>
+              <div className="text-[0.63rem] tracking-widest uppercase mt-0.5" style={{ color: "#6B58A2" }}>{label}</div>
             </div>
           ))}
         </motion.div>

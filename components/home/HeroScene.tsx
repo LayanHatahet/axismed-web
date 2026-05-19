@@ -1,295 +1,386 @@
 "use client";
 
-import { useRef, useEffect, useState, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRef, useEffect, useMemo, useCallback, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Html, Float } from "@react-three/drei";
+import { Html } from "@react-three/drei";
 import * as THREE from "three";
-import {
-  GraduationCap, Globe, Zap, Activity,
-  Users, Scissors, Cpu, Brain, Video,
-} from "lucide-react";
 
-type Mouse = { x: number; y: number };
+/* ═══════════════════════════════════════════════════════════════
+   CONFIGURATION
+═══════════════════════════════════════════════════════════════ */
 
-/* ─────────────────────────────────────────────────────────
-   DATA
-───────────────────────────────────────────────────────── */
+const S        = 1.52;
+const SEG      = 600;
+const RIB_W    = 0.30;
+const RIB_T    = 0.052;
+const DRAW_SEC = 9.2;
+const BRANCH_S = 2.8;
+const B_SEG    = 90;
+// Shift whole scene down so knot doesn't overlap the navbar
+const Y_OFFSET = -1.2;
 
-const ORBIT_DEFS = [
-  { radius: 2.8, tubeR: 0.007, rotX: 0.28, rotZ: 0.00, speed:  0.28, color: "#3B0F8C", opacity: 0.55 },
-  { radius: 3.9, tubeR: 0.006, rotX: 0.65, rotZ: 0.52, speed: -0.18, color: "#2D0A70", opacity: 0.42 },
-  { radius: 5.0, tubeR: 0.005, rotX: 1.12, rotZ: 0.95, speed:  0.12, color: "#1E0850", opacity: 0.30 },
+const CAM = [
+  { px:  0.6, py:  0.3, pz:  6.0, lx:  0.1, ly:  0.0, t0:  0.0, t1:  3.0 },
+  { px:  2.0, py:  0.8, pz:  9.0, lx:  0.3, ly:  0.1, t0:  3.0, t1:  6.0 },
+  { px: -1.6, py:  0.5, pz: 10.6, lx: -0.2, ly:  0.0, t0:  6.0, t1:  8.5 },
+  { px:  0.0, py:  0.0, pz: 11.5, lx:  0.0, ly:  0.0, t0:  8.5, t1: 11.0 },
 ] as const;
 
-const TWO_THIRDS_PI = (Math.PI * 2) / 3;
-
-const NODE_DEFS = [
-  { Icon: GraduationCap, label: "Surgical Education",    orbit: 0, angle: 0,                 color: "#4C1D95", href: "/courses"  },
-  { Icon: Activity,      label: "ECG / Pulse",            orbit: 0, angle: TWO_THIRDS_PI,     color: "#3B0F8C", href: "/courses"  },
-  { Icon: Users,         label: "Surgeon Community",      orbit: 0, angle: TWO_THIRDS_PI * 2, color: "#42148C", href: "/about"    },
-  { Icon: Globe,         label: "Global Connection",      orbit: 1, angle: Math.PI * 0.5,     color: "#2D0A6E", href: "/partners" },
-  { Icon: Cpu,           label: "Robotic Surgery",        orbit: 1, angle: Math.PI * 1.16,    color: "#3A1080", href: "/courses"  },
-  { Icon: Brain,         label: "AI Healthcare",          orbit: 1, angle: Math.PI * 1.83,    color: "#331070", href: "/courses"  },
-  { Icon: Zap,           label: "Healthcare Innovation",  orbit: 2, angle: Math.PI * 0.3,     color: "#4A1890", href: "/about"    },
-  { Icon: Scissors,      label: "Cadaveric Training",     orbit: 2, angle: Math.PI * 1.0,     color: "#3D0E80", href: "/courses"  },
-  { Icon: Video,         label: "Media & Communication",  orbit: 2, angle: Math.PI * 1.7,     color: "#3F1285", href: "/media"    },
+const BRANCHES = [
+  { color: "#9B77FF", paramT: 0.33, tx: -8.0, ty:  4.5, tz: 0 },
+  { color: "#7C6AFF", paramT: 0.67, tx:  8.0, ty:  4.5, tz: 0 },
+  { color: "#B89CFF", paramT: 0.00, tx:  0.0, ty: -8.0, tz: 0 },
 ] as const;
 
-/* ─────────────────────────────────────────────────────────
-   CAMERA
-───────────────────────────────────────────────────────── */
+/* Label world positions — close to branch tips but safely within the
+   camera's viewport at z=11.5, FOV=50° (visible ≈ ±9.5 x / ±5.3 y) */
+const BRANCH_LABELS = [
+  { label: "Courses", href: "/courses", pos: [-6.5,  3.8, 0] as [number,number,number] },
+  { label: "Media",   href: "/media",   pos: [ 6.5,  3.8, 0] as [number,number,number] },
+  { label: "Events",  href: "/events",  pos: [ 0.0, -4.5, 0] as [number,number,number] },
+] as const;
 
-function CameraRig({ mouse }: { mouse: React.MutableRefObject<Mouse> }) {
-  const { camera } = useThree();
-  useFrame(() => {
-    camera.position.x += (mouse.current.x * 2.2 - camera.position.x) * 0.034;
-    camera.position.y += (mouse.current.y * 1.6 - camera.position.y) * 0.034;
-    camera.lookAt(0, 0, 0);
-  });
-  return null;
+/* ═══════════════════════════════════════════════════════════════
+   TRIQUETRA CURVE
+═══════════════════════════════════════════════════════════════ */
+
+function makeTrefoilCurve(scale: number): THREE.CatmullRomCurve3 {
+  const pts: THREE.Vector3[] = [];
+  const N = SEG + 1;
+  for (let i = 0; i <= N; i++) {
+    const t = (i / N) * Math.PI * 2;
+    pts.push(new THREE.Vector3(
+      (Math.sin(t) + 2 * Math.sin(2 * t)) * scale,
+      (2 * Math.cos(2 * t) - Math.cos(t)) * scale,
+      -Math.sin(3 * t) * scale * 0.50,
+    ));
+  }
+  return new THREE.CatmullRomCurve3(pts, true);
 }
 
-/* ─────────────────────────────────────────────────────────
-   CENTRAL MONUMENT
-───────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   FLAT RIBBON GEOMETRY
+═══════════════════════════════════════════════════════════════ */
 
-function MonumentLogo({ phase, mouse }: { phase: number; mouse: React.MutableRefObject<Mouse> }) {
+type Frames = ReturnType<THREE.CatmullRomCurve3["computeFrenetFrames"]>;
+
+function buildFlatRibbon(
+  curve: THREE.CatmullRomCurve3,
+  frames: Frames,
+  segments: number,
+  width: number,
+  thick: number,
+): THREE.BufferGeometry {
+  const pos: number[] = [], norm: number[] = [], uv: number[] = [], idx: number[] = [];
+  const hw = width / 2, ht = thick / 2;
+
+  for (let i = 0; i <= segments; i++) {
+    const t  = i / segments;
+    const pt = curve.getPoint(t);
+    const N  = frames.normals[i];
+    const B  = frames.binormals[i];
+
+    const tl = new THREE.Vector3(pt.x - B.x*hw + N.x*ht, pt.y - B.y*hw + N.y*ht, pt.z - B.z*hw + N.z*ht);
+    const tr = new THREE.Vector3(pt.x + B.x*hw + N.x*ht, pt.y + B.y*hw + N.y*ht, pt.z + B.z*hw + N.z*ht);
+    const br = new THREE.Vector3(pt.x + B.x*hw - N.x*ht, pt.y + B.y*hw - N.y*ht, pt.z + B.z*hw - N.z*ht);
+    const bl = new THREE.Vector3(pt.x - B.x*hw - N.x*ht, pt.y - B.y*hw - N.y*ht, pt.z - B.z*hw - N.z*ht);
+
+    pos.push(tl.x,tl.y,tl.z, tr.x,tr.y,tr.z, br.x,br.y,br.z, bl.x,bl.y,bl.z);
+    norm.push( N.x, N.y, N.z,  N.x, N.y, N.z, -N.x,-N.y,-N.z, -N.x,-N.y,-N.z);
+    uv.push(0,t*6, 1,t*6, 1,t*6, 0,t*6);
+  }
+
+  for (let i = 0; i < segments; i++) {
+    const a = i * 4, b = a + 4;
+    idx.push(a,a+1,b, a+1,b+1,b);
+    idx.push(a+3,a+2,b+3, a+2,b+2,b+3);
+    idx.push(a,b,a+3, b,b+3,a+3);
+    idx.push(a+1,a+2,b+1, a+2,b+2,b+1);
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos,  3));
+  geo.setAttribute("normal",   new THREE.Float32BufferAttribute(norm, 3));
+  geo.setAttribute("uv",       new THREE.Float32BufferAttribute(uv,   2));
+  geo.setIndex(idx);
+  geo.setDrawRange(0, 0);
+  return geo;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RIBBON KNOT
+═══════════════════════════════════════════════════════════════ */
+
+function RibbonKnot({
+  mouse, onComplete, active, drawElapsed,
+}: {
+  mouse:       React.MutableRefObject<{ x: number; y: number }>;
+  onComplete:  () => void;
+  active:      boolean;
+  drawElapsed: React.MutableRefObject<number>;
+}) {
   const groupRef = useRef<THREE.Group>(null);
+  const drawRef  = useRef(0);
+  const doneRef  = useRef(false);
   const autoRotY = useRef(0);
   const tiltX    = useRef(0);
   const tiltY    = useRef(0);
-  const t        = useRef(0);
+  const floatT   = useRef(0);
 
-  const coreMat = useMemo(() => new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color("#7C3AED"),
-    metalness: 0.88, roughness: 0.06, reflectivity: 1.0,
-    envMapIntensity: 3.8,
-    emissive: new THREE.Color("#4C2A9A"), emissiveIntensity: 0,
-    transparent: true, opacity: 0,
-    clearcoat: 0.95, clearcoatRoughness: 0.05,
-    iridescence: 0.25, iridescenceIOR: 1.6,
+  const curve    = useMemo(() => makeTrefoilCurve(S), []);
+  const frames   = useMemo(() => curve.computeFrenetFrames(SEG, true), [curve]);
+  const geo      = useMemo(() => buildFlatRibbon(curve, frames, SEG, RIB_W, RIB_T), [curve, frames]);
+  const totalIdx = useMemo(() => geo.index?.count ?? SEG * 24, [geo]);
+
+  const mat = useMemo(() => new THREE.MeshPhysicalMaterial({
+    color:              new THREE.Color("#6D28D9"),
+    metalness:          0.04,
+    roughness:          0.13,
+    clearcoat:          0.90,
+    clearcoatRoughness: 0.05,
+    sheen:              0.55,
+    sheenRoughness:     0.28,
+    sheenColor:         new THREE.Color("#C4B5FD"),
+    iridescence:        0.48,
+    iridescenceIOR:     1.58,
+    side:               THREE.DoubleSide,
+    envMapIntensity:    2.8,
   }), []);
 
-  const glowMat = useMemo(() => new THREE.MeshBasicMaterial({
-    color: new THREE.Color("#9B5CF6"),
-    transparent: true, opacity: 0,
-    side: THREE.BackSide,
-    blending: THREE.AdditiveBlending, depthWrite: false,
-  }), []);
+  const makeGlowMat = (c: string) => new THREE.MeshBasicMaterial({
+    color: new THREE.Color(c), transparent: true, opacity: 0,
+    side: THREE.BackSide, blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const g1 = useMemo(() => makeGlowMat("#7C3AED"), []);
+  const g2 = useMemo(() => makeGlowMat("#5B21B6"), []);
+  const g3 = useMemo(() => makeGlowMat("#3B0F8C"), []);
 
-  const trailGeo = useMemo(() => {
-    const pts: THREE.Vector3[] = [];
-    const p = 2, q = 3, R = 2.1;
-    for (let i = 0; i <= 360; i++) {
-      const u = (i / 360) * Math.PI * 2 * p;
-      const qu = (q / p) * u;
-      pts.push(new THREE.Vector3(
-        R * (2 + Math.cos(qu)) * 0.5 * Math.cos(u),
-        R * (2 + Math.cos(qu)) * 0.5 * Math.sin(u),
-        R * Math.sin(qu) * 0.5,
-      ));
-    }
-    return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true), 360, 0.0045, 6, true);
-  }, []);
+  const onDone = useCallback(() => { doneRef.current = true; onComplete(); }, [onComplete]);
 
-  const trailMat = useMemo(() => new THREE.MeshBasicMaterial({
-    color: new THREE.Color("#E0D8FF"),
-    transparent: true, opacity: 0,
-    blending: THREE.AdditiveBlending, depthWrite: false,
-  }), []);
+  useFrame((_, dt) => {
+    if (!active) return;
+    floatT.current += dt;
+    const de = drawElapsed.current;
 
-  const pulse = useRef({ active: false, t: 0, next: 4.5 });
+    if (!doneRef.current) {
+      drawRef.current += (totalIdx / DRAW_SEC) * dt;
+      const c = Math.min(Math.floor(drawRef.current), totalIdx);
+      geo.setDrawRange(0, c);
+      if (drawRef.current >= totalIdx) onDone();
+    }
 
-  useFrame((_, delta) => {
-    t.current += delta;
-    const ps = pulse.current;
-    const opT = phase >= 2 ? 1 : 0;
-    coreMat.opacity           += (opT               - coreMat.opacity)           * 0.009;
-    glowMat.opacity           += (opT * 0.042        - glowMat.opacity)           * 0.009;
-    coreMat.emissiveIntensity += (opT * 0.055        - coreMat.emissiveIntensity) * 0.009;
-    if (phase >= 2) {
-      coreMat.emissiveIntensity = Math.max(0, 0.055 * 0.68 + Math.sin(t.current * 0.36) * 0.028);
+    const glowP = Math.min(de / 3.0, 1.0);
+    const boost = doneRef.current ? 1.1 : 1.0;
+    g1.opacity += (glowP * 0.07 * boost - g1.opacity) * 0.045;
+    g2.opacity += (glowP * 0.035 * boost - g2.opacity) * 0.035;
+    g3.opacity += (glowP * 0.016 * boost - g3.opacity) * 0.025;
+
+    if (groupRef.current) {
+      const sp  = Math.min(de / 7.0, 1.0);
+      const ep  = sp < 0.5 ? 2*sp*sp : 1 - Math.pow(-2*sp+2, 2)/2;
+      const scl = doneRef.current ? 1.0 : 4.0 - 3.0 * ep;
+      groupRef.current.scale.setScalar(scl);
     }
-    if (phase >= 3 && !ps.active && t.current > ps.next) {
-      ps.active = true; ps.t = 0;
-      ps.next = t.current + 5.5 + Math.random() * 4.5;
-    }
-    if (ps.active) {
-      ps.t += delta / 3;
-      const pr = ps.t;
-      trailMat.opacity = pr < 0.14 ? (pr / 0.14) * 0.12 : pr < 0.52 ? 0.12 : 0.12 * (1 - (pr - 0.52) / 0.48);
-      if (ps.t >= 1) { ps.active = false; trailMat.opacity = 0; }
-    }
-    autoRotY.current += delta * 0.085;
-    tiltX.current += (mouse.current.y *  0.36 - tiltX.current) * 0.040;
-    tiltY.current += (mouse.current.x *  0.48 - tiltY.current) * 0.040;
+
+    autoRotY.current += dt * (doneRef.current ? 0.09 : 0.038);
+    tiltX.current += (mouse.current.y * 0.28 - tiltX.current) * 0.042;
+    tiltY.current += (mouse.current.x * 0.40 - tiltY.current) * 0.042;
+
     if (groupRef.current) {
       groupRef.current.rotation.y = autoRotY.current + tiltY.current;
-      groupRef.current.rotation.x = Math.sin(t.current * 0.072) * 0.042 + tiltX.current;
-      groupRef.current.rotation.z = Math.cos(t.current * 0.055) * 0.018;
+      groupRef.current.rotation.x = Math.sin(floatT.current * 0.052) * 0.026 + tiltX.current;
+      groupRef.current.rotation.z = Math.cos(floatT.current * 0.040) * 0.013;
     }
   });
 
   return (
     <group ref={groupRef}>
-      <mesh><torusKnotGeometry args={[2.1, 0.52, 320, 32, 2, 3]} /><primitive object={glowMat} attach="material" /></mesh>
-      <mesh><torusKnotGeometry args={[2.1, 0.42, 320, 32, 2, 3]} /><primitive object={coreMat} attach="material" /></mesh>
-      <mesh geometry={trailGeo} material={trailMat} />
+      <group scale={6.5}><mesh geometry={geo} material={g3} /></group>
+      <group scale={3.5}><mesh geometry={geo} material={g2} /></group>
+      <group scale={1.9}><mesh geometry={geo} material={g1} /></group>
+      <mesh geometry={geo} material={mat} />
     </group>
   );
 }
 
-/* ─────────────────────────────────────────────────────────
-   ORBITAL RING + ENERGY PULSES
-───────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   BRANCH PATHS + LABELS AT ENDPOINTS
+═══════════════════════════════════════════════════════════════ */
 
-function OrbitalRing({ def, phase }: { def: typeof ORBIT_DEFS[number]; phase: number }) {
-  const groupRef  = useRef<THREE.Group>(null);
-  const pulse1Ref = useRef<THREE.Mesh>(null);
-  const pulse2Ref = useRef<THREE.Mesh>(null);
-  const angleRef  = useRef(0);
-
-  const ringMat = useMemo(() => new THREE.MeshBasicMaterial({
-    color: new THREE.Color(def.color),
-    transparent: true, opacity: 0,
-    blending: THREE.AdditiveBlending, depthWrite: false,
-  }), [def.color]);
-
-  const pulseMat = useMemo(() => new THREE.MeshBasicMaterial({
-    color: new THREE.Color("#D8D0FF"),
-    transparent: true, opacity: 0,
-    blending: THREE.AdditiveBlending, depthWrite: false,
-  }), []);
-
-  useEffect(() => {
-    if (groupRef.current) {
-      groupRef.current.rotation.x = def.rotX;
-      groupRef.current.rotation.z = def.rotZ;
-    }
-  }, [def.rotX, def.rotZ]);
-
-  useFrame((_, delta) => {
-    const target = phase >= 2 ? def.opacity : 0;
-    ringMat.opacity  += (target       - ringMat.opacity)  * 0.014;
-    pulseMat.opacity += (target * 1.4 - pulseMat.opacity) * 0.014;
-    if (groupRef.current) groupRef.current.rotation.y += delta * def.speed;
-    angleRef.current += delta * Math.abs(def.speed) * 2.2;
-    const r = def.radius;
-    if (pulse1Ref.current) pulse1Ref.current.position.set(Math.cos(angleRef.current) * r, 0, Math.sin(angleRef.current) * r);
-    if (pulse2Ref.current) pulse2Ref.current.position.set(Math.cos(angleRef.current + Math.PI) * r, 0, Math.sin(angleRef.current + Math.PI) * r);
-  });
-
-  return (
-    <group ref={groupRef}>
-      <mesh><torusGeometry args={[def.radius, def.tubeR, 6, 128]} /><primitive object={ringMat} attach="material" /></mesh>
-      <mesh ref={pulse1Ref}><sphereGeometry args={[0.045, 8, 8]} /><primitive object={pulseMat} attach="material" /></mesh>
-      <mesh ref={pulse2Ref}><sphereGeometry args={[0.038, 8, 8]} /><primitive object={pulseMat} attach="material" /></mesh>
-    </group>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────
-   FLOATING GLASS SPHERE NODE
-───────────────────────────────────────────────────────── */
-
-function FloatingNode({ nodeDef, orbitDef, phase }: {
-  nodeDef:  typeof NODE_DEFS[number];
-  orbitDef: typeof ORBIT_DEFS[number];
-  phase:    number;
+function BranchPath({ branchCurve, color, active }: {
+  branchCurve: THREE.CatmullRomCurve3;
+  color: string;
+  active: boolean;
 }) {
-  const router    = useRouter();
-  const groupRef  = useRef<THREE.Group>(null);
-  const sphereRef = useRef<THREE.Mesh>(null);
-  const iconRef   = useRef<HTMLDivElement>(null);
-  const [hovered, setHovered] = useState(false);
-  const angleRef  = useRef(nodeDef.angle);
+  const drawRef  = useRef(0);
+  const totalRef = useRef(0);
 
-  const navigate = useCallback(() => router.push(nodeDef.href), [router, nodeDef.href]);
+  const geo = useMemo(() => {
+    const g = new THREE.TubeGeometry(branchCurve, B_SEG, 0.014, 6, false);
+    totalRef.current = g.index?.count ?? B_SEG * 6 * 6;
+    g.setDrawRange(0, 0);
+    return g;
+  }, [branchCurve]);
 
-  const glassMat = useMemo(() => new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color("#0E052A"),
-    metalness: 0.0, roughness: 0.05,
-    reflectivity: 0.92, envMapIntensity: 2.8,
-    emissive: new THREE.Color(nodeDef.color), emissiveIntensity: 0,
-    transparent: true, opacity: 0,
-    transmission: 0.72, thickness: 0.5, ior: 1.42,
-  }), [nodeDef.color]);
-
-  const coreMat = useMemo(() => new THREE.MeshBasicMaterial({
-    color: new THREE.Color(nodeDef.color),
-    transparent: true, opacity: 0,
+  const mat = useMemo(() => new THREE.MeshBasicMaterial({
+    color: new THREE.Color(color), transparent: true, opacity: 0.6,
     blending: THREE.AdditiveBlending, depthWrite: false,
-  }), [nodeDef.color]);
+  }), [color]);
 
-  useEffect(() => {
-    if (groupRef.current) {
-      groupRef.current.rotation.x = orbitDef.rotX;
-      groupRef.current.rotation.z = orbitDef.rotZ;
-    }
-  }, [orbitDef.rotX, orbitDef.rotZ]);
-
-  const _wp = useMemo(() => new THREE.Vector3(), []);
-
-  useFrame(({ camera }, delta) => {
-    const opTarget = phase >= 3 ? 0.78 : 0;
-    glassMat.opacity           += (opTarget                  - glassMat.opacity)           * 0.012;
-    glassMat.emissiveIntensity += ((hovered ? 0.22 : 0.07)  - glassMat.emissiveIntensity) * 0.08;
-    coreMat.opacity            += (opTarget * 0.55           - coreMat.opacity)            * 0.012;
-    if (groupRef.current) groupRef.current.rotation.y += delta * orbitDef.speed;
-    angleRef.current += delta * orbitDef.speed;
-    if (iconRef.current && sphereRef.current) {
-      sphereRef.current.getWorldPosition(_wp);
-      iconRef.current.style.visibility = _wp.dot(camera.position) > 0 ? "visible" : "hidden";
-    }
+  useFrame((_, dt) => {
+    if (!active) return;
+    drawRef.current += (totalRef.current / BRANCH_S) * dt;
+    geo.setDrawRange(0, Math.min(Math.floor(drawRef.current), totalRef.current));
   });
 
-  const r = orbitDef.radius;
-  const x = Math.cos(nodeDef.angle) * r;
-  const z = Math.sin(nodeDef.angle) * r;
-  const Icon = nodeDef.Icon;
+  return <mesh geometry={geo} material={mat} />;
+}
+
+function BranchPaths({
+  knotCurve, active, showLabels,
+}: {
+  knotCurve:  THREE.CatmullRomCurve3;
+  active:     boolean;
+  showLabels: boolean;
+}) {
+  const curves = useMemo(() =>
+    BRANCHES.map(({ paramT, tx, ty, tz }) => {
+      const start = knotCurve.getPoint(paramT);
+      const tang  = knotCurve.getTangent(paramT);
+      const ctrl  = new THREE.Vector3(
+        start.x + (tx - start.x) * 0.38 + tang.x * 1.6,
+        start.y + (ty - start.y) * 0.38 + tang.y * 1.6,
+        start.z * 0.2,
+      );
+      return new THREE.CatmullRomCurve3([start.clone(), ctrl, new THREE.Vector3(tx, ty, tz)], false);
+    }),
+  [knotCurve]);
+
+  // Inject keyframes into the document once
+  useEffect(() => {
+    const id = "axismed-branch-keyframes";
+    if (document.getElementById(id)) return;
+    const style = document.createElement("style");
+    style.id = id;
+    style.textContent = `
+      @keyframes orbPulse {
+        0%,100% { transform: scale(1);   opacity: 0.9; box-shadow: 0 0 0 0 rgba(139,92,246,0.55); }
+        50%      { transform: scale(1.3); opacity: 0.6; box-shadow: 0 0 0 7px rgba(139,92,246,0); }
+      }
+      @keyframes ringBurst {
+        0%   { transform: scale(0.8); opacity: 0.8; }
+        100% { transform: scale(2.8); opacity: 0; }
+      }
+      @keyframes labelBloom {
+        0%   { opacity: 0; transform: scale(0.5)  translateY(6px);  filter: blur(6px); }
+        55%  { opacity: 1;                                            filter: blur(0);   }
+        75%  { transform: scale(1.07) translateY(-2px); }
+        100% { opacity: 1; transform: scale(1)    translateY(0);    filter: blur(0);   }
+      }
+    `;
+    document.head.appendChild(style);
+  }, []);
 
   return (
-    <group ref={groupRef}>
-      <Float speed={1.2} rotationIntensity={0.06} floatIntensity={0.18}>
-        <group
-          position={[x, 0, z]}
-          scale={hovered ? 1.18 : 1.0}
-          onPointerOver={() => { setHovered(true);  document.body.style.cursor = "pointer"; }}
-          onPointerOut ={() => { setHovered(false); document.body.style.cursor = "default"; }}
-          onClick={navigate}
-        >
-          <mesh ref={sphereRef}><sphereGeometry args={[0.40, 32, 32]} /><primitive object={glassMat} attach="material" /></mesh>
-          <mesh><sphereGeometry args={[0.12, 16, 16]} /><primitive object={coreMat} attach="material" /></mesh>
-          {phase >= 3 && (
-            <Html center style={{ pointerEvents: "none", userSelect: "none" }}>
-              <div ref={iconRef} style={{ cursor: "pointer" }}>
-                <Icon size={22} color="#ffffff" style={{ opacity: hovered ? 1 : 0.75, transition: "opacity 0.3s" }} />
-              </div>
-            </Html>
-          )}
-        </group>
-      </Float>
-    </group>
+    <>
+      {curves.map((c, i) => (
+        <BranchPath key={i} branchCurve={c} color={BRANCHES[i].color} active={active} />
+      ))}
+
+      {BRANCH_LABELS.map(({ label, href, pos }, i) => {
+        const delay = `${i * 0.14}s`;
+        return (
+          <Html key={label} position={pos} center zIndexRange={[100, 0]}>
+            <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+
+              {/* Pulsing orb — visible while branches are drawing, before label reveals */}
+              <div style={{
+                position:    "absolute",
+                width:       "12px",
+                height:      "12px",
+                borderRadius: "50%",
+                background:  "radial-gradient(circle at 35% 35%, #C4B5FD, #7C3AED)",
+                boxShadow:   "0 0 14px rgba(124,58,237,0.7)",
+                opacity:      active && !showLabels ? 1 : 0,
+                animation:    active && !showLabels ? `orbPulse 1.7s ease-in-out ${delay} infinite` : "none",
+                transition:  "opacity 0.4s ease",
+                pointerEvents: "none",
+              }} />
+
+              {/* Burst ring — fires once as label blooms in */}
+              <div style={{
+                position:      "absolute",
+                width:         "12px",
+                height:        "12px",
+                borderRadius:  "50%",
+                border:        "2px solid rgba(139,92,246,0.7)",
+                opacity:        showLabels ? 0 : 0,
+                animation:      showLabels ? `ringBurst 0.7s cubic-bezier(0.22,1,0.36,1) ${delay} both` : "none",
+                pointerEvents: "none",
+              }} />
+
+              {/* Label pill — blooms in after branches complete */}
+              <a
+                href={href}
+                style={{
+                  display:         "flex",
+                  alignItems:      "center",
+                  gap:             "9px",
+                  padding:         "11px 22px",
+                  background:      "rgba(255,255,255,0.86)",
+                  border:          "1px solid rgba(124,58,237,0.22)",
+                  borderRadius:    "11px",
+                  backdropFilter:  "blur(20px)",
+                  WebkitBackdropFilter: "blur(20px)",
+                  color:           "#5B21B6",
+                  fontSize:        "15px",
+                  fontWeight:      700,
+                  letterSpacing:   "0.09em",
+                  textTransform:   "uppercase",
+                  textDecoration:  "none",
+                  whiteSpace:      "nowrap",
+                  boxShadow:       "0 3px 22px rgba(109,40,217,0.14), inset 0 1px 0 rgba(255,255,255,0.9)",
+                  animation:       showLabels ? `labelBloom 0.75s cubic-bezier(0.22,1,0.36,1) ${delay} both` : "none",
+                  opacity:          showLabels ? undefined : 0,
+                  pointerEvents:   showLabels ? "auto" : "none",
+                  cursor:          "pointer",
+                }}
+              >
+                {/* Animated dot — pulses gently after reveal */}
+                <span style={{
+                  width:      "9px",
+                  height:     "9px",
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg, #A78BFA, #6D28D9)",
+                  flexShrink: 0,
+                  boxShadow:  "0 0 6px rgba(124,58,237,0.5)",
+                }} />
+                {label}
+              </a>
+            </div>
+          </Html>
+        );
+      })}
+    </>
   );
 }
 
-/* ─────────────────────────────────────────────────────────
-   DUST FIELD
-───────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   PARTICLES
+═══════════════════════════════════════════════════════════════ */
 
-function DustField({ phase }: { phase: number }) {
-  const COUNT = 90;
+function Particles() {
+  const COUNT = 100;
   const { geo, vel } = useMemo(() => {
     const pos = new Float32Array(COUNT * 3);
     const v   = new Float32Array(COUNT * 3);
     for (let i = 0; i < COUNT; i++) {
-      pos[i*3]   = (Math.random() - 0.5) * 28;
+      pos[i*3]   = (Math.random() - 0.5) * 30;
       pos[i*3+1] = (Math.random() - 0.5) * 22;
-      pos[i*3+2] = (Math.random() - 0.5) * 18;
-      v[i*3]     = (Math.random() - 0.5) * 0.0028;
-      v[i*3+1]   = 0.0010 + Math.random() * 0.0020;
-      v[i*3+2]   = (Math.random() - 0.5) * 0.0016;
+      pos[i*3+2] = (Math.random() - 0.5) * 16 - 4;
+      v[i*3]     = (Math.random() - 0.5) * 0.0012;
+      v[i*3+1]   = 0.0004 + Math.random() * 0.0009;
+      v[i*3+2]   = (Math.random() - 0.5) * 0.0006;
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(pos.slice(), 3));
@@ -297,14 +388,11 @@ function DustField({ phase }: { phase: number }) {
   }, []);
 
   const mat = useMemo(() => new THREE.PointsMaterial({
-    color: new THREE.Color("#5038A0"), size: 0.014,
-    transparent: true, opacity: 0,
-    blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
+    color: new THREE.Color("#8B5CF6"), size: 0.018,
+    transparent: true, opacity: 0.22, sizeAttenuation: true, depthWrite: false,
   }), []);
 
-  useFrame((_, delta) => {
-    mat.opacity += ((phase >= 1 ? 0.15 : 0) - mat.opacity) * 0.007;
-    if (mat.opacity < 0.003) return;
+  useFrame(() => {
     const pos = geo.attributes.position.array as Float32Array;
     for (let i = 0; i < COUNT; i++) {
       pos[i*3]   += vel[i*3];
@@ -318,213 +406,128 @@ function DustField({ phase }: { phase: number }) {
   return <points geometry={geo} material={mat} />;
 }
 
-/* ─────────────────────────────────────────────────────────
-   NEURON FIELD
-───────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   CINEMATIC CAMERA
+═══════════════════════════════════════════════════════════════ */
 
-function lcg(seed: number) {
-  let s = seed >>> 0;
-  return () => {
-    s = (Math.imul(1664525, s) + 1013904223) >>> 0;
-    return s / 4294967296;
-  };
-}
-
-function makeNeuronGeo(seed: number): THREE.BufferGeometry {
-  const rand = lcg(seed);
-  const verts: number[] = [];
-  const BRANCHES = 5 + Math.floor(rand() * 4);
-  for (let b = 0; b < BRANCHES; b++) {
-    const theta = rand() * Math.PI * 2;
-    const phi   = Math.acos(2 * rand() - 1);
-    const dx = Math.sin(phi) * Math.cos(theta);
-    const dy = Math.sin(phi) * Math.sin(theta);
-    const dz = Math.cos(phi);
-    const len = 0.32 + rand() * 0.46;
-    verts.push(dx*0.13, dy*0.13, dz*0.13, dx*len, dy*len, dz*len);
-    const subs = 1 + Math.floor(rand() * 2);
-    for (let sb = 0; sb < subs; sb++) {
-      const t  = 0.38 + rand() * 0.42;
-      const bx = dx*len*t, by = dy*len*t, bz = dz*len*t;
-      const st2 = rand() * Math.PI * 2, sp2 = Math.acos(2 * rand() - 1);
-      const sdx = Math.sin(sp2)*Math.cos(st2), sdy = Math.sin(sp2)*Math.sin(st2), sdz = Math.cos(sp2);
-      const slen = (0.14 + rand() * 0.24) * len;
-      verts.push(bx, by, bz, bx+sdx*slen, by+sdy*slen, bz+sdz*slen);
-    }
-  }
-  const at = rand()*Math.PI*2, ap = Math.acos(2*rand()-1);
-  const ax = Math.sin(ap)*Math.cos(at), ay = Math.sin(ap)*Math.sin(at), az = Math.cos(ap);
-  const alen = 0.75 + rand() * 0.55;
-  verts.push(ax*0.13, ay*0.13, az*0.13, ax*alen, ay*alen, az*alen);
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute("position", new THREE.Float32BufferAttribute(verts, 3));
-  return geo;
-}
-
-function NeuronCell({ initPos, rotSpeed, driftVel, scale, seed, phase }: {
-  initPos:  THREE.Vector3;
-  rotSpeed: number;
-  driftVel: THREE.Vector3;
-  scale:    number;
-  seed:     number;
-  phase:    number;
+function CinematicCamera({
+  mouse, drawElapsed, active,
+}: {
+  mouse:       React.MutableRefObject<{ x: number; y: number }>;
+  drawElapsed: React.MutableRefObject<number>;
+  active:      boolean;
 }) {
-  const groupRef = useRef<THREE.Group>(null);
-  const pos      = useRef(initPos.clone());
-  const t        = useRef(seed % 10);
+  const { camera } = useThree();
+  const camPos  = useRef(new THREE.Vector3(0, 0, 14));
+  const curLook = useRef(new THREE.Vector3(0, 0, 0));
+  const tLook   = useRef(new THREE.Vector3(0, 0, 0));
 
-  const somaGeo = useMemo(() => new THREE.SphereGeometry(0.12, 7, 7), []);
-  const dendGeo = useMemo(() => makeNeuronGeo(seed), [seed]);
+  useFrame(() => {
+    const de   = drawElapsed.current;
+    const last = CAM[CAM.length - 1];
+    let tx: number = last.px, ty: number = last.py, tz: number = last.pz;
+    let lx: number = last.lx, ly: number = last.ly;
 
-  const somaMat = useMemo(() => new THREE.MeshBasicMaterial({
-    color: new THREE.Color("#9B5CF6"),
-    transparent: true, opacity: 0,
-    blending: THREE.AdditiveBlending, depthWrite: false,
-  }), []);
-
-  const dendMat = useMemo(() => new THREE.LineBasicMaterial({
-    color: new THREE.Color("#7C5FC8"),
-    transparent: true, opacity: 0,
-    blending: THREE.AdditiveBlending, depthWrite: false,
-  }), []);
-
-  useFrame((_, delta) => {
-    t.current += delta;
-    const pulse  = 0.72 + Math.sin(t.current * 0.9) * 0.28;
-    const baseOp = phase >= 2 ? 0.52 : 0;
-    somaMat.opacity += (baseOp * pulse        - somaMat.opacity) * 0.016;
-    dendMat.opacity += (baseOp * pulse * 0.70 - dendMat.opacity) * 0.016;
-    pos.current.addScaledVector(driftVel, delta * 60);
-    if (pos.current.x >  18) pos.current.x = -18;
-    if (pos.current.x < -18) pos.current.x =  18;
-    if (pos.current.y >  14) pos.current.y = -14;
-    if (pos.current.y < -14) pos.current.y =  14;
-    if (groupRef.current) {
-      groupRef.current.position.copy(pos.current);
-      groupRef.current.rotation.y += delta * rotSpeed;
-      groupRef.current.rotation.x += delta * rotSpeed * 0.55;
+    if (!active) {
+      tx = 0; ty = 0; tz = 14; lx = 0; ly = 0;
+    } else {
+      for (let i = 0; i < CAM.length - 1; i++) {
+        const a = CAM[i], b = CAM[i + 1];
+        if (de >= a.t0 && de < a.t1) {
+          const raw = (de - a.t0) / (a.t1 - a.t0);
+          const p   = raw < 0.5 ? 4*raw*raw*raw : 1 - Math.pow(-2*raw+2, 3)/2;
+          tx = a.px + (b.px - a.px) * p;
+          ty = a.py + (b.py - a.py) * p;
+          tz = a.pz + (b.pz - a.pz) * p;
+          lx = a.lx + (b.lx - a.lx) * p;
+          ly = a.ly + (b.ly - a.ly) * p;
+          break;
+        }
+      }
+      if (de >= last.t1) {
+        tx += mouse.current.x * 1.4;
+        ty += mouse.current.y * 0.9;
+      }
     }
+
+    camPos.current.set(tx, ty, tz);
+    tLook.current.set(lx, ly + Y_OFFSET, 0);
+    camera.position.lerp(camPos.current, 0.038);
+    curLook.current.lerp(tLook.current, 0.046);
+    camera.lookAt(curLook.current);
   });
 
-  return (
-    <group ref={groupRef} scale={scale}>
-      <mesh geometry={somaGeo} material={somaMat} />
-      <lineSegments geometry={dendGeo} material={dendMat} />
-    </group>
-  );
+  return null;
 }
 
-function NeuronField({ phase }: { phase: number }) {
-  const cells = useMemo(() => {
-    const r = lcg(99991);
-    return Array.from({ length: 22 }, (_, i) => ({
-      initPos:  new THREE.Vector3((r()-0.5)*34, (r()-0.5)*26, -9 - r()*13),
-      rotSpeed: (r()-0.5) * 0.42,
-      driftVel: new THREE.Vector3((r()-0.5)*0.038, (r()-0.5)*0.028, 0),
-      scale:    0.5 + r() * 1.1,
-      seed:     (i+1) * 7919,
-    }));
-  }, []);
-  return (
-    <>
-      {cells.map((c, i) => <NeuronCell key={i} {...c} phase={phase} />)}
-    </>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────
-   FAINT HOLOGRAPHIC BACKGROUND PANELS
-───────────────────────────────────────────────────────── */
-
-function buildAmbientTex(variant: "rings" | "grid"): THREE.CanvasTexture {
-  const cv = document.createElement("canvas");
-  cv.width = cv.height = 512;
-  const ctx = cv.getContext("2d")!;
-  ctx.clearRect(0, 0, 512, 512);
-  ctx.strokeStyle = "rgba(170,138,255,0.85)";
-  if (variant === "rings") {
-    ctx.lineWidth = 0.8;
-    for (let r = 32; r < 238; r += 44) { ctx.beginPath(); ctx.arc(256, 256, r, 0, Math.PI * 2); ctx.stroke(); }
-    ctx.lineWidth = 0.6;
-    ctx.beginPath(); ctx.moveTo(256, 40); ctx.lineTo(256, 472); ctx.moveTo(40, 256); ctx.lineTo(472, 256); ctx.stroke();
-  } else {
-    ctx.lineWidth = 0.44;
-    for (let x = 42; x <= 470; x += 48) { ctx.beginPath(); ctx.moveTo(x, 42); ctx.lineTo(x, 470); ctx.stroke(); }
-    for (let y = 42; y <= 470; y += 48) { ctx.beginPath(); ctx.moveTo(42, y); ctx.lineTo(470, y); ctx.stroke(); }
-    ctx.lineWidth = 1.8;
-    ([[52,52],[460,52],[52,460],[460,460]] as [number,number][]).forEach(([cx,cy]) => {
-      const d = 26; const dx = cx < 256 ? d : -d; const dy = cy < 256 ? d : -d;
-      ctx.beginPath(); ctx.moveTo(cx+dx, cy); ctx.lineTo(cx, cy); ctx.lineTo(cx, cy+dy); ctx.stroke();
-    });
-  }
-  return new THREE.CanvasTexture(cv);
-}
-
-function HolographicSides({ phase }: { phase: number }) {
-  const t    = useRef(0);
-  const lTex = useMemo(() => buildAmbientTex("rings"), []);
-  const rTex = useMemo(() => buildAmbientTex("grid"),  []);
-  const lMat = useMemo(() => new THREE.MeshBasicMaterial({ map: lTex, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }), [lTex]);
-  const rMat = useMemo(() => new THREE.MeshBasicMaterial({ map: rTex, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }), [rTex]);
-  useFrame((_, delta) => {
-    t.current += delta;
-    const base   = phase >= 3 ? 0.040 : 0;
-    const target = Math.max(0, base + Math.sin(t.current * 0.18) * 0.008);
-    lMat.opacity += (target - lMat.opacity) * 0.010;
-    rMat.opacity += (target - rMat.opacity) * 0.010;
-  });
-  return (
-    <>
-      <mesh position={[-7.0, 0, -4.5]} rotation={[0,  0.15, 0]}><planeGeometry args={[6, 6]} /><primitive object={lMat} attach="material" /></mesh>
-      <mesh position={[ 7.0, 0, -4.5]} rotation={[0, -0.15, 0]}><planeGeometry args={[6, 6]} /><primitive object={rMat} attach="material" /></mesh>
-    </>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════════
    SCENE ROOT
-───────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════════════ */
 
-function Scene({ mouse }: { mouse: React.MutableRefObject<Mouse> }) {
-  const [phase, setPhase] = useState(0);
+function Scene({
+  mouse, onKnotComplete, active,
+}: {
+  mouse:          React.MutableRefObject<{ x: number; y: number }>;
+  onKnotComplete: () => void;
+  active:         boolean;
+}) {
+  const drawElapsed = useRef(0);
+  const [branches,   setBranches]   = useState(false);
+  const [showLabels, setShowLabels] = useState(false);
 
-  useEffect(() => {
-    const timers = [
-      setTimeout(() => setPhase(1), 350),
-      setTimeout(() => setPhase(2), 900),
-      setTimeout(() => setPhase(3), 2200),
-    ];
-    return () => timers.forEach(clearTimeout);
-  }, []);
+  useFrame((_, dt) => { if (active) drawElapsed.current += dt; });
+
+  const handleKnotDone = useCallback(() => {
+    onKnotComplete();
+    setTimeout(() => {
+      setBranches(true);
+      // Labels appear after branches finish drawing
+      setTimeout(() => setShowLabels(true), BRANCH_S * 1000 + 400);
+    }, 700);
+  }, [onKnotComplete]);
+
+  const knotCurve = useMemo(() => makeTrefoilCurve(S), []);
 
   return (
     <>
-      <CameraRig mouse={mouse} />
-      <fog attach="fog" args={["#020104", 18, 38]} />
+      <CinematicCamera mouse={mouse} drawElapsed={drawElapsed} active={active} />
 
-      <ambientLight     intensity={0.055}                             color="#050115" />
-      <directionalLight position={[-3.5,  7.5,  4]} intensity={11}   color="#EDE8FF" />
-      <directionalLight position={[ 5.5, -2.0, -3]} intensity={4.5}  color="#38108A" />
-      <pointLight       position={[ 0.0, -3.5,  5]} intensity={1.4}  color="#180640" />
-      <pointLight       position={[ 0.0,  4.5, -2]} intensity={3.0}  color="#6029B8" />
-      <pointLight       position={[-4.0,  0.0,  3]} intensity={2.2}  color="#9B5CF6" />
+      <ambientLight intensity={1.6} color="#F0EAFF" />
+      <directionalLight position={[0, 10, 8]}   intensity={10} color="#EDE8FF" />
+      <directionalLight position={[-8, 2, -3]}  intensity={4}  color="#7C3AED" />
+      <directionalLight position={[ 8, -1, -3]} intensity={2.5} color="#5B21B6" />
+      <pointLight position={[0,  8, 4]}  intensity={18} color="#9B77FF" distance={26} />
+      <pointLight position={[0, -7, 3]}  intensity={8}  color="#6D4AFF" distance={20} />
+      <pointLight position={[-6, 1, 5]}  intensity={10} color="#8B5CF6" distance={18} />
+      <pointLight position={[ 6, 1, 5]}  intensity={10} color="#7C3AED" distance={18} />
+      <pointLight position={[0, 0, 7]}   intensity={6}  color="#F4EEFF" distance={14} />
 
-      <NeuronField          phase={phase} />
-      <MonumentLogo         phase={phase} mouse={mouse} />
-      {ORBIT_DEFS.map((def, i) => <OrbitalRing key={i} def={def} phase={phase} />)}
-      {NODE_DEFS.map((nd, i)   => <FloatingNode key={i} nodeDef={nd} orbitDef={ORBIT_DEFS[nd.orbit]} phase={phase} />)}
-      <DustField            phase={phase} />
-      <HolographicSides     phase={phase} />
+      <group position={[0, Y_OFFSET, 0]}>
+        <RibbonKnot
+          mouse={mouse}
+          onComplete={handleKnotDone}
+          active={active}
+          drawElapsed={drawElapsed}
+        />
+        <BranchPaths knotCurve={knotCurve} active={branches} showLabels={showLabels} />
+      </group>
+      <Particles />
     </>
   );
 }
 
-/* ─────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════════
    CANVAS EXPORT
-───────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════════════ */
 
-export function HeroScene() {
-  const mouse = useRef<Mouse>({ x: 0, y: 0 });
+export function HeroScene({
+  onKnotComplete,
+  active,
+}: {
+  onKnotComplete: () => void;
+  active:         boolean;
+}) {
+  const mouse = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
@@ -539,17 +542,20 @@ export function HeroScene() {
 
   return (
     <Canvas
-      camera={{ position: [0, 0, 11], fov: 54 }}
-      gl={{ antialias: true, powerPreference: "high-performance" }}
-      onCreated={({ gl }) => {
-        gl.setClearColor(0x020104, 1);
-        gl.toneMapping = THREE.ACESFilmicToneMapping;
-        gl.toneMappingExposure = 1.22;
+      camera={{ position: [0, 0, 14], fov: 50 }}
+      gl={{
+        antialias:       true,
+        alpha:           true,
+        powerPreference: "high-performance",
       }}
-      style={{ width: "100%", height: "100%", background: "#020104" }}
+      onCreated={({ gl }) => {
+        gl.toneMapping        = THREE.ACESFilmicToneMapping;
+        gl.toneMappingExposure = 1.35;
+      }}
+      style={{ width: "100%", height: "100%" }}
       dpr={[1, 2]}
     >
-      <Scene mouse={mouse} />
+      <Scene mouse={mouse} onKnotComplete={onKnotComplete} active={active} />
     </Canvas>
   );
 }

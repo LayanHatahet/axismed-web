@@ -5,9 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { Play, Mic, Image as ImageIcon, ArrowRight } from "lucide-react";
 import { MotionBackground } from "@/components/ui/MotionBackground";
-import { getFeaturedMedia } from "@/lib/data/media";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { formatDateShort } from "@/lib/utils/formatDate";
+import type { MediaItem } from "@/lib/types";
 
 const typeIcon = {
   video: Play,
@@ -23,8 +23,10 @@ const typeBg = {
   image: "bg-slate-500/20 text-slate-400",
 };
 
-export function MediaInsights() {
-  const items = getFeaturedMedia();
+interface Props { items: MediaItem[] }
+
+export function MediaInsights({ items }: Props) {
+  if (items.length === 0) return null;
 
   return (
     <section className="section-tonal relative py-28 overflow-hidden">

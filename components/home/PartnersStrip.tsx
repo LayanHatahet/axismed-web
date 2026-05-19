@@ -2,11 +2,14 @@
 
 import { motion } from "framer-motion";
 import { SectionReveal } from "@/components/ui/SectionReveal";
-import { getFeaturedPartners } from "@/lib/data/partners";
+import type { Partner } from "@/lib/types";
 import Link from "next/link";
 
-export function PartnersStrip() {
-  const partners = getFeaturedPartners();
+interface Props { partners: Partner[] }
+
+export function PartnersStrip({ partners }: Props) {
+  if (partners.length === 0) return null;
+
   const doubled = [...partners, ...partners];
 
   return (
@@ -36,9 +39,18 @@ export function PartnersStrip() {
               whileHover={{ scale: 1.05 }}
               className="flex-shrink-0 w-48 h-20 glass glow-border rounded-xl flex items-center justify-center px-6 cursor-default"
             >
-              <span className="text-text-muted text-sm font-medium text-center leading-tight">
-                {partner.name}
-              </span>
+              {partner.logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={partner.logo}
+                  alt={partner.name}
+                  className="max-h-10 max-w-full object-contain opacity-70 hover:opacity-100 transition-opacity"
+                />
+              ) : (
+                <span className="text-text-muted text-sm font-medium text-center leading-tight">
+                  {partner.name}
+                </span>
+              )}
             </motion.div>
           ))}
         </div>

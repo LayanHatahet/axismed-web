@@ -132,7 +132,7 @@ function ImageField({ label, value, onChange, hint, folder = "uploads/content" }
   );
 }
 
-function SectionCard({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
+function SectionCard({ title, icon: Icon, children }: { title: string; icon: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
     <div className="glass glow-border rounded-2xl p-6 space-y-4">
       <h3 className="flex items-center gap-2 font-display font-semibold text-white text-base border-b border-border pb-3">

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate:voices": "node scripts/generate-voices.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -15,7 +16,9 @@
     "@types/three": "^0.184.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.16.0",
+    "msedge-tts": "^2.0.5",
     "next": "16.2.6",
+    "openai": "^6.38.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.76.0",

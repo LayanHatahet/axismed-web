@@ -1,0 +1,405 @@
+[
+  {
+    "id": "1",
+    "slug": "orthognathic-psi-course",
+    "title": "Orthognathic & PSI Course",
+    "subtitle": "Advanced Patient-Specific Implant Planning and Surgical Execution",
+    "category": "Oral & Maxillofacial Surgery",
+    "programType": "Cadaveric Training",
+    "image": "https://images.unsplash.com/photo-1551190822-a9333d879b1f?w=800&h=500&q=80&auto=format&fit=crop",
+    "instructor": "Prof. Ahmed Al-Rashid",
+    "instructorTitle": "Professor of Oral & Maxillofacial Surgery",
+    "location": "Mediclinic City Hospital, Dubai Healthcare City",
+    "city": "Dubai, UAE",
+    "startDate": "2025-09-12",
+    "endDate": "2025-09-14",
+    "duration": "3 Days",
+    "seats": 24,
+    "seatsAvailable": 8,
+    "price": 3500,
+    "currency": "USD",
+    "status": "open",
+    "featured": true,
+    "description": "A comprehensive three-day cadaveric training program combining digital planning workflows with live surgical simulation for orthognathic procedures and patient-specific implant placement.",
+    "overview": "This intensive program bridges the gap between digital surgical planning and real-world operative execution. Participants will work with industry-leading planning software, patient-specific cutting guides, and titanium PSI implants on cadaveric specimens under expert supervision. The curriculum is designed for practicing oral and maxillofacial surgeons seeking to integrate digital workflows into their practice.",
+    "agenda": [
+      {
+        "day": "Day 1",
+        "sessions": [
+          {
+            "time": "08:00",
+            "title": "Registration & Welcome"
+          },
+          {
+            "time": "09:00",
+            "title": "Digital Planning Fundamentals & Software Walkthrough",
+            "speaker": "Prof. Ahmed Al-Rashid"
+          },
+          {
+            "time": "11:00",
+            "title": "Virtual Surgical Planning (VSP) — Live Demonstration"
+          },
+          {
+            "time": "14:00",
+            "title": "Cadaveric Lab: Osteotomy Techniques & Guide Placement"
+          },
+          {
+            "time": "17:30",
+            "title": "Debrief & Q&A"
+          }
+        ]
+      },
+      {
+        "day": "Day 2",
+        "sessions": [
+          {
+            "time": "09:00",
+            "title": "PSI Design Principles & Manufacturing Overview"
+          },
+          {
+            "time": "11:00",
+            "title": "Cadaveric Lab: PSI Placement — Le Fort I & BSSO"
+          },
+          {
+            "time": "14:00",
+            "title": "Case Presentation: Complex Asymmetry Cases"
+          },
+          {
+            "time": "16:00",
+            "title": "Industry Symposium: Next-Generation Implant Systems"
+          }
+        ]
+      },
+      {
+        "day": "Day 3",
+        "sessions": [
+          {
+            "time": "09:00",
+            "title": "Cadaveric Lab: Full Case Simulation — Participants Lead"
+          },
+          {
+            "time": "12:00",
+            "title": "Complications & Revision Strategies"
+          },
+          {
+            "time": "14:00",
+            "title": "Certificate Ceremony & Closing"
+          }
+        ]
+      }
+    ],
+    "faculty": [
+      {
+        "id": "f1",
+        "name": "Prof. Ahmed Al-Rashid",
+        "title": "Program Director",
+        "institution": "Dubai Academic Health Corporation",
+        "specialty": "Oral & Maxillofacial Surgery"
+      },
+      {
+        "id": "f2",
+        "name": "Dr. Sara Mansoor",
+        "title": "Digital Planning Specialist",
+        "institution": "Mediclinic, UAE",
+        "specialty": "Digital Surgery & VSP"
+      }
+    ],
+    "sponsors": [
+      "DePuy Synthes",
+      "KLS Martin",
+      "Stryker CMF"
+    ],
+    "tags": [
+      "orthognathic",
+      "PSI",
+      "cadaveric",
+      "digital planning",
+      "OMFS"
+    ],
+    "gallery": [],
+    "createdAt": "2025-01-10",
+    "updatedAt": "2025-06-01"
+  },
+  {
+    "id": "2",
+    "slug": "digital-surgery-workflow",
+    "title": "Digital Surgery Workflow",
+    "subtitle": "From CBCT to Operating Room — End-to-End Digital Precision",
+    "category": "Digital Surgery",
+    "programType": "Hands-on Workshop",
+    "image": "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&h=500&q=80&auto=format&fit=crop",
+    "instructor": "Dr. Khalid Nasser",
+    "instructorTitle": "CMF Surgeon & Digital Workflow Specialist",
+    "location": "AxisMed Training Center, Dubai",
+    "city": "Dubai, UAE",
+    "startDate": "2025-10-03",
+    "endDate": "2025-10-04",
+    "duration": "2 Days",
+    "seats": 18,
+    "seatsAvailable": 14,
+    "price": 2200,
+    "currency": "USD",
+    "status": "open",
+    "featured": true,
+    "description": "A practical two-day workshop covering the complete digital surgery pipeline from imaging acquisition through 3D planning, guide fabrication, and intraoperative navigation.",
+    "overview": "Surgeons will gain hands-on experience with CBCT data processing, 3D planning software, and surgical guide design. The program includes simulation exercises with 3D-printed anatomical models and guided implant placement exercises. Ideal for surgeons at any stage of digital adoption.",
+    "agenda": [
+      {
+        "day": "Day 1",
+        "sessions": [
+          {
+            "time": "09:00",
+            "title": "CBCT Acquisition & Data Processing",
+            "speaker": "Dr. Khalid Nasser"
+          },
+          {
+            "time": "11:00",
+            "title": "3D Planning Software: Hands-on Session"
+          },
+          {
+            "time": "14:00",
+            "title": "Surgical Guide Design & Manufacturing Options"
+          },
+          {
+            "time": "16:30",
+            "title": "Case Study Review"
+          }
+        ]
+      },
+      {
+        "day": "Day 2",
+        "sessions": [
+          {
+            "time": "09:00",
+            "title": "Intraoperative Navigation Overview"
+          },
+          {
+            "time": "11:00",
+            "title": "Simulation Lab: Model-Based Surgery"
+          },
+          {
+            "time": "14:00",
+            "title": "Workflow Integration in Clinical Practice"
+          },
+          {
+            "time": "16:00",
+            "title": "Certification & Close"
+          }
+        ]
+      }
+    ],
+    "faculty": [
+      {
+        "id": "f3",
+        "name": "Dr. Khalid Nasser",
+        "title": "Course Director",
+        "institution": "Cleveland Clinic Abu Dhabi",
+        "specialty": "Digital Surgery"
+      }
+    ],
+    "sponsors": [
+      "Materialise",
+      "Nobel Biocare",
+      "3Shape"
+    ],
+    "tags": [
+      "digital surgery",
+      "CBCT",
+      "3D planning",
+      "navigation",
+      "workflow"
+    ],
+    "gallery": [],
+    "createdAt": "2025-02-01",
+    "updatedAt": "2025-06-01"
+  },
+  {
+    "id": "3",
+    "slug": "cmf-reconstruction-workshop",
+    "title": "CMF Reconstruction Workshop",
+    "subtitle": "Advanced Craniomaxillofacial Reconstruction Techniques",
+    "category": "CMF Reconstruction",
+    "programType": "Cadaveric Training",
+    "image": "https://images.unsplash.com/photo-1579154204601-01588f351e67?w=800&h=500&q=80&auto=format&fit=crop",
+    "instructor": "Prof. Michael Chen",
+    "instructorTitle": "Professor of Craniofacial Surgery",
+    "location": "University Hospital Training Center, Riyadh",
+    "city": "Riyadh, KSA",
+    "startDate": "2025-11-07",
+    "endDate": "2025-11-09",
+    "duration": "3 Days",
+    "seats": 20,
+    "seatsAvailable": 5,
+    "price": 4000,
+    "currency": "USD",
+    "status": "open",
+    "featured": true,
+    "description": "Three intensive days of cadaveric simulation focusing on advanced orbital, mandibular, and mid-face reconstruction using titanium mesh, custom implants, and modern fixation systems.",
+    "overview": "This program addresses the most demanding cases in CMF practice — post-traumatic and oncologic reconstruction. Participants will perform complete reconstruction sequences on cadaveric specimens, utilizing the latest implant technologies and guided by internationally recognized faculty.",
+    "agenda": [
+      {
+        "day": "Day 1",
+        "sessions": [
+          {
+            "time": "08:30",
+            "title": "Orbital Reconstruction: Anatomy & Implant Selection"
+          },
+          {
+            "time": "10:30",
+            "title": "Cadaveric Lab: Orbital Floor & Wall Repair"
+          },
+          {
+            "time": "14:00",
+            "title": "Mid-Face Reconstruction: Principles & Planning"
+          }
+        ]
+      },
+      {
+        "day": "Day 2",
+        "sessions": [
+          {
+            "time": "09:00",
+            "title": "Mandibular Reconstruction: Free Flap Concepts"
+          },
+          {
+            "time": "11:00",
+            "title": "Cadaveric Lab: Plate Bending & Fixation"
+          },
+          {
+            "time": "14:00",
+            "title": "Industry Presentations: Custom Titanium Solutions"
+          }
+        ]
+      },
+      {
+        "day": "Day 3",
+        "sessions": [
+          {
+            "time": "09:00",
+            "title": "Comprehensive Case Simulation — Lead Surgeon"
+          },
+          {
+            "time": "12:00",
+            "title": "Literature Review & Evidence-Based Practice"
+          },
+          {
+            "time": "14:30",
+            "title": "Certification & Closing"
+          }
+        ]
+      }
+    ],
+    "faculty": [
+      {
+        "id": "f4",
+        "name": "Prof. Michael Chen",
+        "title": "Program Director",
+        "institution": "King Faisal Specialist Hospital",
+        "specialty": "Craniofacial Surgery"
+      }
+    ],
+    "sponsors": [
+      "Synthes CMF",
+      "Stryker",
+      "Biomet"
+    ],
+    "tags": [
+      "CMF",
+      "reconstruction",
+      "orbital",
+      "mandible",
+      "cadaveric"
+    ],
+    "gallery": [],
+    "createdAt": "2025-02-15",
+    "updatedAt": "2025-06-01"
+  },
+  {
+    "id": "4",
+    "slug": "advanced-implant-planning",
+    "title": "Advanced Implant Planning",
+    "subtitle": "Precision-Guided Implant Placement for Complex Cases",
+    "category": "Implantology",
+    "programType": "Hands-on Workshop",
+    "image": "https://images.unsplash.com/photo-1606811842248-d42c15540e0a?w=800&h=500&q=80&auto=format&fit=crop",
+    "instructor": "Dr. Layla Hassan",
+    "instructorTitle": "Prosthodontist & Implant Specialist",
+    "location": "American Hospital Dubai, Training Suite",
+    "city": "Dubai, UAE",
+    "startDate": "2025-12-05",
+    "endDate": "2025-12-06",
+    "duration": "2 Days",
+    "seats": 16,
+    "seatsAvailable": 16,
+    "price": 1800,
+    "currency": "USD",
+    "status": "upcoming",
+    "featured": true,
+    "description": "An evidence-based workshop for clinicians seeking to master digital implant planning, guided surgery protocols, and immediate loading strategies for complex multi-unit restorations.",
+    "overview": "Participants will work through advanced case scenarios using guided surgery software, fabricate surgical guides on in-house printers, and practice placement technique on high-fidelity phantom models. The program integrates prosthodontic planning perspectives with surgical execution.",
+    "agenda": [
+      {
+        "day": "Day 1",
+        "sessions": [
+          {
+            "time": "09:00",
+            "title": "Guided Surgery Software — Advanced Module"
+          },
+          {
+            "time": "11:00",
+            "title": "Bone Augmentation Planning for Compromised Sites"
+          },
+          {
+            "time": "14:00",
+            "title": "Phantom Lab: Guided Placement Exercises"
+          }
+        ]
+      },
+      {
+        "day": "Day 2",
+        "sessions": [
+          {
+            "time": "09:00",
+            "title": "Immediate Loading Protocols: Evidence & Technique"
+          },
+          {
+            "time": "11:00",
+            "title": "Phantom Lab: Full-Arch Reconstruction Simulation"
+          },
+          {
+            "time": "14:00",
+            "title": "Case Review & Mentoring Session"
+          },
+          {
+            "time": "16:00",
+            "title": "Certification"
+          }
+        ]
+      }
+    ],
+    "faculty": [
+      {
+        "id": "f5",
+        "name": "Dr. Layla Hassan",
+        "title": "Course Director",
+        "institution": "American Hospital Dubai",
+        "specialty": "Implantology & Prosthodontics"
+      }
+    ],
+    "sponsors": [
+      "Straumann",
+      "Nobel Biocare",
+      "Zimmer Biomet"
+    ],
+    "tags": [
+      "implants",
+      "guided surgery",
+      "digital",
+      "immediate loading",
+      "prosthodontics"
+    ],
+    "gallery": [],
+    "createdAt": "2025-03-01",
+    "updatedAt": "2025-06-01"
+  }
+]

@@ -270,7 +270,7 @@ export default function AdminPartners() {
         <div className="flex justify-end mb-5">
           <button
             onClick={() => setModal({ ...EMPTY })}
-            className="inline-flex items-center gap-2 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-5 py-3 rounded-xl transition-all shadow-[0_0_16px_rgba(124,58,237,0.3)]"
+            className="inline-flex items-center gap-2 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-5 py-3 rounded-xl transition-all shadow-[0_0_16px_rgba(164,158,207,0.3)]"
           >
             <Plus className="w-4 h-4" /> Add Partner
           </button>

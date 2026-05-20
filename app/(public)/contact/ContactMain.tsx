@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -142,7 +142,7 @@ export function ContactMain() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-purple-500 hover:bg-purple-400 disabled:opacity-60 text-white font-semibold py-4 rounded-xl transition-all shadow-[0_0_24px_rgba(124,58,237,0.4)] hover:shadow-[0_0_36px_rgba(124,58,237,0.6)] flex items-center justify-center gap-2"
+                    className="w-full bg-purple-500 hover:bg-purple-400 disabled:opacity-60 text-white font-semibold py-4 rounded-xl transition-all shadow-[0_0_24px_rgba(164,158,207,0.4)] hover:shadow-[0_0_36px_rgba(164,158,207,0.6)] flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
                       <>

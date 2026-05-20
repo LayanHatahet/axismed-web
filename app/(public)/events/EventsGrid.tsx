@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -120,7 +120,7 @@ function EventCard({ event, index }: { event: Event; index: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.06 }}
-      className="group glass glow-border rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all hover:shadow-[0_8px_32px_rgba(124,58,237,0.12)]"
+      className="group glass glow-border rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all hover:shadow-[0_8px_32px_rgba(164,158,207,0.12)]"
     >
       {/* Cover image */}
       <div className="relative h-44 bg-bg-elevated overflow-hidden">

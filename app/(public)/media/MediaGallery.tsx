@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -46,7 +46,7 @@ export function MediaGallery() {
                 whileHover={{ y: -4 }}
                 className="group cursor-pointer"
               >
-                <div className="glass glow-border rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all hover:shadow-[0_8px_32px_rgba(124,58,237,0.15)]">
+                <div className="glass glow-border rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all hover:shadow-[0_8px_32px_rgba(164,158,207,0.15)]">
                   <div className="relative h-52 bg-bg-elevated flex items-center justify-center overflow-hidden">
                     {item.thumbnail ? (
                       <>

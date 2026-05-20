@@ -54,7 +54,7 @@ export function CollaborationOpportunities() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: i * 0.1 }}
                 whileHover={{ y: -4 }}
-                className="glass glow-border rounded-2xl p-8 flex flex-col hover:border-purple-500/30 hover:shadow-[0_8px_32px_rgba(124,58,237,0.15)] transition-all"
+                className="glass glow-border rounded-2xl p-8 flex flex-col hover:border-purple-500/30 hover:shadow-[0_8px_32px_rgba(164,158,207,0.15)] transition-all"
               >
                 <div className="w-14 h-14 rounded-2xl bg-purple-500/15 flex items-center justify-center mb-6">
                   <Icon className="w-7 h-7 text-purple-400" />

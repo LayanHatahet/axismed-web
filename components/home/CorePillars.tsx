@@ -11,7 +11,7 @@ const pillars = [
     description:
       "Delivering cadaveric training, digital surgery programs, and hands-on workshops that meet the highest international clinical standards for practicing healthcare professionals.",
     gradient: "from-purple-600/20 to-purple-900/10",
-    accent: "#9B5CF6",
+    accent: "#bcb8df",
     tags: ["Cadaveric Labs", "Digital Workshops", "Hands-on Training"],
   },
   {
@@ -20,7 +20,7 @@ const pillars = [
     description:
       "Organizing and managing world-class surgical conferences, professional symposiums, and industry educational events that connect experts and drive knowledge exchange.",
     gradient: "from-violet-600/20 to-violet-900/10",
-    accent: "#7C3AED",
+    accent: "#a49ecf",
     tags: ["Conferences", "Symposiums", "Industry Events"],
   },
   {
@@ -70,7 +70,7 @@ export function CorePillars() {
                   className={`relative rounded-2xl glass glow-border p-8 h-full
                     bg-gradient-to-br ${pillar.gradient}
                     hover:border-purple-500/30 transition-all duration-300
-                    hover:shadow-[0_12px_48px_rgba(124,58,237,0.18)]`}
+                    hover:shadow-[0_12px_48px_rgba(164,158,207,0.18)]`}
                 >
                   {/* Number */}
                   <div className="absolute top-6 right-6 text-5xl font-display font-bold text-white/[0.04] select-none">

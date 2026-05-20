@@ -44,7 +44,7 @@ const EDGES: [string, string][] = [
 ];
 
 const TYPE_COLOR: Record<string, string> = {
-  hq: "#C4B5FD", education: "#93C5FD", event: "#86EFAC", partner: "#FCA5A5",
+  hq: "#dddaee", education: "#93C5FD", event: "#86EFAC", partner: "#FCA5A5",
 };
 const TYPE_LABEL: Record<string, string> = {
   hq: "Headquarters", education: "Education Hub", event: "Event Host", partner: "Partner",
@@ -91,28 +91,28 @@ function Tooltip({ node, pos }: { node: Hub; pos: { x: number; y: number } }) {
         style={{
           maxWidth: 230,
           background: "rgba(6,4,16,0.97)",
-          border: "1px solid rgba(139,92,246,0.24)",
+          border: "1px solid rgba(164,158,207,0.24)",
           backdropFilter: "blur(28px)",
           WebkitBackdropFilter: "blur(28px)",
-          boxShadow: "0 12px 48px rgba(0,0,0,0.65), 0 0 30px rgba(75,29,255,0.1)",
+          boxShadow: "0 12px 48px rgba(0,0,0,0.65), 0 0 30px rgba(136,128,184,0.1)",
         }}
       >
         <span
           className="inline-block text-[0.58rem] font-semibold tracking-[0.2em] uppercase px-2 py-0.5 rounded-full mb-2"
-          style={{ background: "rgba(75,29,255,0.15)", color: TYPE_COLOR[node.type] }}
+          style={{ background: "rgba(136,128,184,0.15)", color: TYPE_COLOR[node.type] }}
         >
           {TYPE_LABEL[node.type]}
         </span>
         <div className="text-[0.82rem] font-semibold leading-tight mb-0.5" style={{ color: "rgba(220,210,255,0.97)" }}>
           {node.city}
-          <span className="font-normal text-[0.72rem] ml-2" style={{ color: "rgba(139,92,246,0.6)" }}>
+          <span className="font-normal text-[0.72rem] ml-2" style={{ color: "rgba(164,158,207,0.6)" }}>
             {node.country}
           </span>
         </div>
         <p className="text-[0.70rem] leading-snug mb-1.5" style={{ color: "rgba(196,181,253,0.6)" }}>
           {node.desc}
         </p>
-        <div className="text-[0.62rem] tracking-wide font-medium" style={{ color: "rgba(139,92,246,0.5)" }}>
+        <div className="text-[0.62rem] tracking-wide font-medium" style={{ color: "rgba(164,158,207,0.5)" }}>
           {node.specialty}
         </div>
       </div>
@@ -173,12 +173,12 @@ export function GlobalMap() {
       for (let lng = -180; lng <= 180; lng += 30) {
         const { x } = project(0, lng + CENTER_LNG, W, H);
         ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H);
-        ctx.strokeStyle = "rgba(75,29,255,0.055)"; ctx.stroke();
+        ctx.strokeStyle = "rgba(136,128,184,0.055)"; ctx.stroke();
       }
       for (let lat = -60; lat <= 75; lat += 30) {
         const { y } = project(lat, CENTER_LNG, W, H);
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y);
-        ctx.strokeStyle = "rgba(75,29,255,0.055)"; ctx.stroke();
+        ctx.strokeStyle = "rgba(136,128,184,0.055)"; ctx.stroke();
       }
 
       // Compute node positions
@@ -201,7 +201,7 @@ export function GlobalMap() {
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
         ctx.quadraticCurveTo(cx, cy, p2.x, p2.y);
-        ctx.strokeStyle = "rgba(75,29,255,0.10)";
+        ctx.strokeStyle = "rgba(136,128,184,0.10)";
         ctx.lineWidth = 0.7 * dpr;
         ctx.stroke();
 
@@ -233,15 +233,15 @@ export function GlobalMap() {
 
         // Glow 2
         const g2 = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, hov2);
-        g2.addColorStop(0, `rgba(75,29,255,${isHQ ? 0.055 : 0.035})`);
-        g2.addColorStop(1, "rgba(75,29,255,0)");
+        g2.addColorStop(0, `rgba(136,128,184,${isHQ ? 0.055 : 0.035})`);
+        g2.addColorStop(1, "rgba(136,128,184,0)");
         ctx.fillStyle = g2;
         ctx.beginPath(); ctx.arc(p.x, p.y, hov2, 0, Math.PI*2); ctx.fill();
 
         // Glow 1
         const g1 = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, hov1);
-        g1.addColorStop(0, `rgba(139,92,246,${(isHQ ? 0.22 : 0.14) + pulse * 0.06 + (isHov ? 0.1 : 0)})`);
-        g1.addColorStop(1, "rgba(139,92,246,0)");
+        g1.addColorStop(0, `rgba(164,158,207,${(isHQ ? 0.22 : 0.14) + pulse * 0.06 + (isHov ? 0.1 : 0)})`);
+        g1.addColorStop(1, "rgba(164,158,207,0)");
         ctx.fillStyle = g1;
         ctx.beginPath(); ctx.arc(p.x, p.y, hov1, 0, Math.PI*2); ctx.fill();
 
@@ -250,7 +250,7 @@ export function GlobalMap() {
         ctx.arc(p.x, p.y, base, 0, Math.PI*2);
         ctx.fillStyle = isHQ
           ? `rgba(210,192,255,${0.88 + pulse * 0.12})`
-          : `rgba(139,92,246,${0.72 + pulse * 0.22})`;
+          : `rgba(164,158,207,${0.72 + pulse * 0.22})`;
         ctx.fill();
 
         // HQ ring
@@ -310,7 +310,7 @@ export function GlobalMap() {
           className="text-center mb-12"
         >
           <div className="inline-block text-[0.62rem] font-semibold tracking-[0.28em] uppercase mb-5 px-4 py-1.5 rounded-full"
-            style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", color: "#6B3FC0" }}>
+            style={{ background: "rgba(164,158,207,0.08)", border: "1px solid rgba(164,158,207,0.2)", color: "#6B3FC0" }}>
             Global Reach
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4"
@@ -330,8 +330,8 @@ export function GlobalMap() {
           className="relative rounded-3xl overflow-hidden"
           style={{
             height: "clamp(260px, 42vw, 460px)",
-            border: "1px solid rgba(139,92,246,0.11)",
-            boxShadow: "0 0 100px rgba(75,29,255,0.07), inset 0 1px 0 rgba(255,255,255,0.02)",
+            border: "1px solid rgba(164,158,207,0.11)",
+            boxShadow: "0 0 100px rgba(136,128,184,0.07), inset 0 1px 0 rgba(255,255,255,0.02)",
           }}
         >
           <canvas
@@ -342,7 +342,7 @@ export function GlobalMap() {
             style={{ cursor: hovered ? "pointer" : "default" }}
           />
           <div className="absolute top-4 left-5 text-[0.56rem] tracking-[0.32em] uppercase select-none"
-            style={{ color: "rgba(139,92,246,0.28)" }}>
+            style={{ color: "rgba(164,158,207,0.28)" }}>
             Healthcare Intelligence Network
           </div>
           <div className="absolute top-4 right-5 flex items-center gap-1.5">
@@ -370,8 +370,8 @@ export function GlobalMap() {
         >
           {STATS.map(({ Icon, val, label }) => (
             <div key={label} className="flex flex-col items-center py-5 rounded-2xl"
-              style={{ background: "rgba(255,255,255,0.7)", border: "1px solid rgba(124,58,237,0.12)" }}>
-              <Icon size={15} color="rgba(124,58,237,0.6)" className="mb-2" />
+              style={{ background: "rgba(255,255,255,0.7)", border: "1px solid rgba(164,158,207,0.12)" }}>
+              <Icon size={15} color="rgba(164,158,207,0.6)" className="mb-2" />
               <div className="text-[1.65rem] font-bold tracking-tight" style={{ color: "#12082C" }}>{val}</div>
               <div className="text-[0.63rem] tracking-widest uppercase mt-0.5" style={{ color: "#6B58A2" }}>{label}</div>
             </div>

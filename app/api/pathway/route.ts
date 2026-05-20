@@ -43,7 +43,7 @@ const PROGRAMS: (ProgramRec & { scores: Record<string, number> })[] = [
     duration: "3 Days",
     level: "Advanced",
     href: "/courses/orthognathic-psi-course",
-    accent: "#7C3AED",
+    accent: "#a49ecf",
     reason: "",
     scores: {
       specialty_omfs: 3, specialty_cmf: 2,
@@ -232,7 +232,7 @@ function scoreKey(input: PathwayInput) {
 ────────────────────────────────────────────────────────── */
 
 const CATEGORY_ACCENT: Record<string, string> = {
-  "Oral & Maxillofacial Surgery": "#7C3AED",
+  "Oral & Maxillofacial Surgery": "#a49ecf",
   "CMF Reconstruction":           "#F59E0B",
   "Implantology":                 "#10B981",
   "Digital Surgery":              "#0EA5E9",
@@ -240,7 +240,7 @@ const CATEGORY_ACCENT: Record<string, string> = {
   "General Surgery":              "#6366F1",
   "Orthopedic Surgery":           "#F97316",
   "Neurosurgery":                 "#14B8A6",
-  "Healthcare Management":        "#8B5CF6",
+  "Healthcare Management":        "#bcb8df",
 };
 
 const CATEGORY_SPECIALTY: Record<string, string> = {
@@ -281,7 +281,7 @@ function liveCoursesToPrograms(
         duration: c.duration,
         level: "All Levels",
         href: `/courses/${c.slug}`,
-        accent: CATEGORY_ACCENT[c.category] ?? "#7C3AED",
+        accent: CATEGORY_ACCENT[c.category] ?? "#a49ecf",
         reason: "",
         scores,
       };

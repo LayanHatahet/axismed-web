@@ -47,7 +47,7 @@ export function PulseNetwork() {
           const y = yBase + l.amp * Math.sin(x * l.freq + t * l.speed * 6.28);
           x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
         }
-        ctx.strokeStyle = `rgba(124,58,237,${l.opacity})`;
+        ctx.strokeStyle = `rgba(164,158,207,${l.opacity})`;
         ctx.lineWidth = 1;
         ctx.stroke();
 
@@ -57,7 +57,7 @@ export function PulseNetwork() {
           const y = yBase + l.amp * 0.5 * Math.sin(x * l.freq * 1.6 + t * l.speed * 4.5 + 1.2);
           x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
         }
-        ctx.strokeStyle = `rgba(139,92,246,${l.opacity * 0.7})`;
+        ctx.strokeStyle = `rgba(164,158,207,${l.opacity * 0.7})`;
         ctx.lineWidth = 0.6;
         ctx.stroke();
       }

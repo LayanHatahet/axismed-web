@@ -79,19 +79,19 @@ function TypingDots() {
     <div className="flex items-start gap-2.5 mb-5">
       <div
         className="w-6 h-6 rounded-xl flex-shrink-0 flex items-center justify-center mt-0.5"
-        style={{ background: "rgba(75,29,255,0.18)", border: "1px solid rgba(139,92,246,0.28)" }}
+        style={{ background: "rgba(136,128,184,0.18)", border: "1px solid rgba(164,158,207,0.28)" }}
       >
-        <Sparkles size={10} color="#9B5CF6" />
+        <Sparkles size={10} color="#bcb8df" />
       </div>
       <div
         className="px-4 py-3 rounded-2xl rounded-tl-sm flex items-center gap-1.5"
-        style={{ background: "rgba(237,232,255,0.8)", border: "1px solid rgba(124,58,237,0.14)" }}
+        style={{ background: "rgba(237,232,255,0.8)", border: "1px solid rgba(164,158,207,0.14)" }}
       >
         {[0, 1, 2].map((i) => (
           <motion.div
             key={i}
             className="rounded-full"
-            style={{ width: 6, height: 6, background: "rgba(139,92,246,0.65)" }}
+            style={{ width: 6, height: 6, background: "rgba(164,158,207,0.65)" }}
             animate={{ y: [0, -5, 0], opacity: [0.3, 1, 0.3] }}
             transition={{ duration: 1.1, repeat: Infinity, delay: i * 0.2, ease: "easeInOut" }}
           />
@@ -117,9 +117,9 @@ function Bubble({ msg }: { msg: Msg }) {
       {isAI && (
         <div
           className="w-6 h-6 rounded-xl flex-shrink-0 flex items-center justify-center mt-0.5"
-          style={{ background: "rgba(75,29,255,0.18)", border: "1px solid rgba(139,92,246,0.28)" }}
+          style={{ background: "rgba(136,128,184,0.18)", border: "1px solid rgba(164,158,207,0.28)" }}
         >
-          <Sparkles size={10} color="#9B5CF6" />
+          <Sparkles size={10} color="#bcb8df" />
         </div>
       )}
       <div
@@ -130,12 +130,12 @@ function Bubble({ msg }: { msg: Msg }) {
           isAI
             ? {
                 background: "rgba(237,232,255,0.75)",
-                border: "1px solid rgba(124,58,237,0.14)",
+                border: "1px solid rgba(164,158,207,0.14)",
                 color: "#3D2878",
               }
             : {
-                background: "linear-gradient(140deg, rgba(75,29,255,0.52), rgba(124,58,237,0.4))",
-                border: "1px solid rgba(139,92,246,0.32)",
+                background: "linear-gradient(140deg, rgba(136,128,184,0.52), rgba(164,158,207,0.4))",
+                border: "1px solid rgba(164,158,207,0.32)",
                 color: "rgba(240,235,255,0.97)",
               }
         }
@@ -165,22 +165,22 @@ function HandoffCard({ waUrl }: { waUrl: string }) {
       className="mb-5 rounded-2xl overflow-hidden"
       style={{
         background: "rgba(255,255,255,0.96)",
-        border: "1px solid rgba(124,58,237,0.22)",
-        boxShadow: "0 0 40px rgba(124,58,237,0.07)",
+        border: "1px solid rgba(164,158,207,0.22)",
+        boxShadow: "0 0 40px rgba(164,158,207,0.07)",
       }}
     >
       {/* Top accent line */}
       <div
         className="h-px w-full"
-        style={{ background: "linear-gradient(90deg, transparent, rgba(139,92,246,0.5), transparent)" }}
+        style={{ background: "linear-gradient(90deg, transparent, rgba(164,158,207,0.5), transparent)" }}
       />
       <div className="p-4">
         <div className="flex items-center gap-2.5 mb-3">
           <div
             className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: "rgba(75,29,255,0.18)", border: "1px solid rgba(139,92,246,0.3)" }}
+            style={{ background: "rgba(136,128,184,0.18)", border: "1px solid rgba(164,158,207,0.3)" }}
           >
-            <Users size={12} color="#9B5CF6" />
+            <Users size={12} color="#bcb8df" />
           </div>
           <div>
             <div className="text-[0.75rem] font-semibold" style={{ color: "#12082C" }}>
@@ -204,8 +204,8 @@ function HandoffCard({ waUrl }: { waUrl: string }) {
           whileTap={{ scale: 0.97 }}
           className="flex items-center justify-between px-4 py-3 rounded-xl text-[0.75rem] font-semibold tracking-wide"
           style={{
-            background: "linear-gradient(135deg, rgba(75,29,255,0.45), rgba(124,58,237,0.35))",
-            border: "1px solid rgba(139,92,246,0.38)",
+            background: "linear-gradient(135deg, rgba(136,128,184,0.45), rgba(164,158,207,0.35))",
+            border: "1px solid rgba(164,158,207,0.38)",
             color: "rgba(224,214,255,0.96)",
           }}
         >
@@ -213,7 +213,7 @@ function HandoffCard({ waUrl }: { waUrl: string }) {
           <ArrowRight size={13} />
         </motion.a>
 
-        <p className="text-center text-[0.60rem] mt-2.5 tracking-wide" style={{ color: "rgba(139,92,246,0.35)" }}>
+        <p className="text-center text-[0.60rem] mt-2.5 tracking-wide" style={{ color: "rgba(164,158,207,0.35)" }}>
           Opens WhatsApp · Your context is included
         </p>
       </div>
@@ -237,15 +237,15 @@ function LeadBadge({ lead }: { lead: Lead }) {
       animate={{ opacity: 1, height: "auto" }}
       transition={{ duration: 0.4 }}
       className="px-5 py-2 flex items-center gap-2"
-      style={{ borderBottom: "1px solid rgba(139,92,246,0.07)", background: "rgba(75,29,255,0.04)" }}
+      style={{ borderBottom: "1px solid rgba(164,158,207,0.07)", background: "rgba(136,128,184,0.04)" }}
     >
       <motion.div
         className="w-1 h-1 rounded-full"
-        style={{ background: "rgba(139,92,246,0.5)" }}
+        style={{ background: "rgba(164,158,207,0.5)" }}
         animate={{ opacity: [0.4, 1, 0.4] }}
         transition={{ duration: 2.5, repeat: Infinity }}
       />
-      <span className="text-[0.60rem] tracking-widest uppercase" style={{ color: "rgba(139,92,246,0.5)" }}>
+      <span className="text-[0.60rem] tracking-widest uppercase" style={{ color: "rgba(164,158,207,0.5)" }}>
         Concierge remembers:
       </span>
       <span className="text-[0.63rem] font-medium" style={{ color: "#6B58A2" }}>
@@ -297,12 +297,12 @@ function Panel({
         width: "min(400px, calc(100vw - 48px))",
         height: "min(620px, calc(100dvh - 140px))",
         background: "rgba(255,255,255,0.97)",
-        border: "1px solid rgba(124,58,237,0.17)",
+        border: "1px solid rgba(164,158,207,0.17)",
         borderRadius: 24,
         backdropFilter: "blur(56px)",
         WebkitBackdropFilter: "blur(56px)",
         boxShadow:
-          "0 0 0 1px rgba(124,58,237,0.04), 0 32px 100px rgba(124,58,237,0.12), 0 0 80px rgba(124,58,237,0.06)",
+          "0 0 0 1px rgba(164,158,207,0.04), 0 32px 100px rgba(164,158,207,0.12), 0 0 80px rgba(164,158,207,0.06)",
       }}
     >
       {/* Top ambient glow */}
@@ -310,7 +310,7 @@ function Panel({
         className="absolute top-0 left-0 right-0 h-40 pointer-events-none z-0"
         style={{
           background:
-            "radial-gradient(ellipse 90% 70% at 50% -8%, rgba(75,29,255,0.15) 0%, transparent 100%)",
+            "radial-gradient(ellipse 90% 70% at 50% -8%, rgba(136,128,184,0.15) 0%, transparent 100%)",
         }}
       />
       {/* Grid texture */}
@@ -318,7 +318,7 @@ function Panel({
         className="absolute inset-0 pointer-events-none z-0 opacity-[0.02]"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(139,92,246,1) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,1) 1px, transparent 1px)",
+            "linear-gradient(rgba(164,158,207,1) 1px, transparent 1px), linear-gradient(90deg, rgba(164,158,207,1) 1px, transparent 1px)",
           backgroundSize: "36px 36px",
         }}
       />
@@ -326,18 +326,18 @@ function Panel({
       {/* ── Header ── */}
       <div
         className="relative z-10 flex items-center justify-between px-5 py-4 flex-shrink-0"
-        style={{ borderBottom: "1px solid rgba(124,58,237,0.10)" }}
+        style={{ borderBottom: "1px solid rgba(164,158,207,0.10)" }}
       >
         <div className="flex items-center gap-3">
           <div
             className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
             style={{
-              background: "rgba(75,29,255,0.16)",
-              border: "1px solid rgba(139,92,246,0.28)",
-              boxShadow: "0 0 18px rgba(75,29,255,0.16)",
+              background: "rgba(136,128,184,0.16)",
+              border: "1px solid rgba(164,158,207,0.28)",
+              boxShadow: "0 0 18px rgba(136,128,184,0.16)",
             }}
           >
-            <Sparkles size={15} color="#9B5CF6" />
+            <Sparkles size={15} color="#bcb8df" />
           </div>
           <div>
             <div className="text-[0.8rem] font-semibold tracking-wide" style={{ color: "#12082C" }}>
@@ -362,15 +362,15 @@ function Panel({
           <button
             onClick={onRequestHandoff}
             className="text-[0.62rem] tracking-widest uppercase px-2.5 py-1.5 rounded-lg transition-all duration-200"
-            style={{ color: "rgba(139,92,246,0.45)", border: "1px solid rgba(139,92,246,0.12)" }}
+            style={{ color: "rgba(164,158,207,0.45)", border: "1px solid rgba(164,158,207,0.12)" }}
             onMouseEnter={(e) => {
               e.currentTarget.style.color = "rgba(196,181,253,0.8)";
-              e.currentTarget.style.borderColor = "rgba(139,92,246,0.3)";
-              e.currentTarget.style.background = "rgba(75,29,255,0.08)";
+              e.currentTarget.style.borderColor = "rgba(164,158,207,0.3)";
+              e.currentTarget.style.background = "rgba(136,128,184,0.08)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = "rgba(139,92,246,0.45)";
-              e.currentTarget.style.borderColor = "rgba(139,92,246,0.12)";
+              e.currentTarget.style.color = "rgba(164,158,207,0.45)";
+              e.currentTarget.style.borderColor = "rgba(164,158,207,0.12)";
               e.currentTarget.style.background = "transparent";
             }}
           >
@@ -380,13 +380,13 @@ function Panel({
           <button
             onClick={onClose}
             className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200"
-            style={{ color: "rgba(139,92,246,0.4)" }}
+            style={{ color: "rgba(164,158,207,0.4)" }}
             onMouseEnter={(e) => {
               e.currentTarget.style.color = "rgba(196,181,253,0.9)";
-              e.currentTarget.style.background = "rgba(139,92,246,0.1)";
+              e.currentTarget.style.background = "rgba(164,158,207,0.1)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = "rgba(139,92,246,0.4)";
+              e.currentTarget.style.color = "rgba(164,158,207,0.4)";
               e.currentTarget.style.background = "transparent";
             }}
           >
@@ -428,18 +428,18 @@ function Panel({
                 onClick={() => onQuick(q.msg)}
                 className="text-left px-4 py-3 rounded-xl text-[0.74rem] font-medium tracking-wide flex items-center justify-between gap-3 transition-all duration-200"
                 style={{
-                  background: "rgba(124,58,237,0.05)",
-                  border: "1px solid rgba(124,58,237,0.14)",
+                  background: "rgba(164,158,207,0.05)",
+                  border: "1px solid rgba(164,158,207,0.14)",
                   color: "#3D2878",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(124,58,237,0.10)";
-                  e.currentTarget.style.borderColor = "rgba(124,58,237,0.3)";
+                  e.currentTarget.style.background = "rgba(164,158,207,0.10)";
+                  e.currentTarget.style.borderColor = "rgba(164,158,207,0.3)";
                   e.currentTarget.style.color = "#12082C";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(124,58,237,0.05)";
-                  e.currentTarget.style.borderColor = "rgba(124,58,237,0.14)";
+                  e.currentTarget.style.background = "rgba(164,158,207,0.05)";
+                  e.currentTarget.style.borderColor = "rgba(164,158,207,0.14)";
                   e.currentTarget.style.color = "#3D2878";
                 }}
               >
@@ -456,7 +456,7 @@ function Panel({
       {/* ── Footer divider ── */}
       <div
         className="relative z-10 flex-shrink-0"
-        style={{ borderTop: "1px solid rgba(139,92,246,0.07)" }}
+        style={{ borderTop: "1px solid rgba(164,158,207,0.07)" }}
       >
         {/* WhatsApp subtle link */}
         {!handoff && (
@@ -466,9 +466,9 @@ function Panel({
               target="_blank"
               rel="noreferrer"
               className="text-[0.60rem] tracking-widest uppercase transition-colors duration-300"
-              style={{ color: "rgba(139,92,246,0.28)" }}
+              style={{ color: "rgba(164,158,207,0.28)" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(196,181,253,0.55)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(139,92,246,0.28)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(164,158,207,0.28)")}
             >
               Continue on WhatsApp →
             </a>
@@ -481,7 +481,7 @@ function Panel({
             className="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200"
             style={{
               background: "rgba(237,232,255,0.5)",
-              border: "1px solid rgba(124,58,237,0.15)",
+              border: "1px solid rgba(164,158,207,0.15)",
             }}
           >
             <input
@@ -499,12 +499,12 @@ function Panel({
               className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-200 disabled:opacity-20"
               style={{
                 background: input.trim()
-                  ? "rgba(75,29,255,0.7)"
-                  : "rgba(75,29,255,0.12)",
-                border: "1px solid rgba(139,92,246,0.35)",
+                  ? "rgba(136,128,184,0.7)"
+                  : "rgba(136,128,184,0.12)",
+                border: "1px solid rgba(164,158,207,0.35)",
               }}
             >
-              <Send size={11} color="#C4B5FD" />
+              <Send size={11} color="#dddaee" />
             </motion.button>
           </div>
         </div>
@@ -540,7 +540,7 @@ function FloatButton({
             <motion.div
               key={i}
               className="absolute inset-0 rounded-full pointer-events-none"
-              style={{ background: i === 0 ? "rgba(75,29,255,0.13)" : "rgba(139,92,246,0.07)" }}
+              style={{ background: i === 0 ? "rgba(136,128,184,0.13)" : "rgba(164,158,207,0.07)" }}
               animate={{ scale: [1, 2.1 + i * 0.5, 1], opacity: [0.5 - i * 0.1, 0, 0.5 - i * 0.1] }}
               transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut", delay: i * 1.0 }}
             />
@@ -550,7 +550,7 @@ function FloatButton({
             <motion.div
               key={i}
               className="absolute rounded-full pointer-events-none"
-              style={{ width: 3, height: 3, background: "rgba(139,92,246,0.5)", top: "50%", left: "50%" }}
+              style={{ width: 3, height: 3, background: "rgba(164,158,207,0.5)", top: "50%", left: "50%" }}
               animate={{
                 x: [0, Math.cos((i / 4) * Math.PI * 2) * 30],
                 y: [0, Math.sin((i / 4) * Math.PI * 2) * 30],
@@ -577,19 +577,19 @@ function FloatButton({
           y: sy,
           background: "rgba(9,7,20,0.93)",
           border: isOpen
-            ? "1px solid rgba(139,92,246,0.52)"
-            : "1px solid rgba(139,92,246,0.3)",
+            ? "1px solid rgba(164,158,207,0.52)"
+            : "1px solid rgba(164,158,207,0.3)",
           backdropFilter: "blur(28px)",
           WebkitBackdropFilter: "blur(28px)",
           boxShadow: isOpen
-            ? "0 0 44px rgba(75,29,255,0.38), 0 8px 32px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.07)"
-            : "0 0 26px rgba(75,29,255,0.20), 0 8px 28px rgba(0,0,0,0.62), inset 0 1px 0 rgba(255,255,255,0.05)",
+            ? "0 0 44px rgba(136,128,184,0.38), 0 8px 32px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.07)"
+            : "0 0 26px rgba(136,128,184,0.20), 0 8px 28px rgba(0,0,0,0.62), inset 0 1px 0 rgba(255,255,255,0.05)",
         }}
         className="relative w-14 h-14 rounded-full flex items-center justify-center"
       >
         <div
           className="absolute inset-0 rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle at 38% 32%, rgba(139,92,246,0.2) 0%, transparent 60%)" }}
+          style={{ background: "radial-gradient(circle at 38% 32%, rgba(164,158,207,0.2) 0%, transparent 60%)" }}
         />
         <AnimatePresence mode="wait">
           {isOpen ? (
@@ -601,7 +601,7 @@ function FloatButton({
               transition={{ duration: 0.22, ease: "easeOut" }}
               className="relative z-10"
             >
-              <X size={18} color="#9B5CF6" />
+              <X size={18} color="#bcb8df" />
             </motion.div>
           ) : (
             <motion.div
@@ -612,7 +612,7 @@ function FloatButton({
               transition={{ duration: 0.22, ease: "easeOut" }}
               className="relative z-10"
             >
-              <Sparkles size={18} color="#9B5CF6" />
+              <Sparkles size={18} color="#bcb8df" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -625,7 +625,7 @@ function FloatButton({
               exit={{ scale: 0, opacity: 0 }}
               transition={{ type: "spring", stiffness: 440, damping: 22 }}
               className="absolute -top-1 -right-1 rounded-full flex items-center justify-center text-[9px] font-bold"
-              style={{ width: 18, height: 18, background: "#7C3AED", color: "#fff", boxShadow: "0 0 12px rgba(124,58,237,0.7)" }}
+              style={{ width: 18, height: 18, background: "#a49ecf", color: "#fff", boxShadow: "0 0 12px rgba(164,158,207,0.7)" }}
             >
               {unread}
             </motion.div>

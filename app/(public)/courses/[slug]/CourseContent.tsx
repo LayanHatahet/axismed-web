@@ -359,7 +359,7 @@ export function CourseContent({ course }: Props) {
                     key={tier}
                     className={`rounded-2xl p-6 border transition-all ${
                       highlight
-                        ? "bg-purple-500/12 border-purple-500/35 shadow-[0_0_24px_rgba(124,58,237,0.15)]"
+                        ? "bg-purple-500/12 border-purple-500/35 shadow-[0_0_24px_rgba(164,158,207,0.15)]"
                         : "glass border-border"
                     }`}
                   >

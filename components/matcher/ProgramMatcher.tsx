@@ -78,7 +78,7 @@ const ALL_PROGRAMS: Program[] = [
     duration: "3–5 Days",
     level: "Specialist & above",
     href: "/courses",
-    accent: "#9B5CF6",
+    accent: "#bcb8df",
   },
   {
     title: "Robotic Surgery Fundamentals Program",
@@ -87,7 +87,7 @@ const ALL_PROGRAMS: Program[] = [
     duration: "1 Week",
     level: "Resident to Consultant",
     href: "/courses",
-    accent: "#7C3AED",
+    accent: "#a49ecf",
   },
   {
     title: "AI in Healthcare — Clinical Intelligence",
@@ -105,7 +105,7 @@ const ALL_PROGRAMS: Program[] = [
     duration: "Modular, 6 Weeks",
     level: "Consultant & Director",
     href: "/courses",
-    accent: "#8B5CF6",
+    accent: "#bcb8df",
   },
   {
     title: "International CMF Surgery Course",
@@ -114,7 +114,7 @@ const ALL_PROGRAMS: Program[] = [
     duration: "4 Days",
     level: "Specialist & above",
     href: "/courses",
-    accent: "#A78BFA",
+    accent: "#cac6e6",
   },
   {
     title: "Emergency Medicine Innovation Summit",
@@ -123,7 +123,7 @@ const ALL_PROGRAMS: Program[] = [
     duration: "2 Days",
     level: "All Levels",
     href: "/courses",
-    accent: "#7C3AED",
+    accent: "#a49ecf",
   },
   {
     title: "Digital Radiology & AI Imaging",
@@ -132,7 +132,7 @@ const ALL_PROGRAMS: Program[] = [
     duration: "3 Days",
     level: "Specialist & above",
     href: "/courses",
-    accent: "#6D28D9",
+    accent: "#8880b8",
   },
   {
     title: "Global Surgical Research Program",
@@ -141,7 +141,7 @@ const ALL_PROGRAMS: Program[] = [
     duration: "8 Weeks Online",
     level: "All Levels",
     href: "/courses",
-    accent: "#9B5CF6",
+    accent: "#bcb8df",
   },
 ];
 
@@ -209,14 +209,14 @@ function StepCard({
       style={
         selected
           ? {
-              background: "linear-gradient(135deg, rgba(124,58,237,0.18), rgba(107,63,192,0.12))",
-              border: "1px solid rgba(124,58,237,0.45)",
+              background: "linear-gradient(135deg, rgba(164,158,207,0.18), rgba(107,63,192,0.12))",
+              border: "1px solid rgba(164,158,207,0.45)",
               color: "#3D2878",
-              boxShadow: "0 0 24px rgba(124,58,237,0.10)",
+              boxShadow: "0 0 24px rgba(164,158,207,0.10)",
             }
           : {
               background: "rgba(255,255,255,0.6)",
-              border: "1px solid rgba(124,58,237,0.12)",
+              border: "1px solid rgba(164,158,207,0.12)",
               color: "#3D2878",
             }
       }
@@ -228,7 +228,7 @@ function StepCard({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ background: "rgba(124,58,237,0.5)", border: "1px solid rgba(196,181,253,0.4)" }}
+            style={{ background: "rgba(164,158,207,0.5)", border: "1px solid rgba(196,181,253,0.4)" }}
           >
             <div className="w-1.5 h-1.5 rounded-full bg-purple-200" />
           </motion.div>
@@ -247,8 +247,8 @@ function ResultCard({ program, index }: { program: Program; index: number }) {
       className="rounded-2xl p-5 flex flex-col"
       style={{
         background: "rgba(255,255,255,0.75)",
-        border: `1px solid rgba(124,58,237,0.14)`,
-        boxShadow: `0 4px 24px rgba(124,58,237,0.06)`,
+        border: `1px solid rgba(164,158,207,0.14)`,
+        boxShadow: `0 4px 24px rgba(164,158,207,0.06)`,
       }}
     >
       <div
@@ -267,7 +267,7 @@ function ResultCard({ program, index }: { program: Program; index: number }) {
         {[program.duration, program.level].map((tag) => (
           <span key={tag}
             className="text-[0.62rem] tracking-wide px-2.5 py-1 rounded-lg"
-            style={{ background: "rgba(75,29,255,0.1)", color: "rgba(139,92,246,0.6)", border: "1px solid rgba(139,92,246,0.12)" }}>
+            style={{ background: "rgba(136,128,184,0.1)", color: "rgba(164,158,207,0.6)", border: "1px solid rgba(164,158,207,0.12)" }}>
             {tag}
           </span>
         ))}
@@ -276,7 +276,7 @@ function ResultCard({ program, index }: { program: Program; index: number }) {
         <motion.div
           whileHover={{ x: 3 }}
           className="flex items-center gap-2 text-[0.73rem] font-semibold"
-          style={{ color: "rgba(139,92,246,0.7)" }}
+          style={{ color: "rgba(164,158,207,0.7)" }}
         >
           <span>View Program</span>
           <ExternalLink size={11} />
@@ -326,7 +326,7 @@ export function ProgramMatcher() {
     <section className="relative py-24 overflow-hidden" style={{ backgroundColor: "#F5F1FF" }}>
       {/* Ambient glow */}
       <div className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(124,58,237,0.06) 0%, transparent 70%)" }} />
+        style={{ background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(164,158,207,0.06) 0%, transparent 70%)" }} />
 
       <div className="max-w-3xl mx-auto px-6">
         {/* Heading */}
@@ -336,7 +336,7 @@ export function ProgramMatcher() {
           className="text-center mb-12"
         >
           <div className="inline-flex items-center gap-2 text-[0.62rem] font-semibold tracking-[0.28em] uppercase mb-5 px-4 py-1.5 rounded-full"
-            style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", color: "#6B3FC0" }}>
+            style={{ background: "rgba(164,158,207,0.08)", border: "1px solid rgba(164,158,207,0.2)", color: "#6B3FC0" }}>
             <Sparkles size={10} />
             AI Program Matcher
           </div>
@@ -355,18 +355,18 @@ export function ProgramMatcher() {
           className="relative rounded-3xl overflow-hidden"
           style={{
             background: "rgba(255,255,255,0.88)",
-            border: "1px solid rgba(124,58,237,0.14)",
+            border: "1px solid rgba(164,158,207,0.14)",
             backdropFilter: "blur(40px)",
             WebkitBackdropFilter: "blur(40px)",
-            boxShadow: "0 0 80px rgba(124,58,237,0.06), 0 8px 40px rgba(124,58,237,0.05)",
+            boxShadow: "0 0 80px rgba(164,158,207,0.06), 0 8px 40px rgba(164,158,207,0.05)",
           }}
         >
           {/* Progress bar */}
           {!results && !loading && (
-            <div className="h-px w-full" style={{ background: "rgba(139,92,246,0.1)" }}>
+            <div className="h-px w-full" style={{ background: "rgba(164,158,207,0.1)" }}>
               <motion.div
                 className="h-full"
-                style={{ background: "linear-gradient(90deg, rgba(75,29,255,0.8), rgba(139,92,246,0.6))" }}
+                style={{ background: "linear-gradient(90deg, rgba(136,128,184,0.8), rgba(164,158,207,0.6))" }}
                 animate={{ width: `${((stepIdx) / STEPS.length) * 100}%` }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
               />
@@ -385,7 +385,7 @@ export function ProgramMatcher() {
                   <div className="relative w-16 h-16">
                     <motion.div
                       className="absolute inset-0 rounded-full"
-                      style={{ border: "1px solid rgba(139,92,246,0.3)" }}
+                      style={{ border: "1px solid rgba(164,158,207,0.3)" }}
                       animate={{ rotate: 360 }}
                       transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
                     />
@@ -396,7 +396,7 @@ export function ProgramMatcher() {
                       transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
                     />
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <Sparkles size={16} color="#9B5CF6" />
+                      <Sparkles size={16} color="#bcb8df" />
                     </div>
                   </div>
                   <div className="text-center">
@@ -410,7 +410,7 @@ export function ProgramMatcher() {
                   <div className="flex gap-1.5">
                     {[0,1,2].map(i => (
                       <motion.div key={i} className="w-1.5 h-1.5 rounded-full"
-                        style={{ background: "rgba(139,92,246,0.6)" }}
+                        style={{ background: "rgba(164,158,207,0.6)" }}
                         animate={{ y: [0,-5,0], opacity: [0.3,1,0.3] }}
                         transition={{ duration: 1.1, repeat: Infinity, delay: i*0.2 }} />
                     ))}
@@ -435,9 +435,9 @@ export function ProgramMatcher() {
                     </div>
                     <button onClick={reset}
                       className="flex items-center gap-1.5 text-[0.68rem] tracking-wide px-3 py-1.5 rounded-xl transition-all duration-200"
-                      style={{ color: "rgba(139,92,246,0.5)", border: "1px solid rgba(139,92,246,0.12)" }}
-                      onMouseEnter={e => { e.currentTarget.style.color = "rgba(196,181,253,0.8)"; e.currentTarget.style.borderColor = "rgba(139,92,246,0.3)"; }}
-                      onMouseLeave={e => { e.currentTarget.style.color = "rgba(139,92,246,0.5)"; e.currentTarget.style.borderColor = "rgba(139,92,246,0.12)"; }}>
+                      style={{ color: "rgba(164,158,207,0.5)", border: "1px solid rgba(164,158,207,0.12)" }}
+                      onMouseEnter={e => { e.currentTarget.style.color = "rgba(196,181,253,0.8)"; e.currentTarget.style.borderColor = "rgba(164,158,207,0.3)"; }}
+                      onMouseLeave={e => { e.currentTarget.style.color = "rgba(164,158,207,0.5)"; e.currentTarget.style.borderColor = "rgba(164,158,207,0.12)"; }}>
                       <RotateCcw size={11} /> Restart
                     </button>
                   </div>
@@ -448,7 +448,7 @@ export function ProgramMatcher() {
                     <Link href="/courses">
                       <motion.span whileHover={{ x: 3 }}
                         className="inline-flex items-center gap-2 text-[0.74rem] font-semibold"
-                        style={{ color: "rgba(139,92,246,0.6)" }}>
+                        style={{ color: "rgba(164,158,207,0.6)" }}>
                         Browse all programs <ArrowRight size={12} />
                       </motion.span>
                     </Link>

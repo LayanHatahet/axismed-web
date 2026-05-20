@@ -24,30 +24,43 @@ const TEXT_CUES = [
 const ACTIVATE_MS = 8200;
 const EASE = [0.22, 1, 0.36, 1] as const;
 
+const NAV_LINKS = [
+  { label: "Courses", href: "/courses" },
+  { label: "Media",   href: "/media"   },
+  { label: "Events",  href: "/events"  },
+] as const;
+
 export function Hero() {
   const [phase,       setPhase]       = useState<Phase>("text");
   const [active,      setActive]      = useState(false);
   const [currentText, setCurrentText] = useState("");
   const [textVisible, setTextVisible] = useState(false);
+  const [mounted,     setMounted]     = useState(false);
 
   const introTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  /* ── Cinematic text intro sequence ─────────────────────────── */
+  useEffect(() => { setMounted(true); }, []);
+
+  // On mobile there is no 3D knot — auto-complete shortly after the animation would start
+  useEffect(() => {
+    if (!active || !mounted) return;
+    if (window.innerWidth >= 768) return;
+    const t = setTimeout(() => setPhase("complete"), 700);
+    return () => clearTimeout(t);
+  }, [active, mounted]);
+
+  /* ── Cinematic text intro ── */
   useEffect(() => {
     const t: ReturnType<typeof setTimeout>[] = [];
-
     TEXT_CUES.forEach(({ text, showAt, hideAt }) => {
-      t.push(setTimeout(() => { setCurrentText(text); setTextVisible(true); }, showAt));
+      t.push(setTimeout(() => { setCurrentText(text); setTextVisible(true);  }, showAt));
       t.push(setTimeout(() => setTextVisible(false), hideAt));
     });
-
     t.push(setTimeout(() => { setPhase("forming"); setActive(true); }, ACTIVATE_MS));
-
     introTimers.current = t;
     return () => t.forEach(clearTimeout);
   }, []);
 
-  /* ── Skip intro ─────────────────────────────────────────────── */
   const skip = useCallback(() => {
     introTimers.current.forEach(clearTimeout);
     setTextVisible(false);
@@ -55,32 +68,35 @@ export function Hero() {
     setActive(true);
   }, []);
 
-  /* ── Knot complete ───────────────────────────────────────────── */
   const onKnotComplete = useCallback(() => setPhase("complete"), []);
 
   const isComplete = phase === "complete";
   const isText     = phase === "text";
+  const isMobile   = mounted && window.innerWidth < 768;
 
   const bgGradient = isComplete
-    ? "radial-gradient(ellipse 150% 110% at 50% 5%, #EEE7FF 0%, #F5F1FF 30%, #FAF8FF 60%, #FFFFFF 100%)"
-    : "linear-gradient(160deg, #2D0A5E 0%, #3B1070 40%, #4A1287 70%, #2A0854 100%)";
+    ? "radial-gradient(ellipse 150% 110% at 50% 5%, #eeedf6 0%, #efeef7 30%, #f8f7fa 60%, #FFFFFF 100%)"
+    : "linear-gradient(160deg, #a49ecf 0%, #b0accf 40%, #bcb8df 70%, #8880b8 100%)";
 
   return (
     <div
       className="relative h-screen overflow-hidden"
       style={{ background: bgGradient, transition: "background 1.8s cubic-bezier(0.4,0,0.2,1)" }}
     >
-      <div className="absolute inset-x-0 bottom-0 z-0" style={{ top: "72px" }}>
-        <HeroScene onKnotComplete={onKnotComplete} active={active} />
-      </div>
+      {/* ── 3D canvas — desktop only ── */}
+      {!isMobile && (
+        <div className="absolute inset-x-0 bottom-0 z-0" style={{ top: "72px" }}>
+          {mounted && <HeroScene onKnotComplete={onKnotComplete} active={active} />}
+        </div>
+      )}
 
       {/* Edge vignette */}
       <div
         className="absolute inset-0 z-10 pointer-events-none"
         style={{
           background: isComplete
-            ? "radial-gradient(ellipse 85% 80% at 50% 50%, transparent 50%, rgba(238,231,255,0.55) 100%)"
-            : "radial-gradient(ellipse 82% 78% at 50% 50%, transparent 35%, rgba(10,2,30,0.55) 100%)",
+            ? "radial-gradient(ellipse 85% 80% at 50% 50%, transparent 50%, rgba(232,230,238,0.55) 100%)"
+            : "radial-gradient(ellipse 82% 78% at 50% 50%, transparent 35%, rgba(10,9,20,0.55) 100%)",
           transition: "background 1.8s ease",
         }}
       />
@@ -90,8 +106,8 @@ export function Hero() {
         className="absolute top-0 inset-x-0 h-28 z-10 pointer-events-none"
         style={{
           background: isComplete
-            ? "linear-gradient(to bottom, rgba(238,231,255,0.5) 0%, transparent 100%)"
-            : "linear-gradient(to bottom, rgba(30,8,71,0.5) 0%, transparent 100%)",
+            ? "linear-gradient(to bottom, rgba(232,230,238,0.5) 0%, transparent 100%)"
+            : "linear-gradient(to bottom, rgba(20,18,35,0.5) 0%, transparent 100%)",
           transition: "background 1.8s ease",
         }}
       />
@@ -109,12 +125,12 @@ export function Hero() {
               className="text-center px-6"
               style={{
                 fontFamily:    "var(--font-display, Georgia, serif)",
-                fontSize:      "clamp(1.5rem, 4vw, 2.9rem)",
+                fontSize:      "clamp(1.4rem, 5vw, 2.9rem)",
                 fontWeight:    300,
                 letterSpacing: "0.06em",
                 color:         "#F5F0FF",
                 lineHeight:    1.25,
-                textShadow:    "0 0 80px rgba(167,139,250,0.45), 0 2px 40px rgba(109,40,217,0.25)",
+                textShadow:    "0 0 80px rgba(167,139,250,0.45), 0 2px 40px rgba(136,128,184,0.25)",
               }}
             >
               {currentText}
@@ -122,6 +138,79 @@ export function Hero() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* ── Mobile complete UI — CSS orb + nav buttons ── */}
+      <AnimatePresence>
+        {isMobile && isComplete && (
+          <motion.div
+            className="absolute inset-0 z-20 flex flex-col items-center justify-center"
+            style={{ paddingTop: "60px", gap: "48px" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.9, ease: EASE }}
+          >
+            {/* Glowing orb — stands in for the 3D knot */}
+            <motion.div
+              style={{
+                width:        "160px",
+                height:       "160px",
+                borderRadius: "50%",
+                background:   "radial-gradient(circle at 38% 35%, #e1dff0 0%, #a49ecf 50%, #484575 100%)",
+                boxShadow:    "0 0 60px rgba(164,158,207,0.55), 0 0 120px rgba(136,128,184,0.28), inset 0 0 40px rgba(197,192,212,0.2)",
+              }}
+              animate={{
+                scale:     [1, 1.06, 1],
+                boxShadow: [
+                  "0 0 60px rgba(164,158,207,0.55), 0 0 120px rgba(136,128,184,0.28)",
+                  "0 0 80px rgba(164,158,207,0.75), 0 0 160px rgba(136,128,184,0.40)",
+                  "0 0 60px rgba(164,158,207,0.55), 0 0 120px rgba(136,128,184,0.28)",
+                ],
+              }}
+              transition={{ repeat: Infinity, duration: 3.2, ease: "easeInOut" }}
+            />
+
+            {/* Nav buttons */}
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center", padding: "0 24px" }}>
+              {NAV_LINKS.map(({ label, href }, i) => (
+                <motion.a
+                  key={label}
+                  href={href}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0  }}
+                  transition={{ delay: 0.25 + i * 0.1, duration: 0.5, ease: EASE }}
+                  style={{
+                    display:              "flex",
+                    alignItems:           "center",
+                    gap:                  "7px",
+                    padding:              "11px 20px",
+                    background:           "rgba(255,255,255,0.88)",
+                    border:               "1px solid rgba(164,158,207,0.28)",
+                    borderRadius:         "12px",
+                    backdropFilter:       "blur(20px)",
+                    WebkitBackdropFilter: "blur(20px)",
+                    color:                "#8880b8",
+                    fontSize:             "12px",
+                    fontWeight:           700,
+                    letterSpacing:        "0.1em",
+                    textTransform:        "uppercase",
+                    textDecoration:       "none",
+                    boxShadow:            "0 4px 20px rgba(136,128,184,0.15)",
+                    whiteSpace:           "nowrap",
+                  } as React.CSSProperties}
+                >
+                  <span style={{
+                    width: 7, height: 7, borderRadius: "50%",
+                    background: "linear-gradient(135deg,#cac6e6,#8880b8)",
+                    flexShrink: 0,
+                    boxShadow: "0 0 6px rgba(164,158,207,0.5)",
+                  }} />
+                  {label}
+                </motion.a>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Skip intro */}
       <AnimatePresence>

@@ -53,7 +53,7 @@ export function LoadingScreen() {
                   src="/logo-symbol.png"
                   alt="AxisMed"
                   fill
-                  className="object-contain drop-shadow-[0_0_20px_rgba(124,58,237,0.7)]"
+                  className="object-contain [filter:hue-rotate(-13deg)_saturate(0.45)_brightness(1.15)_drop-shadow(0_0_20px_rgba(164,158,207,0.6))]"
                   priority
                 />
               </motion.div>

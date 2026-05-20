@@ -220,7 +220,7 @@ function OptionCard({
       onClick={onClick}
       className={`relative group w-full text-left px-5 py-4 rounded-xl border transition-all duration-250 ${
         selected
-          ? "border-purple-500 bg-purple-500/12 shadow-[0_0_20px_rgba(124,58,237,0.25)]"
+          ? "border-purple-500 bg-purple-500/12 shadow-[0_0_20px_rgba(164,158,207,0.25)]"
           : "border-white/8 bg-white/3 hover:border-white/20 hover:bg-white/6"
       }`}
       whileHover={{ scale: 1.015 }}
@@ -718,7 +718,7 @@ export default function PathwayPage() {
                       href="https://wa.me/971501897038"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 bg-purple-500 hover:bg-purple-400 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 shadow-[0_0_20px_rgba(124,58,237,0.3)]"
+                      className="flex items-center gap-2 bg-purple-500 hover:bg-purple-400 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 shadow-[0_0_20px_rgba(164,158,207,0.3)]"
                     >
                       Talk to the Team
                       <ArrowRight className="w-4 h-4" />

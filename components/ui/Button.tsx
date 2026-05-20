@@ -22,7 +22,7 @@ interface ButtonProps {
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-purple-500 hover:bg-purple-400 text-white shadow-[0_0_20px_rgba(124,58,237,0.4)] hover:shadow-[0_0_32px_rgba(124,58,237,0.6)]",
+    "bg-purple-500 hover:bg-purple-400 text-white shadow-[0_0_20px_rgba(164,158,207,0.4)] hover:shadow-[0_0_32px_rgba(164,158,207,0.6)]",
   secondary:
     "bg-bg-elevated border border-border-strong text-white hover:border-purple-400 hover:bg-purple-900/30",
   ghost:

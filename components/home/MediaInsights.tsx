@@ -67,7 +67,7 @@ export function MediaInsights({ items }: Props) {
                 className="group"
               >
                 <Link href="/media" className="block">
-                  <div className="glass glow-border rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all hover:shadow-[0_8px_32px_rgba(124,58,237,0.15)]">
+                  <div className="glass glow-border rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all hover:shadow-[0_8px_32px_rgba(164,158,207,0.15)]">
                     {/*
                      * PHOTO PLACEHOLDER — upload via Admin > Media Library
                      * Type: Video/podcast thumbnail or event photo

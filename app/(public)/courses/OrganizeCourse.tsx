@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -37,7 +37,7 @@ export function OrganizeCourse() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/contact?type=partnership"
-              className="inline-flex items-center gap-2 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-7 py-3.5 rounded-xl transition-all shadow-[0_0_24px_rgba(124,58,237,0.4)] hover:shadow-[0_0_36px_rgba(124,58,237,0.6)]"
+              className="inline-flex items-center gap-2 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-7 py-3.5 rounded-xl transition-all shadow-[0_0_24px_rgba(164,158,207,0.4)] hover:shadow-[0_0_36px_rgba(164,158,207,0.6)]"
             >
               Get in Touch <ArrowRight className="w-4 h-4" />
             </Link>

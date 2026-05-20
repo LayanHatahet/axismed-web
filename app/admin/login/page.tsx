@@ -44,7 +44,7 @@ export default function AdminLogin() {
         {/* Logo */}
         <div className="flex justify-center mb-10">
           <div className="w-16 h-16 relative">
-            <Image src="/logo-symbol.png" alt="AxisMed" fill className="object-contain drop-shadow-[0_0_16px_rgba(124,58,237,0.6)]" priority />
+            <Image src="/logo-symbol.png" alt="AxisMed" fill className="object-contain drop-shadow-[0_0_16px_rgba(164,158,207,0.6)]" priority />
           </div>
         </div>
 
@@ -81,7 +81,7 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading || !password}
-              className="w-full bg-purple-500 hover:bg-purple-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-all shadow-[0_0_20px_rgba(124,58,237,0.4)]"
+              className="w-full bg-purple-500 hover:bg-purple-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-all shadow-[0_0_20px_rgba(164,158,207,0.4)]"
             >
               {loading ? "Verifying..." : "Sign In"}
             </button>

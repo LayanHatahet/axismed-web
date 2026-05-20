@@ -165,7 +165,7 @@ export default function AdminMedia() {
         action={
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-5 py-2.5 rounded-xl transition-all shadow-[0_0_16px_rgba(124,58,237,0.4)]"
+            className="flex items-center gap-2 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-5 py-2.5 rounded-xl transition-all shadow-[0_0_16px_rgba(164,158,207,0.4)]"
           >
             <Plus className="w-4 h-4" /> Add Media
           </button>
@@ -494,7 +494,7 @@ export default function AdminMedia() {
                 <button
                   onClick={handleSave}
                   disabled={saving || !form.title.trim()}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-purple-500 hover:bg-purple-400 disabled:opacity-50 text-white font-semibold transition-all shadow-[0_0_16px_rgba(124,58,237,0.4)] text-sm"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-purple-500 hover:bg-purple-400 disabled:opacity-50 text-white font-semibold transition-all shadow-[0_0_16px_rgba(164,158,207,0.4)] text-sm"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   {saving ? "Saving..." : editingId ? "Save Changes" : "Add Media"}

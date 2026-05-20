@@ -138,7 +138,7 @@ export function RegistrationSidebar({ course }: Props) {
             {course.status !== "sold_out" && course.status !== "completed" ? (
               <button
                 onClick={() => setStep("method")}
-                className="w-full bg-purple-500 hover:bg-purple-400 text-white font-semibold py-4 rounded-xl transition-all shadow-[0_0_24px_rgba(124,58,237,0.4)] hover:shadow-[0_0_36px_rgba(124,58,237,0.6)] flex items-center justify-center gap-2"
+                className="w-full bg-purple-500 hover:bg-purple-400 text-white font-semibold py-4 rounded-xl transition-all shadow-[0_0_24px_rgba(164,158,207,0.4)] hover:shadow-[0_0_36px_rgba(164,158,207,0.6)] flex items-center justify-center gap-2"
               >
                 Register for this Program
                 <ChevronRight className="w-4 h-4" />

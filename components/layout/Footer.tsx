@@ -48,7 +48,7 @@ export function Footer() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/courses"
-              className="bg-purple-500 hover:bg-purple-400 text-white font-semibold px-7 py-3 rounded-lg transition-all shadow-[0_0_20px_rgba(124,58,237,0.4)] hover:shadow-[0_0_30px_rgba(124,58,237,0.6)]"
+              className="bg-purple-500 hover:bg-purple-400 text-white font-semibold px-7 py-3 rounded-lg transition-all shadow-[0_0_20px_rgba(164,158,207,0.4)] hover:shadow-[0_0_30px_rgba(164,158,207,0.6)]"
             >
               Browse All Courses
             </Link>
@@ -73,7 +73,7 @@ export function Footer() {
                   src="/logo-symbol.png"
                   alt="AxisMed"
                   fill
-                  className="object-contain drop-shadow-[0_0_10px_rgba(124,58,237,0.5)] group-hover:drop-shadow-[0_0_16px_rgba(124,58,237,0.7)] transition-all duration-300"
+                  className="object-contain [filter:hue-rotate(-13deg)_saturate(0.45)_brightness(1.15)_drop-shadow(0_0_10px_rgba(164,158,207,0.4))] transition-all duration-300"
                 />
               </div>
               <div>

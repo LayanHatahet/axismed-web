@@ -61,7 +61,7 @@ export function AdminSidebar({ collapsed, onToggle }: Props) {
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 py-4 border-b border-border min-h-[64px]">
         <div className="w-9 h-9 shrink-0 relative">
-          <Image src="/logo-symbol.png" alt="AxisMed" fill className="object-contain drop-shadow-[0_0_8px_rgba(124,58,237,0.5)]" />
+          <Image src="/logo-symbol.png" alt="AxisMed" fill className="object-contain drop-shadow-[0_0_8px_rgba(164,158,207,0.5)]" />
         </div>
         <AnimatePresence>
           {!collapsed && (

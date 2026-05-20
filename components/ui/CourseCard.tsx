@@ -27,7 +27,7 @@ export function CourseCard({ course, index = 0 }: CourseCardProps) {
     >
       <TiltCard intensity={6} glare className="h-full">
         <Link href={`/courses/${course.slug}`} className="block h-full">
-          <div className="glass glow-border rounded-2xl overflow-hidden h-full transition-colors duration-300 group-hover:border-purple-500/40 group-hover:shadow-[0_8px_40px_rgba(124,58,237,0.2)]">
+          <div className="glass glow-border rounded-2xl overflow-hidden h-full transition-colors duration-300 group-hover:border-purple-500/40 group-hover:shadow-[0_8px_40px_rgba(164,158,207,0.2)]">
             {/* Image */}
             <div className="relative h-48 bg-bg-elevated overflow-hidden">
               {/*
@@ -47,8 +47,8 @@ export function CourseCard({ course, index = 0 }: CourseCardProps) {
                 onError={() => {}}
               />
               {/* Fallback gradient when no image */}
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-900/60 via-bg-base/40 to-bg-base/80" />
-              <div className="absolute inset-0 bg-gradient-to-t from-bg-base/90 via-bg-base/20 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
 
               {/* No-image placeholder label */}
               <div className="absolute inset-0 flex items-center justify-center opacity-30 group-hover:opacity-0 transition-opacity">
@@ -58,7 +58,7 @@ export function CourseCard({ course, index = 0 }: CourseCardProps) {
               </div>
 
               <div className="absolute bottom-3 left-4 z-10">
-                <div className="text-purple-300 text-xs font-semibold tracking-widest uppercase">
+                <div className="text-white text-xs font-semibold tracking-widest uppercase" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.4)" }}>
                   {course.programType}
                 </div>
               </div>
@@ -75,27 +75,27 @@ export function CourseCard({ course, index = 0 }: CourseCardProps) {
             {/* Content */}
             <div className="p-6">
               <div className="mb-3">
-                <span className="text-purple-400 text-xs font-medium tracking-wider uppercase">
+                <span className="text-xs font-medium tracking-wider uppercase" style={{ color: "#4a4570" }}>
                   {course.category}
                 </span>
               </div>
 
-              <h3 className="font-display text-xl font-bold text-white mb-1 group-hover:text-purple-200 transition-colors line-clamp-2">
+              <h3 className="font-display text-xl font-bold mb-1 transition-colors line-clamp-2" style={{ color: "#0f0d1e" }}>
                 {course.title}
               </h3>
-              <p className="text-text-muted text-sm mb-4 line-clamp-2">{course.subtitle}</p>
+              <p className="text-sm mb-4 line-clamp-2" style={{ color: "#1e1b35" }}>{course.subtitle}</p>
 
               <div className="space-y-2 mb-5">
-                <div className="flex items-center gap-2 text-sm text-text-secondary">
-                  <Calendar className="w-4 h-4 text-purple-400 shrink-0" />
+                <div className="flex items-center gap-2 text-sm" style={{ color: "#1e1b35" }}>
+                  <Calendar className="w-4 h-4 shrink-0" style={{ color: "#4a4570" }} />
                   <span>{formatDateRange(course.startDate, course.endDate)}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-text-secondary">
-                  <MapPin className="w-4 h-4 text-purple-400 shrink-0" />
+                <div className="flex items-center gap-2 text-sm" style={{ color: "#1e1b35" }}>
+                  <MapPin className="w-4 h-4 shrink-0" style={{ color: "#4a4570" }} />
                   <span className="truncate">{course.city}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-text-secondary">
-                  <Clock className="w-4 h-4 text-purple-400 shrink-0" />
+                <div className="flex items-center gap-2 text-sm" style={{ color: "#1e1b35" }}>
+                  <Clock className="w-4 h-4 shrink-0" style={{ color: "#4a4570" }} />
                   <span>{course.duration}</span>
                 </div>
               </div>
@@ -103,18 +103,18 @@ export function CourseCard({ course, index = 0 }: CourseCardProps) {
               {/* Seat availability */}
               <div className="mb-5">
                 <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="text-text-muted flex items-center gap-1">
+                  <span className="flex items-center gap-1" style={{ color: "#1e1b35" }}>
                     <Users className="w-3 h-3" /> {course.seatsAvailable} seats left
                   </span>
-                  <span className="text-text-muted">{course.seats} total</span>
+                  <span style={{ color: "#1e1b35" }}>{course.seats} total</span>
                 </div>
-                <div className="h-1 bg-white/8 rounded-full overflow-hidden">
+                <div className="h-1 bg-purple-200 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     whileInView={{ width: `${100 - availabilityPct}%` }}
                     viewport={{ once: true }}
                     transition={{ duration: 1, delay: 0.3 }}
-                    className="h-full bg-purple-500 rounded-full"
+                    className="h-full bg-purple-600 rounded-full"
                   />
                 </div>
               </div>
@@ -122,10 +122,10 @@ export function CourseCard({ course, index = 0 }: CourseCardProps) {
               {/* Footer */}
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-white font-bold text-xl">${course.price.toLocaleString()}</span>
-                  <span className="text-text-muted text-sm ml-1">{course.currency}</span>
+                  <span className="font-bold text-xl" style={{ color: "#0f0d1e" }}>${course.price.toLocaleString()}</span>
+                  <span className="text-sm ml-1" style={{ color: "#4a4570" }}>{course.currency}</span>
                 </div>
-                <div className="flex items-center gap-1 text-purple-400 text-sm font-medium group-hover:gap-2 transition-all">
+                <div className="flex items-center gap-1 text-sm font-medium group-hover:gap-2 transition-all" style={{ color: "#1e1b35" }}>
                   View Course <ArrowRight className="w-4 h-4" />
                 </div>
               </div>

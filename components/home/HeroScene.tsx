@@ -26,18 +26,37 @@ const CAM = [
   { px:  0.0, py:  0.0, pz: 11.5, lx:  0.0, ly:  0.0, t0:  8.5, t1: 11.0 },
 ] as const;
 
-const BRANCHES = [
-  { color: "#9B77FF", paramT: 0.33, tx: -8.0, ty:  4.5, tz: 0 },
-  { color: "#7C6AFF", paramT: 0.67, tx:  8.0, ty:  4.5, tz: 0 },
-  { color: "#B89CFF", paramT: 0.00, tx:  0.0, ty: -8.0, tz: 0 },
+const MOBILE_CAM = [
+  { px:  0.2, py:  0.2, pz:  5.5, lx:  0.0, ly:  0.0, t0:  0.0, t1:  3.0 },
+  { px:  0.8, py:  0.4, pz:  8.5, lx:  0.1, ly:  0.0, t0:  3.0, t1:  6.0 },
+  { px: -0.6, py:  0.2, pz: 11.0, lx:  0.0, ly:  0.0, t0:  6.0, t1:  8.5 },
+  { px:  0.0, py:  0.0, pz: 13.0, lx:  0.0, ly:  0.0, t0:  8.5, t1: 11.0 },
 ] as const;
 
-/* Label world positions — close to branch tips but safely within the
-   camera's viewport at z=11.5, FOV=50° (visible ≈ ±9.5 x / ±5.3 y) */
+const BRANCHES = [
+  { color: "#bcb8df", paramT: 0.33, tx: -8.0, ty:  4.5, tz: 0 },
+  { color: "#b0accf", paramT: 0.67, tx:  8.0, ty:  4.5, tz: 0 },
+  { color: "#cccae3", paramT: 0.00, tx:  0.0, ty: -8.0, tz: 0 },
+] as const;
+
+const MOBILE_BRANCHES = [
+  { color: "#bcb8df", paramT: 0.33, tx: -2.8, ty:  2.5, tz: 0 },
+  { color: "#b0accf", paramT: 0.67, tx:  2.8, ty:  2.5, tz: 0 },
+  { color: "#cccae3", paramT: 0.00, tx:  0.0, ty: -4.5, tz: 0 },
+] as const;
+
+/* Desktop label positions — FOV=50°, z=11.5: visible ≈ ±9.5 x */
 const BRANCH_LABELS = [
   { label: "Courses", href: "/courses", pos: [-6.5,  3.8, 0] as [number,number,number] },
   { label: "Media",   href: "/media",   pos: [ 6.5,  3.8, 0] as [number,number,number] },
   { label: "Events",  href: "/events",  pos: [ 0.0, -4.5, 0] as [number,number,number] },
+] as const;
+
+/* Mobile label positions — pulled well inside the narrow portrait viewport */
+const MOBILE_BRANCH_LABELS = [
+  { label: "Courses", href: "/courses", pos: [-2.4,  2.2, 0] as [number,number,number] },
+  { label: "Media",   href: "/media",   pos: [ 2.4,  2.2, 0] as [number,number,number] },
+  { label: "Events",  href: "/events",  pos: [ 0.0, -3.8, 0] as [number,number,number] },
 ] as const;
 
 /* ═══════════════════════════════════════════════════════════════
@@ -112,12 +131,13 @@ function buildFlatRibbon(
 ═══════════════════════════════════════════════════════════════ */
 
 function RibbonKnot({
-  mouse, onComplete, active, drawElapsed,
+  mouse, onComplete, active, drawElapsed, isMobile,
 }: {
   mouse:       React.MutableRefObject<{ x: number; y: number }>;
   onComplete:  () => void;
   active:      boolean;
   drawElapsed: React.MutableRefObject<number>;
+  isMobile:    boolean;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const drawRef  = useRef(0);
@@ -133,14 +153,14 @@ function RibbonKnot({
   const totalIdx = useMemo(() => geo.index?.count ?? SEG * 24, [geo]);
 
   const mat = useMemo(() => new THREE.MeshPhysicalMaterial({
-    color:              new THREE.Color("#6D28D9"),
+    color:              new THREE.Color("#8880b8"),
     metalness:          0.04,
     roughness:          0.13,
     clearcoat:          0.90,
     clearcoatRoughness: 0.05,
     sheen:              0.55,
     sheenRoughness:     0.28,
-    sheenColor:         new THREE.Color("#C4B5FD"),
+    sheenColor:         new THREE.Color("#dddaee"),
     iridescence:        0.48,
     iridescenceIOR:     1.58,
     side:               THREE.DoubleSide,
@@ -151,9 +171,9 @@ function RibbonKnot({
     color: new THREE.Color(c), transparent: true, opacity: 0,
     side: THREE.BackSide, blending: THREE.AdditiveBlending, depthWrite: false,
   });
-  const g1 = useMemo(() => makeGlowMat("#7C3AED"), []);
-  const g2 = useMemo(() => makeGlowMat("#5B21B6"), []);
-  const g3 = useMemo(() => makeGlowMat("#3B0F8C"), []);
+  const g1 = useMemo(() => makeGlowMat("#a49ecf"), []);
+  const g2 = useMemo(() => makeGlowMat("#8880b8"), []);
+  const g3 = useMemo(() => makeGlowMat("#5e5a88"), []);
 
   const onDone = useCallback(() => { doneRef.current = true; onComplete(); }, [onComplete]);
 
@@ -178,7 +198,8 @@ function RibbonKnot({
     if (groupRef.current) {
       const sp  = Math.min(de / 7.0, 1.0);
       const ep  = sp < 0.5 ? 2*sp*sp : 1 - Math.pow(-2*sp+2, 2)/2;
-      const scl = doneRef.current ? 1.0 : 4.0 - 3.0 * ep;
+      const maxScl = isMobile ? 2.0 : 4.0;
+      const scl = (doneRef.current ? 1.0 : maxScl - (maxScl - 1.0) * ep) * (isMobile ? 0.30 : 1.0);
       groupRef.current.scale.setScalar(scl);
     }
 
@@ -237,14 +258,18 @@ function BranchPath({ branchCurve, color, active }: {
 }
 
 function BranchPaths({
-  knotCurve, active, showLabels,
+  knotCurve, active, showLabels, isMobile,
 }: {
   knotCurve:  THREE.CatmullRomCurve3;
   active:     boolean;
   showLabels: boolean;
+  isMobile:   boolean;
 }) {
+  const activeBranches = isMobile ? MOBILE_BRANCHES : BRANCHES;
+  const activeLabels   = isMobile ? MOBILE_BRANCH_LABELS : BRANCH_LABELS;
+
   const curves = useMemo(() =>
-    BRANCHES.map(({ paramT, tx, ty, tz }) => {
+    activeBranches.map(({ paramT, tx, ty, tz }) => {
       const start = knotCurve.getPoint(paramT);
       const tang  = knotCurve.getTangent(paramT);
       const ctrl  = new THREE.Vector3(
@@ -254,7 +279,7 @@ function BranchPaths({
       );
       return new THREE.CatmullRomCurve3([start.clone(), ctrl, new THREE.Vector3(tx, ty, tz)], false);
     }),
-  [knotCurve]);
+  [knotCurve, activeBranches]);
 
   // Inject keyframes into the document once
   useEffect(() => {
@@ -264,8 +289,8 @@ function BranchPaths({
     style.id = id;
     style.textContent = `
       @keyframes orbPulse {
-        0%,100% { transform: scale(1);   opacity: 0.9; box-shadow: 0 0 0 0 rgba(139,92,246,0.55); }
-        50%      { transform: scale(1.3); opacity: 0.6; box-shadow: 0 0 0 7px rgba(139,92,246,0); }
+        0%,100% { transform: scale(1);   opacity: 0.9; box-shadow: 0 0 0 0 rgba(164,158,207,0.55); }
+        50%      { transform: scale(1.3); opacity: 0.6; box-shadow: 0 0 0 7px rgba(164,158,207,0); }
       }
       @keyframes ringBurst {
         0%   { transform: scale(0.8); opacity: 0.8; }
@@ -284,10 +309,10 @@ function BranchPaths({
   return (
     <>
       {curves.map((c, i) => (
-        <BranchPath key={i} branchCurve={c} color={BRANCHES[i].color} active={active} />
+        <BranchPath key={i} branchCurve={c} color={activeBranches[i].color} active={active} />
       ))}
 
-      {BRANCH_LABELS.map(({ label, href, pos }, i) => {
+      {!isMobile && activeLabels.map(({ label, href, pos }, i) => {
         const delay = `${i * 0.14}s`;
         return (
           <Html key={label} position={pos} center zIndexRange={[100, 0]}>
@@ -299,8 +324,8 @@ function BranchPaths({
                 width:       "12px",
                 height:      "12px",
                 borderRadius: "50%",
-                background:  "radial-gradient(circle at 35% 35%, #C4B5FD, #7C3AED)",
-                boxShadow:   "0 0 14px rgba(124,58,237,0.7)",
+                background:  "radial-gradient(circle at 35% 35%, #dddaee, #a49ecf)",
+                boxShadow:   "0 0 14px rgba(164,158,207,0.7)",
                 opacity:      active && !showLabels ? 1 : 0,
                 animation:    active && !showLabels ? `orbPulse 1.7s ease-in-out ${delay} infinite` : "none",
                 transition:  "opacity 0.4s ease",
@@ -313,7 +338,7 @@ function BranchPaths({
                 width:         "12px",
                 height:        "12px",
                 borderRadius:  "50%",
-                border:        "2px solid rgba(139,92,246,0.7)",
+                border:        "2px solid rgba(164,158,207,0.7)",
                 opacity:        showLabels ? 0 : 0,
                 animation:      showLabels ? `ringBurst 0.7s cubic-bezier(0.22,1,0.36,1) ${delay} both` : "none",
                 pointerEvents: "none",
@@ -322,38 +347,37 @@ function BranchPaths({
               {/* Label pill — blooms in after branches complete */}
               <a
                 href={href}
+                className="hidden md:flex"
                 style={{
-                  display:         "flex",
                   alignItems:      "center",
                   gap:             "9px",
                   padding:         "11px 22px",
                   background:      "rgba(255,255,255,0.86)",
-                  border:          "1px solid rgba(124,58,237,0.22)",
+                  border:          "1px solid rgba(164,158,207,0.22)",
                   borderRadius:    "11px",
                   backdropFilter:  "blur(20px)",
                   WebkitBackdropFilter: "blur(20px)",
-                  color:           "#5B21B6",
+                  color:           "#8880b8",
                   fontSize:        "15px",
                   fontWeight:      700,
                   letterSpacing:   "0.09em",
                   textTransform:   "uppercase",
                   textDecoration:  "none",
                   whiteSpace:      "nowrap",
-                  boxShadow:       "0 3px 22px rgba(109,40,217,0.14), inset 0 1px 0 rgba(255,255,255,0.9)",
+                  boxShadow:       "0 3px 22px rgba(136,128,184,0.14), inset 0 1px 0 rgba(255,255,255,0.9)",
                   animation:       showLabels ? `labelBloom 0.75s cubic-bezier(0.22,1,0.36,1) ${delay} both` : "none",
                   opacity:          showLabels ? undefined : 0,
                   pointerEvents:   showLabels ? "auto" : "none",
                   cursor:          "pointer",
                 }}
               >
-                {/* Animated dot — pulses gently after reveal */}
                 <span style={{
                   width:      "9px",
                   height:     "9px",
                   borderRadius: "50%",
-                  background: "linear-gradient(135deg, #A78BFA, #6D28D9)",
+                  background: "linear-gradient(135deg, #cac6e6, #8880b8)",
                   flexShrink: 0,
-                  boxShadow:  "0 0 6px rgba(124,58,237,0.5)",
+                  boxShadow:  "0 0 6px rgba(164,158,207,0.5)",
                 }} />
                 {label}
               </a>
@@ -388,7 +412,7 @@ function Particles() {
   }, []);
 
   const mat = useMemo(() => new THREE.PointsMaterial({
-    color: new THREE.Color("#8B5CF6"), size: 0.018,
+    color: new THREE.Color("#bcb8df"), size: 0.018,
     transparent: true, opacity: 0.22, sizeAttenuation: true, depthWrite: false,
   }), []);
 
@@ -411,11 +435,12 @@ function Particles() {
 ═══════════════════════════════════════════════════════════════ */
 
 function CinematicCamera({
-  mouse, drawElapsed, active,
+  mouse, drawElapsed, active, isMobile,
 }: {
   mouse:       React.MutableRefObject<{ x: number; y: number }>;
   drawElapsed: React.MutableRefObject<number>;
   active:      boolean;
+  isMobile:    boolean;
 }) {
   const { camera } = useThree();
   const camPos  = useRef(new THREE.Vector3(0, 0, 14));
@@ -423,16 +448,17 @@ function CinematicCamera({
   const tLook   = useRef(new THREE.Vector3(0, 0, 0));
 
   useFrame(() => {
+    const activeCam = isMobile ? MOBILE_CAM : CAM;
     const de   = drawElapsed.current;
-    const last = CAM[CAM.length - 1];
+    const last = activeCam[activeCam.length - 1];
     let tx: number = last.px, ty: number = last.py, tz: number = last.pz;
     let lx: number = last.lx, ly: number = last.ly;
 
     if (!active) {
-      tx = 0; ty = 0; tz = 14; lx = 0; ly = 0;
+      tx = 0; ty = 0; tz = isMobile ? 13 : 14; lx = 0; ly = 0;
     } else {
-      for (let i = 0; i < CAM.length - 1; i++) {
-        const a = CAM[i], b = CAM[i + 1];
+      for (let i = 0; i < activeCam.length - 1; i++) {
+        const a = activeCam[i], b = activeCam[i + 1];
         if (de >= a.t0 && de < a.t1) {
           const raw = (de - a.t0) / (a.t1 - a.t0);
           const p   = raw < 0.5 ? 4*raw*raw*raw : 1 - Math.pow(-2*raw+2, 3)/2;
@@ -465,11 +491,12 @@ function CinematicCamera({
 ═══════════════════════════════════════════════════════════════ */
 
 function Scene({
-  mouse, onKnotComplete, active,
+  mouse, onKnotComplete, active, isMobile,
 }: {
   mouse:          React.MutableRefObject<{ x: number; y: number }>;
   onKnotComplete: () => void;
   active:         boolean;
+  isMobile:       boolean;
 }) {
   const drawElapsed = useRef(0);
   const [branches,   setBranches]   = useState(false);
@@ -490,16 +517,16 @@ function Scene({
 
   return (
     <>
-      <CinematicCamera mouse={mouse} drawElapsed={drawElapsed} active={active} />
+      <CinematicCamera mouse={mouse} drawElapsed={drawElapsed} active={active} isMobile={isMobile} />
 
       <ambientLight intensity={1.6} color="#F0EAFF" />
       <directionalLight position={[0, 10, 8]}   intensity={10} color="#EDE8FF" />
-      <directionalLight position={[-8, 2, -3]}  intensity={4}  color="#7C3AED" />
-      <directionalLight position={[ 8, -1, -3]} intensity={2.5} color="#5B21B6" />
-      <pointLight position={[0,  8, 4]}  intensity={18} color="#9B77FF" distance={26} />
-      <pointLight position={[0, -7, 3]}  intensity={8}  color="#6D4AFF" distance={20} />
-      <pointLight position={[-6, 1, 5]}  intensity={10} color="#8B5CF6" distance={18} />
-      <pointLight position={[ 6, 1, 5]}  intensity={10} color="#7C3AED" distance={18} />
+      <directionalLight position={[-8, 2, -3]}  intensity={4}  color="#a49ecf" />
+      <directionalLight position={[ 8, -1, -3]} intensity={2.5} color="#8880b8" />
+      <pointLight position={[0,  8, 4]}  intensity={18} color="#bcb8df" distance={26} />
+      <pointLight position={[0, -7, 3]}  intensity={8}  color="#9a95c4" distance={20} />
+      <pointLight position={[-6, 1, 5]}  intensity={10} color="#b0accf" distance={18} />
+      <pointLight position={[ 6, 1, 5]}  intensity={10} color="#a49ecf" distance={18} />
       <pointLight position={[0, 0, 7]}   intensity={6}  color="#F4EEFF" distance={14} />
 
       <group position={[0, Y_OFFSET, 0]}>
@@ -508,8 +535,11 @@ function Scene({
           onComplete={handleKnotDone}
           active={active}
           drawElapsed={drawElapsed}
+          isMobile={isMobile}
         />
-        <BranchPaths knotCurve={knotCurve} active={branches} showLabels={showLabels} />
+        {!isMobile && (
+          <BranchPaths knotCurve={knotCurve} active={branches} showLabels={showLabels} isMobile={false} />
+        )}
       </group>
       <Particles />
     </>
@@ -527,7 +557,8 @@ export function HeroScene({
   onKnotComplete: () => void;
   active:         boolean;
 }) {
-  const mouse = useRef({ x: 0, y: 0 });
+  const mouse    = useRef({ x: 0, y: 0 });
+  const isMobile = false; // HeroScene only ever mounts on desktop (Hero guards with !isMobile)
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
@@ -555,7 +586,7 @@ export function HeroScene({
       style={{ width: "100%", height: "100%" }}
       dpr={[1, 2]}
     >
-      <Scene mouse={mouse} onKnotComplete={onKnotComplete} active={active} />
+      <Scene mouse={mouse} onKnotComplete={onKnotComplete} active={active} isMobile={false} />
     </Canvas>
   );
 }

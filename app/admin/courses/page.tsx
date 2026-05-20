@@ -193,7 +193,7 @@ export default function AdminCourses() {
           </div>
           <button
             onClick={openNew}
-            className="flex items-center justify-center gap-2 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-5 py-3 rounded-xl transition-all shadow-[0_0_20px_rgba(124,58,237,0.4)] whitespace-nowrap"
+            className="flex items-center justify-center gap-2 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-5 py-3 rounded-xl transition-all shadow-[0_0_20px_rgba(164,158,207,0.4)] whitespace-nowrap"
           >
             <Plus className="w-4 h-4" /> New Course
           </button>

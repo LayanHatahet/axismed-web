@@ -111,24 +111,24 @@ export function PulseCanvas({ className = "" }: Props) {
 
       // ── Atmospheric gradients ──────────────────────
       const gA = ctx.createRadialGradient(W*0.32, H*0.42, 0, W*0.32, H*0.42, W*0.55);
-      gA.addColorStop(0, "rgba(75,29,255,0.1)");
-      gA.addColorStop(1, "rgba(75,29,255,0)");
+      gA.addColorStop(0, "rgba(136,128,184,0.1)");
+      gA.addColorStop(1, "rgba(136,128,184,0)");
       ctx.fillStyle = gA; ctx.fillRect(0, 0, W, H);
 
       const gB = ctx.createRadialGradient(W*0.70, H*0.58, 0, W*0.70, H*0.58, W*0.44);
-      gB.addColorStop(0, "rgba(139,92,246,0.065)");
-      gB.addColorStop(1, "rgba(139,92,246,0)");
+      gB.addColorStop(0, "rgba(164,158,207,0.065)");
+      gB.addColorStop(1, "rgba(164,158,207,0)");
       ctx.fillStyle = gB; ctx.fillRect(0, 0, W, H);
 
       const gC = ctx.createRadialGradient(W*0.50, H*0.20, 0, W*0.50, H*0.20, W*0.35);
-      gC.addColorStop(0, "rgba(75,29,255,0.04)");
-      gC.addColorStop(1, "rgba(75,29,255,0)");
+      gC.addColorStop(0, "rgba(136,128,184,0.04)");
+      gC.addColorStop(1, "rgba(136,128,184,0)");
       ctx.fillStyle = gC; ctx.fillRect(0, 0, W, H);
 
       // Mouse reactive glow
       const gM = ctx.createRadialGradient(mx*W, my*H, 0, mx*W, my*H, 200);
-      gM.addColorStop(0, "rgba(139,92,246,0.06)");
-      gM.addColorStop(1, "rgba(139,92,246,0)");
+      gM.addColorStop(0, "rgba(164,158,207,0.06)");
+      gM.addColorStop(1, "rgba(164,158,207,0)");
       ctx.fillStyle = gM; ctx.fillRect(0, 0, W, H);
 
       // ── Particles ─────────────────────────────────

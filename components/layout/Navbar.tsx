@@ -78,7 +78,7 @@ export function Navbar() {
                   src="/logo-symbol.png"
                   alt="AxisMed"
                   fill
-                  className="object-contain drop-shadow-[0_0_12px_rgba(124,58,237,0.5)]"
+                  className="object-contain [filter:hue-rotate(-13deg)_saturate(0.45)_brightness(1.15)_drop-shadow(0_0_12px_rgba(164,158,207,0.45))]"
                   priority
                 />
               </motion.div>
@@ -132,7 +132,7 @@ export function Navbar() {
               </a>
               <Link
                 href="/pathway"
-                className="bg-purple-500 hover:bg-purple-400 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-all duration-200 shadow-[0_0_20px_rgba(124,58,237,0.35)] hover:shadow-[0_0_28px_rgba(124,58,237,0.55)]"
+                className="bg-purple-500 hover:bg-purple-400 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-all duration-200 shadow-[0_0_20px_rgba(164,158,207,0.35)] hover:shadow-[0_0_28px_rgba(164,158,207,0.55)]"
               >
                 Find Your Pathway
               </Link>
@@ -214,7 +214,7 @@ export function Navbar() {
               <div className="pt-6 border-t border-border">
                 <Link
                   href="/pathway"
-                  className="block bg-purple-500 text-white text-center font-semibold py-3 rounded-xl shadow-[0_0_20px_rgba(124,58,237,0.4)]"
+                  className="block bg-purple-500 text-white text-center font-semibold py-3 rounded-xl shadow-[0_0_20px_rgba(164,158,207,0.4)]"
                 >
                   Find Your Pathway
                 </Link>

@@ -1,48 +1,55 @@
 @import "tailwindcss";
 
+/* Mobile-only label bar — hidden on desktop via CSS as a hard stop */
+@media (min-width: 768px) {
+  .hero-mobile-labels {
+    display: none !important;
+  }
+}
+
 /* ─── AxisMed Design System — Light Theme ─── */
 
 @theme {
   /* Backgrounds — white to soft lavender */
-  --color-bg-base:       #FAFAFE;
-  --color-bg-dark:       #F5F1FF;
-  --color-bg-surface:    #EDE8FF;
-  --color-bg-elevated:   #E4DBFF;
+  --color-bg-base:       #fafaf8;
+  --color-bg-dark:       #efeef7;
+  --color-bg-surface:    #e8e6f4;
+  --color-bg-elevated:   #e1dff0;
 
-  /* Purple scale — unchanged */
-  --color-purple-950:    #1A0A3E;
-  --color-purple-900:    #2D1B69;
-  --color-purple-800:    #3D2380;
-  --color-purple-700:    #4C2A9A;
-  --color-purple-600:    #6029B8;
-  --color-purple-500:    #7C3AED;
-  --color-purple-400:    #9B5CF6;
-  --color-purple-300:    #B77FFA;
-  --color-purple-200:    #D0A8FC;
-  --color-purple-100:    #EDD9FE;
+  /* Purple scale */
+  --color-purple-950:    #383563;
+  --color-purple-900:    #484575;
+  --color-purple-800:    #5e5a88;
+  --color-purple-700:    #726da0;
+  --color-purple-600:    #8880b8;
+  --color-purple-500:    #a49ecf;
+  --color-purple-400:    #bcb8df;
+  --color-purple-300:    #cac6e6;
+  --color-purple-200:    #dddaee;
+  --color-purple-100:    #eeedf6;
 
-  --color-accent:        #7C3AED;
-  --color-accent-glow:   rgba(124, 58, 237, 0.22);
+  --color-accent:        #a49ecf;
+  --color-accent-glow:   rgba(164, 158, 207, 0.22);
 
   /* Text — dark purple on light backgrounds */
   --color-text-primary:   #12082C;
-  --color-text-secondary: #3D2878;
-  --color-text-muted:     #6B58A2;
-  --color-text-dim:       #9A8FBB;
+  --color-text-secondary: #484575;
+  --color-text-muted:     #a49ecf;
+  --color-text-dim:       #9a96aa;
 
   /* Borders */
-  --color-border:        rgba(124, 58, 237, 0.14);
-  --color-border-strong: rgba(124, 58, 237, 0.28);
+  --color-border:        rgba(164, 158, 207, 0.14);
+  --color-border-strong: rgba(164, 158, 207, 0.28);
 
   /* Typography */
   --font-display: var(--font-sora), 'Sora', system-ui, sans-serif;
   --font-sans:    var(--font-inter), 'Inter', system-ui, sans-serif;
 
   /* Shadows */
-  --shadow-glow-sm:  0 0 20px rgba(124, 58, 237, 0.12);
-  --shadow-glow:     0 0 40px rgba(124, 58, 237, 0.18);
-  --shadow-glow-lg:  0 0 80px rgba(124, 58, 237, 0.22);
-  --shadow-card:     0 4px 24px rgba(109, 40, 217, 0.08);
+  --shadow-glow-sm:  0 0 20px rgba(164, 158, 207, 0.12);
+  --shadow-glow:     0 0 40px rgba(164, 158, 207, 0.18);
+  --shadow-glow-lg:  0 0 80px rgba(164, 158, 207, 0.22);
+  --shadow-card:     0 4px 24px rgba(136, 128, 184, 0.08);
 
   /* Animations */
   --animate-float:       float 6s ease-in-out infinite;
@@ -121,7 +128,7 @@ html {
 }
 
 body {
-  background-color: #F5F1FF;
+  background-color: #efeef7;
   color: #12082C;
   font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -131,7 +138,7 @@ body {
 
 /* Selection */
 ::selection {
-  background: rgba(124, 58, 237, 0.22);
+  background: rgba(164, 158, 207, 0.22);
   color: #12082C;
 }
 
@@ -140,33 +147,33 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F5F1FF;
+  background: #efeef7;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(124, 58, 237, 0.30);
+  background: rgba(164, 158, 207, 0.30);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(124, 58, 237, 0.55);
+  background: rgba(164, 158, 207, 0.55);
 }
 
 /* Focus */
 :focus-visible {
-  outline: 2px solid rgba(124, 58, 237, 0.6);
+  outline: 2px solid rgba(164, 158, 207, 0.6);
   outline-offset: 2px;
 }
 
 /* ─── Utility Classes ─── */
 
 .text-gradient {
-  background: linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #9B5CF6 100%);
+  background: linear-gradient(135deg, #8880b8 0%, #a49ecf 50%, #bcb8df 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .text-gradient-white {
-  background: linear-gradient(135deg, #3D2878 0%, #7C3AED 60%, #9B5CF6 100%);
+  background: linear-gradient(135deg, #484575 0%, #a49ecf 60%, #bcb8df 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -177,36 +184,36 @@ body {
   background: rgba(255, 255, 255, 0.68);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(124, 58, 237, 0.14);
+  border: 1px solid rgba(164, 158, 207, 0.14);
 }
 
 .glass-strong {
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(124, 58, 237, 0.18);
+  border: 1px solid rgba(164, 158, 207, 0.18);
 }
 
 .glow-border {
-  border: 1px solid rgba(124, 58, 237, 0.22);
-  box-shadow: 0 0 20px rgba(124, 58, 237, 0.07), inset 0 0 20px rgba(124, 58, 237, 0.02);
+  border: 1px solid rgba(164, 158, 207, 0.22);
+  box-shadow: 0 0 20px rgba(164, 158, 207, 0.07), inset 0 0 20px rgba(164, 158, 207, 0.02);
 }
 
 .glow-text {
-  text-shadow: 0 0 30px rgba(124, 58, 237, 0.35);
+  text-shadow: 0 0 30px rgba(164, 158, 207, 0.35);
 }
 
 .bg-mesh {
   background-image:
-    radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.05) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(76, 42, 154, 0.05) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 50%, rgba(164, 158, 207, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(188, 184, 224, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(136, 128, 184, 0.05) 0%, transparent 50%);
 }
 
 .bg-grid {
   background-image:
-    linear-gradient(rgba(124, 58, 237, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(124, 58, 237, 0.07) 1px, transparent 1px);
+    linear-gradient(rgba(164, 158, 207, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(164, 158, 207, 0.07) 1px, transparent 1px);
   background-size: 60px 60px;
 }
 
@@ -214,7 +221,7 @@ body {
   background: linear-gradient(
     90deg,
     rgba(255,255,255,0) 0%,
-    rgba(124, 58, 237, 0.05) 50%,
+    rgba(164, 158, 207, 0.05) 50%,
     rgba(255,255,255,0) 100%
   );
   background-size: 200% 100%;
@@ -308,7 +315,7 @@ body {
   top: -20%;
   width: 120px;
   height: 140%;
-  background: linear-gradient(180deg, transparent, rgba(168,85,247,0.06), rgba(124,58,237,0.04), transparent);
+  background: linear-gradient(180deg, transparent, rgba(188,184,224,0.06), rgba(164,158,207,0.04), transparent);
   filter: blur(30px);
   animation: shaft-sweep var(--dur, 14s) var(--delay, 0s) ease-in-out infinite;
 }
@@ -318,8 +325,8 @@ body {
     0deg,
     transparent,
     transparent 3px,
-    rgba(124, 58, 237, 0.022) 3px,
-    rgba(124, 58, 237, 0.022) 4px
+    rgba(164, 158, 207, 0.022) 3px,
+    rgba(164, 158, 207, 0.022) 4px
   );
   animation: holo-scroll 4s linear infinite;
 }
@@ -340,11 +347,11 @@ body {
 .mesh-gradient {
   background: linear-gradient(
     135deg,
-    rgba(124, 58, 237, 0.07) 0%,
-    rgba(168, 85, 247, 0.05) 25%,
-    rgba(196, 181, 253, 0.04) 50%,
-    rgba(124, 58, 237, 0.06) 75%,
-    rgba(168, 85, 247, 0.05) 100%
+    rgba(164, 158, 207, 0.07) 0%,
+    rgba(188, 184, 224, 0.05) 25%,
+    rgba(197, 192, 212, 0.04) 50%,
+    rgba(164, 158, 207, 0.06) 75%,
+    rgba(188, 184, 224, 0.05) 100%
   );
   background-size: 400% 400%;
   animation: mesh-flow 18s ease-in-out infinite;
@@ -352,8 +359,8 @@ body {
 
 .perspective-grid {
   background-image:
-    linear-gradient(rgba(124, 58, 237, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(124, 58, 237, 0.07) 1px, transparent 1px);
+    linear-gradient(rgba(164, 158, 207, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(164, 158, 207, 0.07) 1px, transparent 1px);
   background-size: 50px 50px;
   transform: perspective(500px) rotateX(55deg) scale(2.5);
   transform-origin: center bottom;
@@ -368,7 +375,7 @@ body {
 /* All sections are light; these create gentle contrast between sections */
 
 :root {
-  --color-bg-tonal: #EDE8FF;
+  --color-bg-tonal: #e8e6f4;
 }
 
 /* Slightly deeper lavender — alternating section rhythm */
@@ -381,23 +388,23 @@ body {
 
 /* Luminous purple-tinted surface */
 .section-lift {
-  background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.08) 0%, transparent 65%),
-              #F5F1FF;
+  background: radial-gradient(ellipse at 50% 0%, rgba(164,158,207,0.08) 0%, transparent 65%),
+              #efeef7;
 }
 
 /* Pure white section — clean break */
 .section-white {
   background-color: #FFFFFF;
   --color-bg-base:        #FFFFFF;
-  --color-bg-dark:        #FAFAFE;
-  --color-bg-surface:     #F5F1FF;
-  --color-bg-elevated:    #EDE8FF;
+  --color-bg-dark:        #fafaf8;
+  --color-bg-surface:     #efeef7;
+  --color-bg-elevated:    #e8e6f4;
   --color-text-primary:   #12082C;
-  --color-text-secondary: #3D2878;
-  --color-text-muted:     #6B58A2;
-  --color-text-dim:       #9A8FBB;
-  --color-border:         rgba(124, 58, 237, 0.14);
-  --color-border-strong:  rgba(124, 58, 237, 0.28);
+  --color-text-secondary: #484575;
+  --color-text-muted:     #a49ecf;
+  --color-text-dim:       #9a96aa;
+  --color-border:         rgba(164, 158, 207, 0.14);
+  --color-border-strong:  rgba(164, 158, 207, 0.28);
   color: #12082C;
 }
 
@@ -413,24 +420,43 @@ body {
 .text-white\/80      { color: rgba(18,8,44,0.80); }
 
 /* bg-white/* opacity variants should show as subtle lavender tints */
-.bg-white\/3         { background-color: rgba(124,58,237,0.03); }
-.bg-white\/4         { background-color: rgba(124,58,237,0.04); }
-.bg-white\/5         { background-color: rgba(124,58,237,0.05); }
-.bg-white\/8         { background-color: rgba(124,58,237,0.07); }
-.bg-white\/10        { background-color: rgba(124,58,237,0.08); }
-.bg-white\/15        { background-color: rgba(124,58,237,0.10); }
+.bg-white\/3         { background-color: rgba(164,158,207,0.03); }
+.bg-white\/4         { background-color: rgba(164,158,207,0.04); }
+.bg-white\/5         { background-color: rgba(164,158,207,0.05); }
+.bg-white\/8         { background-color: rgba(164,158,207,0.07); }
+.bg-white\/10        { background-color: rgba(164,158,207,0.08); }
+.bg-white\/15        { background-color: rgba(164,158,207,0.10); }
 
 /* Border opacities — purple tones on light bg */
-.border-white\/8     { border-color: rgba(124,58,237,0.10); }
-.border-white\/15    { border-color: rgba(124,58,237,0.16); }
-.border-white\/20    { border-color: rgba(124,58,237,0.20); }
-.border-white\/25    { border-color: rgba(124,58,237,0.26); }
+.border-white\/8     { border-color: rgba(164,158,207,0.10); }
+.border-white\/15    { border-color: rgba(164,158,207,0.16); }
+.border-white\/20    { border-color: rgba(164,158,207,0.20); }
+.border-white\/25    { border-color: rgba(164,158,207,0.26); }
 
 /* Admin sidebar scrollbar */
 .admin-scroll::-webkit-scrollbar {
   width: 4px;
 }
 .admin-scroll::-webkit-scrollbar-thumb {
-  background: rgba(124, 58, 237, 0.25);
+  background: rgba(164, 158, 207, 0.25);
   border-radius: 2px;
+}
+
+/* ─── Purple scale override ───────────────────────────────────────────────
+   Defined outside @layer so these win over Tailwind's @layer theme values.
+   This is what makes text-purple-*, bg-purple-*, border-purple-* etc. use
+   the new muted palette instead of Tailwind's built-in vivid purples.
+─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --color-purple-50:  #f5f4f8;
+  --color-purple-100: #eeedf6;
+  --color-purple-200: #dddaee;
+  --color-purple-300: #cac6e6;
+  --color-purple-400: #bcb8df;
+  --color-purple-500: #a49ecf;
+  --color-purple-600: #8880b8;
+  --color-purple-700: #726da0;
+  --color-purple-800: #5e5a88;
+  --color-purple-900: #484575;
+  --color-purple-950: #383563;
 }

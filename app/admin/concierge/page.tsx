@@ -244,7 +244,7 @@ export default function AdminConcierge() {
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="flex items-center gap-2 bg-purple-500 hover:bg-purple-400 disabled:opacity-60 text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-[0_0_20px_rgba(124,58,237,0.4)]"
+                  className="flex items-center gap-2 bg-purple-500 hover:bg-purple-400 disabled:opacity-60 text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-[0_0_20px_rgba(164,158,207,0.4)]"
                 >
                   <Save className="w-4 h-4" />
                   {saving ? "Saving…" : saved ? "Saved!" : "Save Settings"}

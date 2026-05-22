@@ -1,21 +1,75 @@
 const CACHE_KEY = "axismed_translations";
-const CONCURRENT = 6; // parallel requests to MyMemory
+const CONCURRENT = 20;
+
+// UI context overrides — single words that APIs mistranslate without context
+const UI_OVERRIDES: Record<string, Record<string, string>> = {
+  ar: {
+    "Home":            "الرئيسية",
+    "About":           "من نحن",
+    "Courses":         "الدورات",
+    "Events":          "الفعاليات",
+    "Media":           "الإعلام",
+    "Partners":        "الشركاء",
+    "Contact":         "اتصل بنا",
+    "Contact Us":      "تواصل معنا",
+    "Search":          "بحث",
+    "Menu":            "القائمة",
+    "Register":        "سجّل",
+    "Login":           "تسجيل الدخول",
+    "Featured":        "مميز",
+    "View Course":     "عرض الدورة",
+    "View All Courses":"عرض جميع الدورات",
+    "Find Your Pathway":"ابحث عن مسارك",
+    "Read More":       "اقرأ المزيد",
+    "Learn More":      "اعرف المزيد",
+    "Get Started":     "ابدأ الآن",
+    "Submit":          "إرسال",
+    "Back":            "رجوع",
+    "Next":            "التالي",
+    "Previous":        "السابق",
+    "Close":           "إغلاق",
+    "Open":            "افتح",
+    "Loading":         "جاري التحميل",
+    "seats left":      "مقاعد متبقية",
+    "total":           "الإجمالي",
+  },
+  fr: {
+    "Home": "Accueil",
+    "About": "À propos",
+    "Contact Us": "Contactez-nous",
+    "View Course": "Voir le cours",
+    "Find Your Pathway": "Trouvez votre parcours",
+    "Read More": "Lire la suite",
+    "Featured": "À la une",
+    "seats left": "places restantes",
+    "total": "total",
+  },
+  es: {
+    "Home": "Inicio",
+    "About": "Acerca de",
+    "Contact Us": "Contáctenos",
+    "View Course": "Ver curso",
+    "Find Your Pathway": "Encuentra tu camino",
+    "Read More": "Leer más",
+    "Featured": "Destacado",
+    "seats left": "plazas restantes",
+    "total": "total",
+  },
+};
 
 type Cache = Record<string, Record<string, string>>;
-
 const nodeOriginals = new Map<Text, string>();
 
 function loadCache(): Cache {
-  try { return JSON.parse(localStorage.getItem(CACHE_KEY) ?? "{}"); }
-  catch { return {}; }
+  try { return JSON.parse(localStorage.getItem(CACHE_KEY) ?? "{}"); } catch { return {}; }
 }
 function saveCache(cache: Cache) {
   try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch {}
 }
 
 const SKIP_TAGS = new Set([
-  "SCRIPT", "STYLE", "CODE", "PRE", "INPUT", "TEXTAREA",
-  "SELECT", "SVG", "CANVAS", "NOSCRIPT",
+  "SCRIPT","STYLE","CODE","PRE","INPUT","TEXTAREA",
+  "SELECT","SVG","CANVAS","NOSCRIPT",
 ]);
 
 function collectTextNodes(root: Element): Text[] {
@@ -25,7 +79,7 @@ function collectTextNodes(root: Element): Text[] {
       const text = (node.textContent ?? "").trim();
       if (
         text.length >= 2 &&
-        !/^[\d\s+\-.,%$€#@/:()[\]|•·*]+$/.test(text) &&
+        !/^[\d\s+\-.,%$€#@/:()[\]|•·*→←↑↓]+$/.test(text) &&
         !/^https?:\/\//.test(text) &&
         !/^[+\d\s\-()]{4,}$/.test(text)
       ) {
@@ -41,45 +95,33 @@ function collectTextNodes(root: Element): Text[] {
   return result;
 }
 
-// MyMemory lang codes differ slightly from ISO
-const LANG_CODE_MAP: Record<string, string> = {
-  zh: "zh-CN",
-  fa: "fa",
-};
-function toMyMemoryCode(lang: string) {
-  return LANG_CODE_MAP[lang] ?? lang;
-}
-
 async function translateOne(text: string, targetLang: string): Promise<string> {
-  const code = toMyMemoryCode(targetLang);
-  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${code}`;
   try {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
     const res = await fetch(url);
     const data = await res.json();
-    if (data.responseStatus === 200 && data.responseData?.translatedText) {
-      // MyMemory sometimes returns HTML entities like &amp; — decode them
-      const txt = data.responseData.translatedText as string;
-      return txt.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'");
-    }
-  } catch {}
-  return text;
+    // Response: [[[translated, original], ...], null, "en"]
+    const translated: string = data?.[0]
+      ?.map((chunk: [string]) => chunk?.[0] ?? "")
+      .join("") ?? text;
+    return translated || text;
+  } catch {
+    return text;
+  }
 }
 
-async function translateBatch(
-  texts: string[],
-  targetLang: string,
-  onProgress?: (n: number) => void
-): Promise<string[]> {
-  const results: string[] = [...texts];
-  for (let i = 0; i < texts.length; i += CONCURRENT) {
-    const slice = texts.slice(i, i + CONCURRENT);
-    const settled = await Promise.allSettled(slice.map((t) => translateOne(t, targetLang)));
-    settled.forEach((r, j) => {
-      if (r.status === "fulfilled") results[i + j] = r.value;
-    });
-    onProgress?.(Math.round(((i + slice.length) / texts.length) * 90));
+function applyToDOM(nodes: Text[], langCache: Record<string, string>) {
+  for (const node of nodes) {
+    if (!node.isConnected) continue;
+    const full     = nodeOriginals.get(node) ?? "";
+    const trimmed  = full.trim();
+    const translation = langCache[trimmed];
+    if (translation && translation !== trimmed) {
+      const leading  = full.match(/^\s*/)?.[0] ?? "";
+      const trailing = full.match(/\s*$/)?.[0] ?? "";
+      node.textContent = leading + translation + trailing;
+    }
   }
-  return results;
 }
 
 export async function translatePage(
@@ -90,16 +132,23 @@ export async function translatePage(
   const nodes = collectTextNodes(document.body);
   if (!nodes.length) return;
 
-  // Store originals
+  // Store originals (only on first translation)
   for (const node of nodes) {
     if (!nodeOriginals.has(node)) {
       nodeOriginals.set(node, node.textContent ?? "");
     }
   }
 
-  // Find uncached unique strings
   const cache = loadCache();
   const langCache = cache[targetLang] ?? {};
+
+  // Apply UI overrides first (instant, no API call needed)
+  const overrides = UI_OVERRIDES[targetLang] ?? {};
+  for (const [orig, translation] of Object.entries(overrides)) {
+    if (!langCache[orig]) langCache[orig] = translation;
+  }
+
+  // Collect unique strings not yet cached
   const uniqueSet = new Set<string>();
   for (const node of nodes) {
     const orig = (nodeOriginals.get(node) ?? "").trim();
@@ -107,23 +156,29 @@ export async function translatePage(
   }
 
   const toTranslate = Array.from(uniqueSet);
+
   if (toTranslate.length > 0) {
-    const translated = await translateBatch(toTranslate, targetLang, onProgress);
-    toTranslate.forEach((orig, i) => { langCache[orig] = translated[i] ?? orig; });
+    let done = 0;
+    // Process in concurrent batches, apply progressively
+    for (let i = 0; i < toTranslate.length; i += CONCURRENT) {
+      const batch = toTranslate.slice(i, i + CONCURRENT);
+      const settled = await Promise.allSettled(
+        batch.map((t) => translateOne(t, targetLang))
+      );
+      settled.forEach((r, j) => {
+        const orig = batch[j];
+        langCache[orig] = r.status === "fulfilled" ? r.value : orig;
+      });
+      done += batch.length;
+      onProgress?.(Math.round((done / toTranslate.length) * 95));
+      // Apply each batch immediately so the page updates progressively
+      applyToDOM(nodes, langCache);
+    }
     cache[targetLang] = langCache;
     saveCache(cache);
-  }
-
-  // Apply to DOM
-  for (const node of nodes) {
-    const full = nodeOriginals.get(node) ?? "";
-    const trimmed = full.trim();
-    const translation = langCache[trimmed];
-    if (translation && translation !== trimmed) {
-      const leading  = full.match(/^\s*/)?.[0] ?? "";
-      const trailing = full.match(/\s*$/)?.[0] ?? "";
-      node.textContent = leading + translation + trailing;
-    }
+  } else {
+    // All cached — apply instantly
+    applyToDOM(nodes, langCache);
   }
 
   onProgress?.(100);

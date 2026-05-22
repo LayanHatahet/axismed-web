@@ -9,6 +9,9 @@ import { WhyAxisMed } from "@/components/home/WhyAxisMed";
 import { HomeMoments } from "@/components/home/HomeMoments";
 import { PartnersStrip } from "@/components/home/PartnersStrip";
 import { MediaInsights } from "@/components/home/MediaInsights";
+import { HomeStats } from "@/components/home/HomeStats";
+import { HomeFAQ } from "@/components/home/HomeFAQ";
+import { SponsorCTA } from "@/components/home/SponsorCTA";
 
 export const dynamic = "force-dynamic";
 
@@ -31,10 +34,13 @@ export default async function HomePage() {
       <Hero />
       <PartnersStrip partners={featuredPartners} />
       <WhoWeAre />
+      <HomeStats />
       <CorePillars />
       <FeaturedCourses courses={featured} />
       <WhyAxisMed />
+      <SponsorCTA />
       <HomeMoments />
+      <HomeFAQ />
       <MediaInsights items={featuredMedia} />
     </>
   );

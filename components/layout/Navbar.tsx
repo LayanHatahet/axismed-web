@@ -8,6 +8,7 @@ import { Menu, X, MessageCircle, Search } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { SearchOverlay } from "@/components/ui/SearchOverlay";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 
 const navLinks = [
   { label: "Home",       href: "/" },
@@ -121,6 +122,7 @@ export function Navbar() {
                 <Search className="w-4 h-4" />
                 <span className="text-xs text-text-dim">⌘K</span>
               </button>
+              <LanguageSwitcher />
               <a
                 href="https://wa.me/971501897038"
                 target="_blank"

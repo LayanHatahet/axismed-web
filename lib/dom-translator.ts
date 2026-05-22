@@ -1,61 +1,73 @@
 const BATCH_SIZE = 50;
 const CACHE_KEY = "axismed_translations";
-const ORIG_ATTR = "data-orig";
 
-type Cache = Record<string, Record<string, string>>; // lang -> { original -> translated }
+type Cache = Record<string, Record<string, string>>;
+
+// In-memory store for original text content — survives re-translations
+const nodeOriginals = new Map<Text, string>();
 
 function loadCache(): Cache {
-  try {
-    return JSON.parse(localStorage.getItem(CACHE_KEY) ?? "{}");
-  } catch {
-    return {};
-  }
+  try { return JSON.parse(localStorage.getItem(CACHE_KEY) ?? "{}"); }
+  catch { return {}; }
 }
-
 function saveCache(cache: Cache) {
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
-  } catch {}
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch {}
 }
 
-function getTextNodes(root: Element = document.body): Text[] {
-  const nodes: Text[] = [];
-  const skip = new Set(["SCRIPT", "STYLE", "CODE", "PRE", "INPUT", "TEXTAREA", "SELECT", "SVG", "CANVAS"]);
+const SKIP_TAGS = new Set([
+  "SCRIPT", "STYLE", "CODE", "PRE", "INPUT", "TEXTAREA",
+  "SELECT", "SVG", "CANVAS", "NOSCRIPT", "BUTTON",
+]);
 
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-    acceptNode(node) {
-      const parent = node.parentElement;
-      if (!parent) return NodeFilter.FILTER_REJECT;
-      if (skip.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
-      // Walk up to check ancestors
-      let el: Element | null = parent;
-      while (el) {
-        if (skip.has(el.tagName)) return NodeFilter.FILTER_REJECT;
-        el = el.parentElement;
+function collectTextNodes(root: Element): Text[] {
+  const result: Text[] = [];
+
+  function walk(node: Node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = (node.textContent ?? "").trim();
+      // Skip empty, pure numbers/symbols, URLs
+      if (
+        text.length >= 2 &&
+        !/^[\d\s+\-.,%$€#@/:()[\]|•·]+$/.test(text) &&
+        !/^https?:\/\//.test(text) &&
+        !/^[+\d\s\-()]+$/.test(text) // phone numbers
+      ) {
+        result.push(node as Text);
       }
-      const text = node.textContent?.trim() ?? "";
-      if (text.length < 2) return NodeFilter.FILTER_SKIP;
-      // Skip pure numbers / symbols / URLs
-      if (/^[\d\s\+\-\.\,\%\$\€\#\@\/\:\(\)\[\]]+$/.test(text)) return NodeFilter.FILTER_SKIP;
-      if (/^https?:\/\//.test(text)) return NodeFilter.FILTER_SKIP;
-      return NodeFilter.FILTER_ACCEPT;
-    },
-  });
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      const el = node as Element;
+      if (!SKIP_TAGS.has(el.tagName)) {
+        for (const child of Array.from(node.childNodes)) {
+          walk(child);
+        }
+      }
+    }
+  }
 
-  let node: Node | null;
-  while ((node = walker.nextNode())) nodes.push(node as Text);
-  return nodes;
+  walk(root);
+  return result;
 }
 
-async function translateBatch(texts: string[], targetLang: string, targetLangName: string): Promise<string[]> {
-  const res = await fetch("/api/translate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ texts, targetLang, targetLangName }),
-  });
-  if (!res.ok) return texts;
-  const data = await res.json();
-  return data.translations ?? texts;
+async function translateBatch(
+  texts: string[],
+  targetLang: string,
+  targetLangName: string
+): Promise<string[]> {
+  try {
+    const res = await fetch("/api/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ texts, targetLang, targetLangName }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error ?? `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    return data.translations ?? texts;
+  } catch (err) {
+    throw err;
+  }
 }
 
 export async function translatePage(
@@ -63,32 +75,35 @@ export async function translatePage(
   targetLangName: string,
   onProgress?: (pct: number) => void
 ): Promise<void> {
-  const nodes = getTextNodes();
+  const nodes = collectTextNodes(document.body);
   if (!nodes.length) return;
 
-  const cache = loadCache();
-  const langCache = cache[targetLang] ?? {};
-
-  // Collect unique texts needing translation
-  const uniqueUntranslated: string[] = [];
-  const seen = new Set<string>();
+  // Store originals before any translation (or restore from stored)
   for (const node of nodes) {
-    // Store original if not already stored
-    if (!node.parentElement?.hasAttribute(ORIG_ATTR)) {
-      node.parentElement?.setAttribute(ORIG_ATTR, node.textContent ?? "");
-    }
-    const orig = node.parentElement?.getAttribute(ORIG_ATTR) ?? node.textContent ?? "";
-    if (!langCache[orig] && !seen.has(orig)) {
-      uniqueUntranslated.push(orig);
-      seen.add(orig);
+    if (!nodeOriginals.has(node)) {
+      nodeOriginals.set(node, node.textContent ?? "");
     }
   }
 
-  // Translate in batches
-  if (uniqueUntranslated.length > 0) {
+  // Collect unique original strings needing translation
+  const cache = loadCache();
+  const langCache = cache[targetLang] ?? {};
+
+  const uniqueSet = new Set<string>();
+  for (const node of nodes) {
+    const orig = (nodeOriginals.get(node) ?? "").trim();
+    if (orig.length >= 2 && !langCache[orig]) {
+      uniqueSet.add(orig);
+    }
+  }
+
+  const toTranslate = Array.from(uniqueSet);
+
+  // Batch translate
+  if (toTranslate.length > 0) {
     const batches: string[][] = [];
-    for (let i = 0; i < uniqueUntranslated.length; i += BATCH_SIZE) {
-      batches.push(uniqueUntranslated.slice(i, i + BATCH_SIZE));
+    for (let i = 0; i < toTranslate.length; i += BATCH_SIZE) {
+      batches.push(toTranslate.slice(i, i + BATCH_SIZE));
     }
 
     let done = 0;
@@ -98,19 +113,22 @@ export async function translatePage(
         langCache[orig] = translations[i] ?? orig;
       });
       done += batch.length;
-      onProgress?.(Math.round((done / uniqueUntranslated.length) * 90));
+      onProgress?.(Math.round((done / toTranslate.length) * 90));
     }
 
     cache[targetLang] = langCache;
     saveCache(cache);
   }
 
-  // Apply translations to DOM
+  // Apply translations to DOM text nodes
   for (const node of nodes) {
-    const orig = node.parentElement?.getAttribute(ORIG_ATTR) ?? node.textContent ?? "";
-    const translated = langCache[orig];
-    if (translated && translated !== orig) {
-      node.textContent = translated;
+    const full = nodeOriginals.get(node) ?? "";
+    const trimmed = full.trim();
+    const translated = langCache[trimmed];
+    if (translated && translated !== trimmed) {
+      const leading  = full.match(/^\s*/)?.[0] ?? "";
+      const trailing = full.match(/\s*$/)?.[0] ?? "";
+      node.textContent = leading + translated + trailing;
     }
   }
 
@@ -118,33 +136,22 @@ export async function translatePage(
 }
 
 export function resetPage(): void {
-  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT);
-  let node: Node | null;
-  while ((node = walker.nextNode())) {
-    const el = node as Element;
-    if (el.hasAttribute(ORIG_ATTR)) {
-      // Find the text node child and restore
-      for (const child of el.childNodes) {
-        if (child.nodeType === Node.TEXT_NODE) {
-          child.textContent = el.getAttribute(ORIG_ATTR);
-          break;
-        }
-      }
-      el.removeAttribute(ORIG_ATTR);
+  for (const [node, orig] of nodeOriginals) {
+    if (node.isConnected) {
+      node.textContent = orig;
     }
   }
-  // Reset RTL
+  nodeOriginals.clear();
   document.documentElement.removeAttribute("dir");
-  document.documentElement.removeAttribute("lang");
+  document.documentElement.setAttribute("lang", "en");
 }
 
 export function applyRTL(lang: string) {
-  const rtlLangs = new Set(["ar", "fa", "he", "ur"]);
-  if (rtlLangs.has(lang)) {
+  const rtl = new Set(["ar", "fa", "he", "ur"]);
+  if (rtl.has(lang)) {
     document.documentElement.setAttribute("dir", "rtl");
-    document.documentElement.setAttribute("lang", lang);
   } else {
     document.documentElement.removeAttribute("dir");
-    document.documentElement.setAttribute("lang", lang);
   }
+  document.documentElement.setAttribute("lang", lang);
 }

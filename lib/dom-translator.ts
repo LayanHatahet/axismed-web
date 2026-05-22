@@ -1,9 +1,8 @@
-const BATCH_SIZE = 50;
 const CACHE_KEY = "axismed_translations";
+const CONCURRENT = 6; // parallel requests to MyMemory
 
 type Cache = Record<string, Record<string, string>>;
 
-// In-memory store for original text content — survives re-translations
 const nodeOriginals = new Map<Text, string>();
 
 function loadCache(): Cache {
@@ -16,119 +15,114 @@ function saveCache(cache: Cache) {
 
 const SKIP_TAGS = new Set([
   "SCRIPT", "STYLE", "CODE", "PRE", "INPUT", "TEXTAREA",
-  "SELECT", "SVG", "CANVAS", "NOSCRIPT", "BUTTON",
+  "SELECT", "SVG", "CANVAS", "NOSCRIPT",
 ]);
 
 function collectTextNodes(root: Element): Text[] {
   const result: Text[] = [];
-
   function walk(node: Node) {
     if (node.nodeType === Node.TEXT_NODE) {
       const text = (node.textContent ?? "").trim();
-      // Skip empty, pure numbers/symbols, URLs
       if (
         text.length >= 2 &&
-        !/^[\d\s+\-.,%$€#@/:()[\]|•·]+$/.test(text) &&
+        !/^[\d\s+\-.,%$€#@/:()[\]|•·*]+$/.test(text) &&
         !/^https?:\/\//.test(text) &&
-        !/^[+\d\s\-()]+$/.test(text) // phone numbers
+        !/^[+\d\s\-()]{4,}$/.test(text)
       ) {
         result.push(node as Text);
       }
     } else if (node.nodeType === Node.ELEMENT_NODE) {
-      const el = node as Element;
-      if (!SKIP_TAGS.has(el.tagName)) {
-        for (const child of Array.from(node.childNodes)) {
-          walk(child);
-        }
+      if (!SKIP_TAGS.has((node as Element).tagName)) {
+        for (const child of Array.from(node.childNodes)) walk(child);
       }
     }
   }
-
   walk(root);
   return result;
+}
+
+// MyMemory lang codes differ slightly from ISO
+const LANG_CODE_MAP: Record<string, string> = {
+  zh: "zh-CN",
+  fa: "fa",
+};
+function toMyMemoryCode(lang: string) {
+  return LANG_CODE_MAP[lang] ?? lang;
+}
+
+async function translateOne(text: string, targetLang: string): Promise<string> {
+  const code = toMyMemoryCode(targetLang);
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${code}`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.responseStatus === 200 && data.responseData?.translatedText) {
+      // MyMemory sometimes returns HTML entities like &amp; — decode them
+      const txt = data.responseData.translatedText as string;
+      return txt.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+    }
+  } catch {}
+  return text;
 }
 
 async function translateBatch(
   texts: string[],
   targetLang: string,
-  targetLangName: string
+  onProgress?: (n: number) => void
 ): Promise<string[]> {
-  try {
-    const res = await fetch("/api/translate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ texts, targetLang, targetLangName }),
+  const results: string[] = [...texts];
+  for (let i = 0; i < texts.length; i += CONCURRENT) {
+    const slice = texts.slice(i, i + CONCURRENT);
+    const settled = await Promise.allSettled(slice.map((t) => translateOne(t, targetLang)));
+    settled.forEach((r, j) => {
+      if (r.status === "fulfilled") results[i + j] = r.value;
     });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error ?? `HTTP ${res.status}`);
-    }
-    const data = await res.json();
-    return data.translations ?? texts;
-  } catch (err) {
-    throw err;
+    onProgress?.(Math.round(((i + slice.length) / texts.length) * 90));
   }
+  return results;
 }
 
 export async function translatePage(
   targetLang: string,
-  targetLangName: string,
+  _targetLangName: string,
   onProgress?: (pct: number) => void
 ): Promise<void> {
   const nodes = collectTextNodes(document.body);
   if (!nodes.length) return;
 
-  // Store originals before any translation (or restore from stored)
+  // Store originals
   for (const node of nodes) {
     if (!nodeOriginals.has(node)) {
       nodeOriginals.set(node, node.textContent ?? "");
     }
   }
 
-  // Collect unique original strings needing translation
+  // Find uncached unique strings
   const cache = loadCache();
   const langCache = cache[targetLang] ?? {};
-
   const uniqueSet = new Set<string>();
   for (const node of nodes) {
     const orig = (nodeOriginals.get(node) ?? "").trim();
-    if (orig.length >= 2 && !langCache[orig]) {
-      uniqueSet.add(orig);
-    }
+    if (orig.length >= 2 && !langCache[orig]) uniqueSet.add(orig);
   }
 
   const toTranslate = Array.from(uniqueSet);
-
-  // Batch translate
   if (toTranslate.length > 0) {
-    const batches: string[][] = [];
-    for (let i = 0; i < toTranslate.length; i += BATCH_SIZE) {
-      batches.push(toTranslate.slice(i, i + BATCH_SIZE));
-    }
-
-    let done = 0;
-    for (const batch of batches) {
-      const translations = await translateBatch(batch, targetLang, targetLangName);
-      batch.forEach((orig, i) => {
-        langCache[orig] = translations[i] ?? orig;
-      });
-      done += batch.length;
-      onProgress?.(Math.round((done / toTranslate.length) * 90));
-    }
-
+    const translated = await translateBatch(toTranslate, targetLang, onProgress);
+    toTranslate.forEach((orig, i) => { langCache[orig] = translated[i] ?? orig; });
     cache[targetLang] = langCache;
     saveCache(cache);
   }
 
-  // Apply translations to DOM text nodes
+  // Apply to DOM
   for (const node of nodes) {
     const full = nodeOriginals.get(node) ?? "";
     const trimmed = full.trim();
-    const translated = langCache[trimmed];
-    if (translated && translated !== trimmed) {
+    const translation = langCache[trimmed];
+    if (translation && translation !== trimmed) {
       const leading  = full.match(/^\s*/)?.[0] ?? "";
       const trailing = full.match(/\s*$/)?.[0] ?? "";
-      node.textContent = leading + translated + trailing;
+      node.textContent = leading + translation + trailing;
     }
   }
 
@@ -137,9 +131,7 @@ export async function translatePage(
 
 export function resetPage(): void {
   for (const [node, orig] of nodeOriginals) {
-    if (node.isConnected) {
-      node.textContent = orig;
-    }
+    if (node.isConnected) node.textContent = orig;
   }
   nodeOriginals.clear();
   document.documentElement.removeAttribute("dir");

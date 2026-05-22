@@ -52,13 +52,9 @@ export function LanguageSwitcher() {
         applyRTL(lang.code);
       }
       setCurrent(lang.code);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      const display = msg.includes("not configured")
-        ? "Add OPENAI_API_KEY to environment variables"
-        : "Translation failed — please try again";
-      setError(display);
-      setTimeout(() => setError(null), 5000);
+    } catch {
+      setError("Translation failed — please try again");
+      setTimeout(() => setError(null), 4000);
     } finally {
       setLoading(false);
       setProgress(0);

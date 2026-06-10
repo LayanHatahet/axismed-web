@@ -40,8 +40,8 @@ const BRANCHES = [
 ] as const;
 
 const MOBILE_BRANCHES = [
-  { color: "#bcb8df", paramT: 0.33, tx: -2.8, ty:  2.5, tz: 0 },
-  { color: "#b0accf", paramT: 0.67, tx:  2.8, ty:  2.5, tz: 0 },
+  { color: "#bcb8df", paramT: 0.33, tx: -1.8, ty:  1.8, tz: 0 },
+  { color: "#b0accf", paramT: 0.67, tx:  1.8, ty:  1.8, tz: 0 },
   { color: "#cccae3", paramT: 0.00, tx:  0.0, ty: -4.5, tz: 0 },
 ] as const;
 
@@ -54,8 +54,8 @@ const BRANCH_LABELS = [
 
 /* Mobile label positions — pulled well inside the narrow portrait viewport */
 const MOBILE_BRANCH_LABELS = [
-  { label: "Courses", href: "/courses", pos: [-2.4,  2.2, 0] as [number,number,number] },
-  { label: "Media",   href: "/media",   pos: [ 2.4,  2.2, 0] as [number,number,number] },
+  { label: "Courses", href: "/courses", pos: [-1.8,  1.8, 0] as [number,number,number] },
+  { label: "Media",   href: "/media",   pos: [ 1.8,  1.8, 0] as [number,number,number] },
   { label: "Events",  href: "/events",  pos: [ 0.0, -3.8, 0] as [number,number,number] },
 ] as const;
 

@@ -351,15 +351,15 @@ function BranchPaths({
                 className="flex"
                 style={{
                   alignItems:      "center",
-                  gap:             "9px",
-                  padding:         "11px 22px",
+                  gap:             isMobile ? "6px" : "9px",
+                  padding:         isMobile ? "7px 14px" : "11px 22px",
                   background:      "rgba(255,255,255,0.86)",
                   border:          "1px solid rgba(164,158,207,0.22)",
-                  borderRadius:    "11px",
+                  borderRadius:    isMobile ? "8px" : "11px",
                   backdropFilter:  "blur(20px)",
                   WebkitBackdropFilter: "blur(20px)",
                   color:           "#8880b8",
-                  fontSize:        "15px",
+                  fontSize:        isMobile ? "11px" : "15px",
                   fontWeight:      700,
                   letterSpacing:   "0.09em",
                   textTransform:   "uppercase",
@@ -373,8 +373,8 @@ function BranchPaths({
                 }}
               >
                 <span style={{
-                  width:      "9px",
-                  height:     "9px",
+                  width:      isMobile ? "6px" : "9px",
+                  height:     isMobile ? "6px" : "9px",
                   borderRadius: "50%",
                   background: "linear-gradient(135deg, #cac6e6, #8880b8)",
                   flexShrink: 0,

@@ -27,10 +27,10 @@ const CAM = [
 ] as const;
 
 const MOBILE_CAM = [
-  { px:  0.2, py:  0.2, pz:  5.5, lx:  0.0, ly:  0.0, t0:  0.0, t1:  3.0 },
-  { px:  0.8, py:  0.4, pz:  8.5, lx:  0.1, ly:  0.0, t0:  3.0, t1:  6.0 },
-  { px: -0.6, py:  0.2, pz: 11.0, lx:  0.0, ly:  0.0, t0:  6.0, t1:  8.5 },
-  { px:  0.0, py:  0.0, pz: 13.0, lx:  0.0, ly:  0.0, t0:  8.5, t1: 11.0 },
+  { px:  0.2, py:  0.2, pz:  4.5, lx:  0.0, ly:  0.0, t0:  0.0, t1:  3.0 },
+  { px:  0.8, py:  0.4, pz:  7.0, lx:  0.1, ly:  0.0, t0:  3.0, t1:  6.0 },
+  { px: -0.6, py:  0.2, pz:  9.0, lx:  0.0, ly:  0.0, t0:  6.0, t1:  8.5 },
+  { px:  0.0, py:  0.0, pz: 10.0, lx:  0.0, ly:  0.0, t0:  8.5, t1: 11.0 },
 ] as const;
 
 const BRANCHES = [
@@ -198,8 +198,8 @@ function RibbonKnot({
     if (groupRef.current) {
       const sp  = Math.min(de / 7.0, 1.0);
       const ep  = sp < 0.5 ? 2*sp*sp : 1 - Math.pow(-2*sp+2, 2)/2;
-      const maxScl = isMobile ? 2.0 : 4.0;
-      const scl = (doneRef.current ? 1.0 : maxScl - (maxScl - 1.0) * ep) * (isMobile ? 0.30 : 1.0);
+      const maxScl = isMobile ? 2.8 : 4.0;
+      const scl = (doneRef.current ? 1.0 : maxScl - (maxScl - 1.0) * ep) * (isMobile ? 0.72 : 1.0);
       groupRef.current.scale.setScalar(scl);
     }
 

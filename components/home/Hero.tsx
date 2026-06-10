@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "lucide-react";
@@ -149,25 +150,31 @@ export function Hero() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.9, ease: EASE }}
           >
-            {/* Glowing orb — stands in for the 3D knot */}
+            {/* AxisMed knot logo — replaces the plain orb on mobile */}
             <motion.div
-              style={{
-                width:        "160px",
-                height:       "160px",
-                borderRadius: "50%",
-                background:   "radial-gradient(circle at 38% 35%, #e1dff0 0%, #a49ecf 50%, #484575 100%)",
-                boxShadow:    "0 0 60px rgba(164,158,207,0.55), 0 0 120px rgba(136,128,184,0.28), inset 0 0 40px rgba(197,192,212,0.2)",
-              }}
-              animate={{
-                scale:     [1, 1.06, 1],
-                boxShadow: [
-                  "0 0 60px rgba(164,158,207,0.55), 0 0 120px rgba(136,128,184,0.28)",
-                  "0 0 80px rgba(164,158,207,0.75), 0 0 160px rgba(136,128,184,0.40)",
-                  "0 0 60px rgba(164,158,207,0.55), 0 0 120px rgba(136,128,184,0.28)",
-                ],
-              }}
+              style={{ position: "relative", width: "180px", height: "180px" }}
+              animate={{ scale: [1, 1.06, 1] }}
               transition={{ repeat: Infinity, duration: 3.2, ease: "easeInOut" }}
-            />
+            >
+              {/* Glow halo behind the logo */}
+              <motion.div
+                style={{
+                  position:     "absolute",
+                  inset:        "-24px",
+                  borderRadius: "50%",
+                  background:   "radial-gradient(circle, rgba(164,158,207,0.45) 0%, transparent 70%)",
+                }}
+                animate={{ opacity: [0.6, 1, 0.6] }}
+                transition={{ repeat: Infinity, duration: 3.2, ease: "easeInOut" }}
+              />
+              <Image
+                src="/logo-symbol-purple.png"
+                alt="AxisMed"
+                fill
+                className="object-contain drop-shadow-[0_0_32px_rgba(136,128,184,0.7)]"
+                priority
+              />
+            </motion.div>
 
             {/* Nav buttons */}
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center", padding: "0 24px" }}>

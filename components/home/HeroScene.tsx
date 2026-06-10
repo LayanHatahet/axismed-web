@@ -312,7 +312,7 @@ function BranchPaths({
         <BranchPath key={i} branchCurve={c} color={activeBranches[i].color} active={active} />
       ))}
 
-      {!isMobile && activeLabels.map(({ label, href, pos }, i) => {
+      {activeLabels.map(({ label, href, pos }, i) => {
         const delay = `${i * 0.14}s`;
         return (
           <Html key={label} position={pos} center zIndexRange={[100, 0]}>
@@ -347,7 +347,7 @@ function BranchPaths({
               {/* Label pill — blooms in after branches complete */}
               <a
                 href={href}
-                className="hidden md:flex"
+                className="flex"
                 style={{
                   alignItems:      "center",
                   gap:             "9px",
@@ -537,9 +537,7 @@ function Scene({
           drawElapsed={drawElapsed}
           isMobile={isMobile}
         />
-        {!isMobile && (
-          <BranchPaths knotCurve={knotCurve} active={branches} showLabels={showLabels} isMobile={false} />
-        )}
+        <BranchPaths knotCurve={knotCurve} active={branches} showLabels={showLabels} isMobile={isMobile} />
       </group>
       <Particles />
     </>
@@ -553,12 +551,13 @@ function Scene({
 export function HeroScene({
   onKnotComplete,
   active,
+  isMobile,
 }: {
   onKnotComplete: () => void;
   active:         boolean;
+  isMobile:       boolean;
 }) {
-  const mouse    = useRef({ x: 0, y: 0 });
-  const isMobile = false; // HeroScene only ever mounts on desktop (Hero guards with !isMobile)
+  const mouse = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
@@ -586,7 +585,7 @@ export function HeroScene({
       style={{ width: "100%", height: "100%" }}
       dpr={[1, 2]}
     >
-      <Scene mouse={mouse} onKnotComplete={onKnotComplete} active={active} isMobile={false} />
+      <Scene mouse={mouse} onKnotComplete={onKnotComplete} active={active} isMobile={isMobile} />
     </Canvas>
   );
 }

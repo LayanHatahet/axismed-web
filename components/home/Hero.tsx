@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "lucide-react";
@@ -42,13 +41,7 @@ export function Hero() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  // On mobile there is no 3D knot — auto-complete shortly after the animation would start
-  useEffect(() => {
-    if (!active || !mounted) return;
-    if (window.innerWidth >= 768) return;
-    const t = setTimeout(() => setPhase("complete"), 700);
-    return () => clearTimeout(t);
-  }, [active, mounted]);
+  // 3D knot runs on all screen sizes — no mobile shortcut needed
 
   /* ── Cinematic text intro ── */
   useEffect(() => {
@@ -84,12 +77,10 @@ export function Hero() {
       className="relative h-screen overflow-hidden"
       style={{ background: bgGradient, transition: "background 1.8s cubic-bezier(0.4,0,0.2,1)" }}
     >
-      {/* ── 3D canvas — desktop only ── */}
-      {!isMobile && (
-        <div className="absolute inset-x-0 bottom-0 z-0" style={{ top: "72px" }}>
-          {mounted && <HeroScene onKnotComplete={onKnotComplete} active={active} />}
-        </div>
-      )}
+      {/* ── 3D canvas — all screen sizes ── */}
+      <div className="absolute inset-x-0 bottom-0 z-0" style={{ top: "72px" }}>
+        {mounted && <HeroScene onKnotComplete={onKnotComplete} active={active} isMobile={isMobile} />}
+      </div>
 
       {/* Edge vignette */}
       <div
@@ -140,84 +131,7 @@ export function Hero() {
         </AnimatePresence>
       </div>
 
-      {/* ── Mobile complete UI — CSS orb + nav buttons ── */}
-      <AnimatePresence>
-        {isMobile && isComplete && (
-          <motion.div
-            className="absolute inset-0 z-20 flex flex-col items-center justify-center"
-            style={{ paddingTop: "60px", gap: "48px" }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.9, ease: EASE }}
-          >
-            {/* AxisMed knot logo — replaces the plain orb on mobile */}
-            <motion.div
-              style={{ position: "relative", width: "180px", height: "180px" }}
-              animate={{ scale: [1, 1.06, 1] }}
-              transition={{ repeat: Infinity, duration: 3.2, ease: "easeInOut" }}
-            >
-              {/* Glow halo behind the logo */}
-              <motion.div
-                style={{
-                  position:     "absolute",
-                  inset:        "-24px",
-                  borderRadius: "50%",
-                  background:   "radial-gradient(circle, rgba(164,158,207,0.45) 0%, transparent 70%)",
-                }}
-                animate={{ opacity: [0.6, 1, 0.6] }}
-                transition={{ repeat: Infinity, duration: 3.2, ease: "easeInOut" }}
-              />
-              <Image
-                src="/logo-symbol-purple.png"
-                alt="AxisMed"
-                fill
-                className="object-contain drop-shadow-[0_0_32px_rgba(136,128,184,0.7)]"
-                priority
-              />
-            </motion.div>
-
-            {/* Nav buttons */}
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center", padding: "0 24px" }}>
-              {NAV_LINKS.map(({ label, href }, i) => (
-                <motion.a
-                  key={label}
-                  href={href}
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0  }}
-                  transition={{ delay: 0.25 + i * 0.1, duration: 0.5, ease: EASE }}
-                  style={{
-                    display:              "flex",
-                    alignItems:           "center",
-                    gap:                  "7px",
-                    padding:              "11px 20px",
-                    background:           "rgba(255,255,255,0.88)",
-                    border:               "1px solid rgba(164,158,207,0.28)",
-                    borderRadius:         "12px",
-                    backdropFilter:       "blur(20px)",
-                    WebkitBackdropFilter: "blur(20px)",
-                    color:                "#8880b8",
-                    fontSize:             "12px",
-                    fontWeight:           700,
-                    letterSpacing:        "0.1em",
-                    textTransform:        "uppercase",
-                    textDecoration:       "none",
-                    boxShadow:            "0 4px 20px rgba(136,128,184,0.15)",
-                    whiteSpace:           "nowrap",
-                  } as React.CSSProperties}
-                >
-                  <span style={{
-                    width: 7, height: 7, borderRadius: "50%",
-                    background: "linear-gradient(135deg,#cac6e6,#8880b8)",
-                    flexShrink: 0,
-                    boxShadow: "0 0 6px rgba(164,158,207,0.5)",
-                  }} />
-                  {label}
-                </motion.a>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Mobile complete UI removed — HeroScene handles labels on all screen sizes */}
 
       {/* Skip intro */}
       <AnimatePresence>

@@ -139,13 +139,14 @@ function RibbonKnot({
   drawElapsed: React.MutableRefObject<number>;
   isMobile:    boolean;
 }) {
-  const groupRef = useRef<THREE.Group>(null);
-  const drawRef  = useRef(0);
-  const doneRef  = useRef(false);
-  const autoRotY = useRef(0);
-  const tiltX    = useRef(0);
-  const tiltY    = useRef(0);
-  const floatT   = useRef(0);
+  const groupRef    = useRef<THREE.Group>(null);
+  const drawRef     = useRef(0);
+  const doneRef     = useRef(false);
+  const doneScaleT  = useRef(0); // 0→1 lerp when drawing finishes
+  const autoRotY    = useRef(0);
+  const tiltX       = useRef(0);
+  const tiltY       = useRef(0);
+  const floatT      = useRef(0);
 
   const curve    = useMemo(() => makeTrefoilCurve(S), []);
   const frames   = useMemo(() => curve.computeFrenetFrames(SEG, true), [curve]);
@@ -199,7 +200,9 @@ function RibbonKnot({
       const sp  = Math.min(de / 7.0, 1.0);
       const ep  = sp < 0.5 ? 2*sp*sp : 1 - Math.pow(-2*sp+2, 2)/2;
       const maxScl = isMobile ? 2.8 : 4.0;
-      const mobileMultiplier = isMobile ? (doneRef.current ? 1.1 : 0.72) : 1.0;
+      // Smoothly lerp the mobile scale up after drawing completes (no pop)
+      if (doneRef.current) doneScaleT.current = Math.min(1, doneScaleT.current + dt * 1.2);
+      const mobileMultiplier = isMobile ? (0.72 + 0.38 * doneScaleT.current) : 1.0;
       const scl = (doneRef.current ? 1.0 : maxScl - (maxScl - 1.0) * ep) * mobileMultiplier;
       groupRef.current.scale.setScalar(scl);
     }

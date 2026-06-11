@@ -4,12 +4,13 @@ import type { Course, Partner, MediaItem } from "@/lib/types";
 import { Hero } from "@/components/home/Hero";
 import { WhoWeAre } from "@/components/home/WhoWeAre";
 import { CorePillars } from "@/components/home/CorePillars";
-import { FeaturedCourses } from "@/components/home/FeaturedCourses";
+import { WhoWeServe } from "@/components/home/WhoWeServe";
 import { WhyAxisMed } from "@/components/home/WhyAxisMed";
+import { ActivitiesShowcase } from "@/components/home/ActivitiesShowcase";
+import { FeaturedCourses } from "@/components/home/FeaturedCourses";
 import { HomeMoments } from "@/components/home/HomeMoments";
 import { PartnersStrip } from "@/components/home/PartnersStrip";
 import { MediaInsights } from "@/components/home/MediaInsights";
-import { HomeStats } from "@/components/home/HomeStats";
 import { HomeFAQ } from "@/components/home/HomeFAQ";
 import { SponsorCTA } from "@/components/home/SponsorCTA";
 
@@ -31,16 +32,40 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* 1. Hero — animated knot + 3 service nav links */}
       <Hero />
+
+      {/* 2. Partners strip — logos of companies we've worked with */}
       <PartnersStrip partners={featuredPartners} />
+
+      {/* 3. Who We Are — clear value proposition within seconds */}
       <WhoWeAre />
-      <HomeStats />
+
+      {/* 4. What We Do — 4 practical services: Education · Events · Media · Partnerships */}
       <CorePillars />
-      <FeaturedCourses courses={featured} />
+
+      {/* 5. Who We Serve — 6 client types (MedTech, Pharma, Societies, Hospitals, HCPs, Academic) */}
+      <WhoWeServe />
+
+      {/* 6. Why AxisMed — real differentiators from GalMed/MedLab background */}
       <WhyAxisMed />
+
+      {/* 7. Examples of activities — concrete program types, not aspirational metrics */}
+      <ActivitiesShowcase />
+
+      {/* 8. Featured courses — live programs available to register */}
+      <FeaturedCourses courses={featured} />
+
+      {/* 9. Partner with us — sponsor/co-develop CTA */}
       <SponsorCTA />
+
+      {/* 10. Moments — photo gallery (admin-managed) */}
       <HomeMoments />
+
+      {/* 11. FAQ */}
       <HomeFAQ />
+
+      {/* 12. Media insights */}
       <MediaInsights items={featuredMedia} />
     </>
   );

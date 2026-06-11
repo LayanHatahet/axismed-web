@@ -4,50 +4,50 @@ import { motion } from "framer-motion";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { MotionBackground } from "@/components/ui/MotionBackground";
 import {
-  Globe2,
-  Users,
-  Zap,
-  Building2,
-  BookOpen,
-  Video,
+  BrainCircuit,
+  Network,
+  UserCheck,
+  Microscope,
+  Rocket,
+  Layers,
 } from "lucide-react";
 
 const reasons = [
   {
-    icon: Globe2,
-    title: "Regional Healthcare Focus",
+    icon: BrainCircuit,
+    title: "Deep Healthcare Industry Knowledge",
     description:
-      "Deep expertise in the Middle East healthcare landscape with an international standard of education and practice.",
+      "Our team's background through GalMed and MedLab means we understand the clinical, regulatory, and commercial realities of the healthcare industry — not just the theory. We speak the language of both clinicians and industry.",
   },
   {
-    icon: Users,
-    title: "Premium Faculty Network",
+    icon: Network,
+    title: "Extensive Regional Network",
     description:
-      "Programs led by internationally recognized specialists and surgeons with proven clinical and academic expertise.",
+      "Years of operating across the Middle East have built us a trusted network of healthcare institutions, hospital groups, medical societies, and academic centers — connections that make every initiative easier to design and faster to execute.",
   },
   {
-    icon: Zap,
-    title: "Hands-on Training",
+    icon: UserCheck,
+    title: "Access to KOLs & Healthcare Institutions",
     description:
-      "Cadaveric labs, simulation facilities, and real case workshops that develop genuine operative competence.",
+      "We have established relationships with key opinion leaders across multiple specialties and geographies. We can identify, engage, and mobilize the right clinical experts for your program — quickly and credibly.",
   },
   {
-    icon: Building2,
-    title: "Strategic Industry Collaboration",
+    icon: Microscope,
+    title: "Cadaveric & Hands-on Education Experience",
     description:
-      "Partnerships with leading medical device companies and healthcare institutions that enhance learning outcomes.",
+      "We have direct experience designing and running cadaveric training workshops — one of the most complex and high-value formats in medical education. From lab setup to faculty coordination and regulatory compliance, we manage it all.",
   },
   {
-    icon: BookOpen,
-    title: "Modern Educational Approach",
+    icon: Rocket,
+    title: "Experience Launching Medical Technologies",
     description:
-      "Blending digital planning tools, evidence-based curricula, and interactive formats for a truly modern learning experience.",
+      "We have supported the introduction of innovative medical technologies into clinical practice, understanding how education, KOL engagement, and event strategy combine to build product awareness and drive adoption.",
   },
   {
-    icon: Video,
-    title: "High-Quality Media Production",
+    icon: Layers,
+    title: "End-to-End Capabilities",
     description:
-      "Every event, course, and insight is documented and produced to the highest professional media standards.",
+      "Unlike single-service agencies, AxisMed covers education design, event management, and media production under one roof. This means tighter integration, consistent quality, and a single accountable partner from concept to delivery.",
   },
 ];
 
@@ -65,10 +65,10 @@ export function WhyAxisMed() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
-          eyebrow="Why Choose AxisMed"
-          title="A Platform Built for"
-          titleHighlight="Healthcare Professionals"
-          subtitle="We combine deep regional understanding, premium faculty networks, and modern educational infrastructure to deliver experiences that genuinely advance clinical practice."
+          eyebrow="Why AxisMed"
+          title="What Sets Us"
+          titleHighlight="Apart"
+          subtitle="Our differentiators are rooted in genuine experience — not aspirational statements. Here is what we actually bring to every engagement."
           className="mb-16"
         />
 
@@ -88,7 +88,7 @@ export function WhyAxisMed() {
                 <div className="w-12 h-12 rounded-xl bg-purple-500/12 group-hover:bg-purple-500/20 flex items-center justify-center mb-5 transition-colors">
                   <Icon className="w-6 h-6 text-purple-400" />
                 </div>
-                <h3 className="font-display text-lg font-bold text-white mb-3">
+                <h3 className="font-display text-lg font-bold text-white mb-3 leading-snug">
                   {reason.title}
                 </h3>
                 <p className="text-text-secondary text-sm leading-relaxed">

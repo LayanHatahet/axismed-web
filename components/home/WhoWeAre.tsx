@@ -31,7 +31,7 @@ export function WhoWeAre() {
         {/* Faint decorative text */}
         <div className="absolute inset-0 flex items-start justify-center pointer-events-none overflow-hidden select-none pt-6">
           <span className="font-display font-black leading-none tracking-tighter"
-            style={{ fontSize: "clamp(4rem,16vw,14rem)", color: "rgba(164,158,207,0.07)" }}>
+            style={{ fontSize: "clamp(4rem,16vw,14rem)", color: "rgba(164,158,207,0.18)" }}>
             WHO WE ARE
           </span>
         </div>
@@ -84,7 +84,7 @@ export function WhoWeAre() {
 
                   {/* Ghost number */}
                   <div className="absolute top-3 right-4 font-display text-6xl font-black select-none leading-none"
-                    style={{ color: "rgba(164,158,207,0.12)" }}>
+                    style={{ color: "rgba(164,158,207,0.28)" }}>
                     {String(i + 1).padStart(2, "0")}
                   </div>
 

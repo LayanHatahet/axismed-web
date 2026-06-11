@@ -60,7 +60,7 @@ export function WhyAxisMed() {
       {/* Ghost watermark */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
         <span className="font-display font-black leading-none tracking-tighter"
-          style={{ fontSize: "20vw", color: "rgba(164,158,207,0.07)" }}>
+          style={{ fontSize: "20vw", color: "rgba(164,158,207,0.18)" }}>
           AXISMED
         </span>
       </div>
@@ -109,7 +109,7 @@ export function WhyAxisMed() {
                   {/* Header row */}
                   <div className="flex items-center gap-5 p-5 md:p-6">
                     <span className="font-display text-3xl font-black shrink-0 leading-none select-none transition-colors duration-300"
-                      style={{ color: isOpen ? "rgba(164,158,207,0.6)" : "rgba(164,158,207,0.25)" }}>
+                      style={{ color: isOpen ? "rgba(136,128,184,0.75)" : "rgba(164,158,207,0.40)" }}>
                       {r.num}
                     </span>
 

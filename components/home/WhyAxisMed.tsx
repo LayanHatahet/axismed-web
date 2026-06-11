@@ -60,7 +60,7 @@ export function WhyAxisMed() {
       {/* Ghost watermark */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
         <span className="font-display font-black leading-none tracking-tighter"
-          style={{ fontSize: "20vw", color: "rgba(164,158,207,0.18)" }}>
+          style={{ fontSize: "20vw", color: "rgba(164,158,207,0.10)" }}>
           AXISMED
         </span>
       </div>

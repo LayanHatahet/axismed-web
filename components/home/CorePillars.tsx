@@ -116,7 +116,7 @@ export function CorePillars() {
 
               {/* Ghost number */}
               <div className="absolute right-8 top-4 font-display font-black select-none leading-none"
-                style={{ fontSize: "clamp(6rem,15vw,12rem)", color: `${p.accent}35` }}>
+                style={{ fontSize: "clamp(6rem,15vw,12rem)", color: `${p.accent}1c` }}>
                 {p.num}
               </div>
 

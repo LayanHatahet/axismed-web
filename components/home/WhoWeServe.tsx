@@ -49,7 +49,7 @@ export function WhoWeServe() {
       {/* Ghost decoration */}
       <div className="absolute inset-0 flex items-center justify-end pr-4 pointer-events-none overflow-hidden select-none">
         <span className="font-display font-black leading-none tracking-tighter"
-          style={{ fontSize: "clamp(3rem,10vw,9rem)", color: "rgba(164,158,207,0.20)", writingMode: "vertical-rl" }}>
+          style={{ fontSize: "clamp(3rem,10vw,9rem)", color: "rgba(164,158,207,0.11)", writingMode: "vertical-rl" }}>
           WHO WE SERVE
         </span>
       </div>
@@ -125,7 +125,7 @@ export function WhoWeServe() {
 
                 {/* Ghost number */}
                 <div className="absolute right-6 top-4 font-display font-black select-none leading-none"
-                  style={{ fontSize: "clamp(5rem,12vw,10rem)", color: `${sel.accent}30` }}>
+                  style={{ fontSize: "clamp(5rem,12vw,10rem)", color: `${sel.accent}18` }}>
                   {sel.num}
                 </div>
 

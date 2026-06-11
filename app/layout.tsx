@@ -52,7 +52,12 @@ export const metadata: Metadata = {
       "Regional platform for advanced surgical training, scientific events and professional healthcare communication.",
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/icon.png", type: "image/png" },
+      { url: "/favicon.ico" },
+    ],
+    apple: "/icon.png",
+    shortcut: "/icon.png",
   },
 };
 

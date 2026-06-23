@@ -1,0 +1,74 @@
+[
+  {
+    "id": "p1",
+    "name": "Stryker",
+    "logo": "/images/partners/stryker.svg",
+    "category": "Industry Partner",
+    "website": "https://www.stryker.com",
+    "featured": true,
+    "description": "Global leader in CMF and orthopedic surgical technologies, instruments, and implant systems."
+  },
+  {
+    "id": "p2",
+    "name": "KLS Martin",
+    "logo": "/images/partners/kls-martin.svg",
+    "category": "Industry Partner",
+    "website": "https://www.kls-martin.com",
+    "featured": true,
+    "description": "Specialist in CMF and oral-maxillofacial surgical instruments, implants, and patient-specific solutions."
+  },
+  {
+    "id": "p3",
+    "name": "Materialise",
+    "logo": "/images/partners/materialise.svg",
+    "category": "Industry Partner",
+    "website": "https://www.materialise.com",
+    "featured": true,
+    "description": "Pioneers in 3D medical printing and virtual surgical planning software including ProPlan CMF."
+  },
+  {
+    "id": "p4",
+    "name": "DePuy Synthes",
+    "logo": "/images/partners/depuysynthes.svg",
+    "category": "Industry Partner",
+    "website": "https://www.depuysynthes.com",
+    "featured": true,
+    "description": "Johnson & Johnson's CMF and orthopedic division, offering comprehensive fixation and reconstruction systems."
+  },
+  {
+    "id": "p5",
+    "name": "Zimmer Biomet",
+    "logo": "/images/partners/zimmerbiomet.svg",
+    "category": "Industry Partner",
+    "website": "https://www.zimmerbiomet.com",
+    "featured": true,
+    "description": "Leading manufacturer of musculoskeletal and CMF implants, instruments, and digital surgery solutions."
+  },
+  {
+    "id": "p6",
+    "name": "Nobel Biocare",
+    "logo": "/images/partners/nobelbiocare.svg",
+    "category": "Industry Partner",
+    "website": "https://www.nobelbiocare.com",
+    "featured": true,
+    "description": "Global innovator in implant-based dental and oral rehabilitation solutions and digital workflows."
+  },
+  {
+    "id": "p7",
+    "name": "Straumann",
+    "logo": "/images/partners/straumann.svg",
+    "category": "Industry Partner",
+    "website": "https://www.straumann.com",
+    "featured": true,
+    "description": "World-leading provider of dental implants, digital dentistry solutions, and regenerative technologies."
+  },
+  {
+    "id": "p8",
+    "name": "3Shape",
+    "logo": "/images/partners/3shape.svg",
+    "category": "Industry Partner",
+    "website": "https://www.3shape.com",
+    "featured": true,
+    "description": "Innovator in 3D scanning and CAD/CAM software for dental and craniofacial digital workflows."
+  }
+]

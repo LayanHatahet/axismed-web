@@ -122,11 +122,17 @@ export function CourseCard({ course, index = 0 }: CourseCardProps) {
               {/* Footer */}
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="font-bold text-xl" style={{ color: "#0f0d1e" }}>${course.price.toLocaleString()}</span>
-                  <span className="text-sm ml-1" style={{ color: "#4a4570" }}>{course.currency}</span>
+                  {course.status === "completed" ? (
+                    <span className="text-sm font-medium" style={{ color: "#a49ecf" }}>Completed</span>
+                  ) : (
+                    <>
+                      <span className="font-bold text-xl" style={{ color: "#0f0d1e" }}>${course.price.toLocaleString()}</span>
+                      <span className="text-sm ml-1" style={{ color: "#4a4570" }}>{course.currency}</span>
+                    </>
+                  )}
                 </div>
                 <div className="flex items-center gap-1 text-sm font-medium group-hover:gap-2 transition-all" style={{ color: "#1e1b35" }}>
-                  View Course <ArrowRight className="w-4 h-4" />
+                  {course.status === "completed" ? "View Details" : "Register Interest"} <ArrowRight className="w-4 h-4" />
                 </div>
               </div>
             </div>

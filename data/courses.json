@@ -1,5 +1,76 @@
 [
   {
+    "id": "5",
+    "slug": "orthognathic-surgery-masterclass-2026",
+    "title": "Orthognathic Surgery Masterclass 2026",
+    "subtitle": "Predictability in Your Hands: From Digital Planning to Personalized Orthognathic Surgery",
+    "category": "Oral & Maxillofacial Surgery",
+    "programType": "Cadaveric Training",
+    "image": "",
+    "instructor": "Prof. Valerio Ramieri",
+    "instructorTitle": "Course Director",
+    "instructorBio": "Prof. Valerio Ramieri is an internationally recognized leader in orthognathic and craniofacial surgery, with extensive experience in digital planning workflows and personalized surgical solutions.",
+    "location": "Dubai, United Arab Emirates",
+    "city": "Dubai, UAE",
+    "startDate": "2026-11-27",
+    "endDate": "2026-11-28",
+    "duration": "2 Days",
+    "seats": 16,
+    "seatsAvailable": 16,
+    "price": 5000,
+    "currency": "USD",
+    "status": "open",
+    "featured": true,
+    "description": "An exclusive two-day program combining advanced digital planning, personalized surgical solutions, and hands-on cadaveric training.",
+    "overview": "This exclusive masterclass brings together advanced digital planning methodology and personalized orthognathic surgical techniques in an intensive two-day cadaveric program. Under the direction of Prof. Valerio Ramieri, participants will work through the full workflow — from virtual surgical planning and patient-specific solution design through to hands-on cadaveric execution. The program is designed for oral and maxillofacial surgeons seeking to achieve greater predictability, precision, and consistency in their orthognathic practice. Seats are strictly limited to ensure individual attention and optimal lab time.",
+    "agenda": [
+      {
+        "day": "Day 1 — Digital Planning & Workflow",
+        "sessions": [
+          { "time": "08:30", "title": "Registration & Welcome" },
+          { "time": "09:00", "title": "Foundations of Predictable Orthognathic Surgery", "speaker": "Prof. Valerio Ramieri" },
+          { "time": "10:30", "title": "Virtual Surgical Planning: Principles & Software Walkthrough" },
+          { "time": "12:30", "title": "Lunch" },
+          { "time": "13:30", "title": "Personalized Surgical Solutions: Design & Execution" },
+          { "time": "15:30", "title": "Cadaveric Lab — Digital Guide Application & Osteotomy Techniques" },
+          { "time": "18:00", "title": "Debrief & Q&A" }
+        ]
+      },
+      {
+        "day": "Day 2 — Hands-on Cadaveric Training",
+        "sessions": [
+          { "time": "09:00", "title": "Case Review: Complex Orthognathic Planning Scenarios" },
+          { "time": "10:00", "title": "Cadaveric Lab — Le Fort I, BSSO & Genioplasty: Full Sequence", "speaker": "Prof. Valerio Ramieri" },
+          { "time": "13:00", "title": "Lunch" },
+          { "time": "14:00", "title": "Cadaveric Lab — Asymmetry Cases & Challenging Presentations" },
+          { "time": "16:30", "title": "Case Discussion & Complications Management" },
+          { "time": "17:30", "title": "Certificate Ceremony & Closing" }
+        ]
+      }
+    ],
+    "faculty": [
+      {
+        "id": "f10",
+        "name": "Prof. Valerio Ramieri",
+        "title": "Course Director",
+        "institution": "University of Turin",
+        "specialty": "Oral & Maxillofacial Surgery / Orthognathic Surgery"
+      }
+    ],
+    "sponsors": [],
+    "tags": [
+      "orthognathic",
+      "cadaveric",
+      "digital planning",
+      "personalized surgery",
+      "OMFS",
+      "masterclass"
+    ],
+    "gallery": [],
+    "createdAt": "2026-06-23",
+    "updatedAt": "2026-06-23"
+  },
+  {
     "id": "1",
     "slug": "orthognathic-psi-course",
     "title": "Orthognathic & PSI Course",
@@ -15,79 +86,14 @@
     "endDate": "2025-09-14",
     "duration": "3 Days",
     "seats": 24,
-    "seatsAvailable": 8,
+    "seatsAvailable": 0,
     "price": 3500,
     "currency": "USD",
-    "status": "open",
-    "featured": true,
+    "status": "completed",
+    "featured": false,
     "description": "A comprehensive three-day cadaveric training program combining digital planning workflows with live surgical simulation for orthognathic procedures and patient-specific implant placement.",
-    "overview": "This intensive program bridges the gap between digital surgical planning and real-world operative execution. Participants will work with industry-leading planning software, patient-specific cutting guides, and titanium PSI implants on cadaveric specimens under expert supervision. The curriculum is designed for practicing oral and maxillofacial surgeons seeking to integrate digital workflows into their practice.",
-    "agenda": [
-      {
-        "day": "Day 1",
-        "sessions": [
-          {
-            "time": "08:00",
-            "title": "Registration & Welcome"
-          },
-          {
-            "time": "09:00",
-            "title": "Digital Planning Fundamentals & Software Walkthrough",
-            "speaker": "Prof. Ahmed Al-Rashid"
-          },
-          {
-            "time": "11:00",
-            "title": "Virtual Surgical Planning (VSP) — Live Demonstration"
-          },
-          {
-            "time": "14:00",
-            "title": "Cadaveric Lab: Osteotomy Techniques & Guide Placement"
-          },
-          {
-            "time": "17:30",
-            "title": "Debrief & Q&A"
-          }
-        ]
-      },
-      {
-        "day": "Day 2",
-        "sessions": [
-          {
-            "time": "09:00",
-            "title": "PSI Design Principles & Manufacturing Overview"
-          },
-          {
-            "time": "11:00",
-            "title": "Cadaveric Lab: PSI Placement — Le Fort I & BSSO"
-          },
-          {
-            "time": "14:00",
-            "title": "Case Presentation: Complex Asymmetry Cases"
-          },
-          {
-            "time": "16:00",
-            "title": "Industry Symposium: Next-Generation Implant Systems"
-          }
-        ]
-      },
-      {
-        "day": "Day 3",
-        "sessions": [
-          {
-            "time": "09:00",
-            "title": "Cadaveric Lab: Full Case Simulation — Participants Lead"
-          },
-          {
-            "time": "12:00",
-            "title": "Complications & Revision Strategies"
-          },
-          {
-            "time": "14:00",
-            "title": "Certificate Ceremony & Closing"
-          }
-        ]
-      }
-    ],
+    "overview": "This intensive program bridges the gap between digital surgical planning and real-world operative execution. Participants worked with industry-leading planning software, patient-specific cutting guides, and titanium PSI implants on cadaveric specimens under expert supervision.",
+    "agenda": [],
     "faculty": [
       {
         "id": "f1",
@@ -95,30 +101,13 @@
         "title": "Program Director",
         "institution": "Dubai Academic Health Corporation",
         "specialty": "Oral & Maxillofacial Surgery"
-      },
-      {
-        "id": "f2",
-        "name": "Dr. Sara Mansoor",
-        "title": "Digital Planning Specialist",
-        "institution": "Mediclinic, UAE",
-        "specialty": "Digital Surgery & VSP"
       }
     ],
-    "sponsors": [
-      "DePuy Synthes",
-      "KLS Martin",
-      "Stryker CMF"
-    ],
-    "tags": [
-      "orthognathic",
-      "PSI",
-      "cadaveric",
-      "digital planning",
-      "OMFS"
-    ],
+    "sponsors": ["DePuy Synthes", "KLS Martin", "Stryker CMF"],
+    "tags": ["orthognathic", "PSI", "cadaveric", "digital planning", "OMFS"],
     "gallery": [],
     "createdAt": "2025-01-10",
-    "updatedAt": "2025-06-01"
+    "updatedAt": "2025-09-15"
   },
   {
     "id": "2",
@@ -136,58 +125,14 @@
     "endDate": "2025-10-04",
     "duration": "2 Days",
     "seats": 18,
-    "seatsAvailable": 14,
+    "seatsAvailable": 0,
     "price": 2200,
     "currency": "USD",
-    "status": "open",
-    "featured": true,
+    "status": "completed",
+    "featured": false,
     "description": "A practical two-day workshop covering the complete digital surgery pipeline from imaging acquisition through 3D planning, guide fabrication, and intraoperative navigation.",
-    "overview": "Surgeons will gain hands-on experience with CBCT data processing, 3D planning software, and surgical guide design. The program includes simulation exercises with 3D-printed anatomical models and guided implant placement exercises. Ideal for surgeons at any stage of digital adoption.",
-    "agenda": [
-      {
-        "day": "Day 1",
-        "sessions": [
-          {
-            "time": "09:00",
-            "title": "CBCT Acquisition & Data Processing",
-            "speaker": "Dr. Khalid Nasser"
-          },
-          {
-            "time": "11:00",
-            "title": "3D Planning Software: Hands-on Session"
-          },
-          {
-            "time": "14:00",
-            "title": "Surgical Guide Design & Manufacturing Options"
-          },
-          {
-            "time": "16:30",
-            "title": "Case Study Review"
-          }
-        ]
-      },
-      {
-        "day": "Day 2",
-        "sessions": [
-          {
-            "time": "09:00",
-            "title": "Intraoperative Navigation Overview"
-          },
-          {
-            "time": "11:00",
-            "title": "Simulation Lab: Model-Based Surgery"
-          },
-          {
-            "time": "14:00",
-            "title": "Workflow Integration in Clinical Practice"
-          },
-          {
-            "time": "16:00",
-            "title": "Certification & Close"
-          }
-        ]
-      }
-    ],
+    "overview": "Surgeons gained hands-on experience with CBCT data processing, 3D planning software, and surgical guide design.",
+    "agenda": [],
     "faculty": [
       {
         "id": "f3",
@@ -197,21 +142,11 @@
         "specialty": "Digital Surgery"
       }
     ],
-    "sponsors": [
-      "Materialise",
-      "Nobel Biocare",
-      "3Shape"
-    ],
-    "tags": [
-      "digital surgery",
-      "CBCT",
-      "3D planning",
-      "navigation",
-      "workflow"
-    ],
+    "sponsors": ["Materialise", "Nobel Biocare", "3Shape"],
+    "tags": ["digital surgery", "CBCT", "3D planning", "navigation", "workflow"],
     "gallery": [],
     "createdAt": "2025-02-01",
-    "updatedAt": "2025-06-01"
+    "updatedAt": "2025-10-05"
   },
   {
     "id": "3",
@@ -229,66 +164,14 @@
     "endDate": "2025-11-09",
     "duration": "3 Days",
     "seats": 20,
-    "seatsAvailable": 5,
+    "seatsAvailable": 0,
     "price": 4000,
     "currency": "USD",
-    "status": "open",
-    "featured": true,
+    "status": "completed",
+    "featured": false,
     "description": "Three intensive days of cadaveric simulation focusing on advanced orbital, mandibular, and mid-face reconstruction using titanium mesh, custom implants, and modern fixation systems.",
-    "overview": "This program addresses the most demanding cases in CMF practice — post-traumatic and oncologic reconstruction. Participants will perform complete reconstruction sequences on cadaveric specimens, utilizing the latest implant technologies and guided by internationally recognized faculty.",
-    "agenda": [
-      {
-        "day": "Day 1",
-        "sessions": [
-          {
-            "time": "08:30",
-            "title": "Orbital Reconstruction: Anatomy & Implant Selection"
-          },
-          {
-            "time": "10:30",
-            "title": "Cadaveric Lab: Orbital Floor & Wall Repair"
-          },
-          {
-            "time": "14:00",
-            "title": "Mid-Face Reconstruction: Principles & Planning"
-          }
-        ]
-      },
-      {
-        "day": "Day 2",
-        "sessions": [
-          {
-            "time": "09:00",
-            "title": "Mandibular Reconstruction: Free Flap Concepts"
-          },
-          {
-            "time": "11:00",
-            "title": "Cadaveric Lab: Plate Bending & Fixation"
-          },
-          {
-            "time": "14:00",
-            "title": "Industry Presentations: Custom Titanium Solutions"
-          }
-        ]
-      },
-      {
-        "day": "Day 3",
-        "sessions": [
-          {
-            "time": "09:00",
-            "title": "Comprehensive Case Simulation — Lead Surgeon"
-          },
-          {
-            "time": "12:00",
-            "title": "Literature Review & Evidence-Based Practice"
-          },
-          {
-            "time": "14:30",
-            "title": "Certification & Closing"
-          }
-        ]
-      }
-    ],
+    "overview": "This program addressed the most demanding cases in CMF practice — post-traumatic and oncologic reconstruction.",
+    "agenda": [],
     "faculty": [
       {
         "id": "f4",
@@ -298,21 +181,11 @@
         "specialty": "Craniofacial Surgery"
       }
     ],
-    "sponsors": [
-      "Synthes CMF",
-      "Stryker",
-      "Biomet"
-    ],
-    "tags": [
-      "CMF",
-      "reconstruction",
-      "orbital",
-      "mandible",
-      "cadaveric"
-    ],
+    "sponsors": ["Synthes CMF", "Stryker", "Biomet"],
+    "tags": ["CMF", "reconstruction", "orbital", "mandible", "cadaveric"],
     "gallery": [],
     "createdAt": "2025-02-15",
-    "updatedAt": "2025-06-01"
+    "updatedAt": "2025-11-10"
   },
   {
     "id": "4",
@@ -330,53 +203,14 @@
     "endDate": "2025-12-06",
     "duration": "2 Days",
     "seats": 16,
-    "seatsAvailable": 16,
+    "seatsAvailable": 0,
     "price": 1800,
     "currency": "USD",
-    "status": "upcoming",
-    "featured": true,
+    "status": "completed",
+    "featured": false,
     "description": "An evidence-based workshop for clinicians seeking to master digital implant planning, guided surgery protocols, and immediate loading strategies for complex multi-unit restorations.",
-    "overview": "Participants will work through advanced case scenarios using guided surgery software, fabricate surgical guides on in-house printers, and practice placement technique on high-fidelity phantom models. The program integrates prosthodontic planning perspectives with surgical execution.",
-    "agenda": [
-      {
-        "day": "Day 1",
-        "sessions": [
-          {
-            "time": "09:00",
-            "title": "Guided Surgery Software — Advanced Module"
-          },
-          {
-            "time": "11:00",
-            "title": "Bone Augmentation Planning for Compromised Sites"
-          },
-          {
-            "time": "14:00",
-            "title": "Phantom Lab: Guided Placement Exercises"
-          }
-        ]
-      },
-      {
-        "day": "Day 2",
-        "sessions": [
-          {
-            "time": "09:00",
-            "title": "Immediate Loading Protocols: Evidence & Technique"
-          },
-          {
-            "time": "11:00",
-            "title": "Phantom Lab: Full-Arch Reconstruction Simulation"
-          },
-          {
-            "time": "14:00",
-            "title": "Case Review & Mentoring Session"
-          },
-          {
-            "time": "16:00",
-            "title": "Certification"
-          }
-        ]
-      }
-    ],
+    "overview": "Participants worked through advanced case scenarios using guided surgery software, fabricated surgical guides, and practised placement technique on high-fidelity phantom models.",
+    "agenda": [],
     "faculty": [
       {
         "id": "f5",
@@ -386,20 +220,10 @@
         "specialty": "Implantology & Prosthodontics"
       }
     ],
-    "sponsors": [
-      "Straumann",
-      "Nobel Biocare",
-      "Zimmer Biomet"
-    ],
-    "tags": [
-      "implants",
-      "guided surgery",
-      "digital",
-      "immediate loading",
-      "prosthodontics"
-    ],
+    "sponsors": ["Straumann", "Nobel Biocare", "Zimmer Biomet"],
+    "tags": ["implants", "guided surgery", "digital", "immediate loading", "prosthodontics"],
     "gallery": [],
     "createdAt": "2025-03-01",
-    "updatedAt": "2025-06-01"
+    "updatedAt": "2025-12-07"
   }
 ]

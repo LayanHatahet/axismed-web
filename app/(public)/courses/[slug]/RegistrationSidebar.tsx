@@ -90,11 +90,12 @@ export function RegistrationSidebar({ course }: Props) {
       >
         {/* Price header */}
         <div className="p-6 border-b border-border bg-bg-elevated">
+          <div className="text-text-dim text-xs font-semibold tracking-widest uppercase mb-1.5">Registration Fee</div>
           <div className="flex items-baseline gap-2 mb-1">
             <span className="font-display text-4xl font-bold text-white">
               {course.price > 0 ? `$${course.price.toLocaleString()}` : "Contact for Pricing"}
             </span>
-            {course.price > 0 && <span className="text-text-muted">{course.currency}</span>}
+            {course.price > 0 && <span className="text-text-muted">{course.currency} per Participant</span>}
           </div>
           <div className="flex items-center gap-2">
             <StatusBadge status={course.status} />
@@ -140,7 +141,7 @@ export function RegistrationSidebar({ course }: Props) {
                 onClick={() => setStep("method")}
                 className="w-full bg-purple-500 hover:bg-purple-400 text-white font-semibold py-4 rounded-xl transition-all shadow-[0_0_24px_rgba(164,158,207,0.4)] hover:shadow-[0_0_36px_rgba(164,158,207,0.6)] flex items-center justify-center gap-2"
               >
-                Register for this Program
+                Register Interest
                 <ChevronRight className="w-4 h-4" />
               </button>
             ) : (

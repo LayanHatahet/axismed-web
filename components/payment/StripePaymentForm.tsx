@@ -52,7 +52,14 @@ function CheckoutForm({ amountLabel }: { amountLabel: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <PaymentElement />
+      {/* Cards + Apple Pay + Google Pay (shown automatically when the device
+          is eligible and the payment method is enabled in the Stripe dashboard). */}
+      <PaymentElement
+        options={{
+          layout: "tabs",
+          wallets: { applePay: "auto", googlePay: "auto" },
+        }}
+      />
 
       {error && (
         <div className="flex items-start gap-2 rounded-xl border border-red-300 bg-red-50 px-4 py-3">

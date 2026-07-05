@@ -19,7 +19,7 @@ export const mediaItems: MediaItem[] = [
     type: "podcast",
     title: "The Future of Digital Surgery in the Middle East",
     description: "Prof. Ahmed Al-Rashid and Dr. Khalid Nasser discuss how AI and digital planning are transforming surgical practice in the region.",
-    thumbnail: "https://images.unsplash.com/photo-1590402494756-fe3dc22aa9f8?w=800&h=450&q=80&auto=format&fit=crop",
+    thumbnail: "https://images.unsplash.com/photo-1589903308904-1010c2294adc?w=800&h=450&q=80&auto=format&fit=crop",
     url: "#",
     duration: "42:10",
     date: "2025-04-28",

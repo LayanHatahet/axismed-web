@@ -3,7 +3,7 @@ import type { SiteSettings } from "@/lib/types";
 export const siteSettings: SiteSettings = {
   siteName: "AxisMed",
   tagline: "Education · Innovation · Global Healthcare",
-  email: "info@axismed.com",
+  email: "admin@theaxismed.com",
   phone: "+971 50 189 7038",
   whatsapp: "+971 50 189 7038",
   address: "Dubai Healthcare City",
@@ -31,6 +31,6 @@ export const siteSettings: SiteSettings = {
   paymentConfig: {
     currency: "USD",
     gateway: "stripe",
-    testMode: true,
+    testMode: false,
   },
 };

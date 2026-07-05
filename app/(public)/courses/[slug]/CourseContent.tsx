@@ -263,7 +263,7 @@ export function CourseContent({ course }: Props) {
                       { icon: Building2, label: "Facility",   value: course.location || "To be confirmed" },
                       { icon: MapPin,    label: "City",        value: course.city },
                       { icon: Phone,     label: "Inquiries",   value: "+971 50 189 7038" },
-                      { icon: Mail,      label: "Email",       value: "info@axismed.com" },
+                      { icon: Mail,      label: "Email",       value: "admin@theaxismed.com" },
                     ].map(({ icon: Icon, label, value }) => (
                       <div key={label} className="flex items-start gap-4">
                         <div className="w-10 h-10 rounded-xl bg-purple-500/12 flex items-center justify-center shrink-0">
@@ -302,8 +302,8 @@ export function CourseContent({ course }: Props) {
                 <p className="text-text-secondary text-sm leading-relaxed">
                   AxisMed partners with premium hotels near the venue for participant accommodation.
                   Special rates are available for registered attendees. Contact us at{" "}
-                  <a href="mailto:info@axismed.com" className="text-purple-400 hover:text-purple-300 transition-colors">
-                    info@axismed.com
+                  <a href="mailto:admin@theaxismed.com" className="text-purple-400 hover:text-purple-300 transition-colors">
+                    admin@theaxismed.com
                   </a>{" "}
                   for hotel recommendations and group booking arrangements.
                 </p>
@@ -387,8 +387,8 @@ export function CourseContent({ course }: Props) {
                       Payment is accepted via bank transfer or credit card. An official invoice and registration
                       confirmation will be sent within 24 hours of registration. Group and institutional billing
                       available upon request — contact{" "}
-                      <a href="mailto:info@axismed.com" className="text-purple-400 hover:text-purple-300 transition-colors">
-                        info@axismed.com
+                      <a href="mailto:admin@theaxismed.com" className="text-purple-400 hover:text-purple-300 transition-colors">
+                        admin@theaxismed.com
                       </a>.
                     </p>
                   </div>

@@ -97,8 +97,8 @@ export function Footer() {
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <Mail className="w-4 h-4 text-purple-400 shrink-0" />
-                <a href="mailto:info@axismed.com" className="text-text-secondary hover:text-white transition-colors">
-                  info@axismed.com
+                <a href="mailto:admin@theaxismed.com" className="text-text-secondary hover:text-white transition-colors">
+                  admin@theaxismed.com
                 </a>
               </div>
               <div className="flex items-center gap-3 text-sm">
@@ -153,9 +153,12 @@ export function Footer() {
               </a>
             ))}
           </div>
-          <div className="flex items-center gap-4 text-xs text-text-dim">
-            <Link href="/privacy" className="hover:text-text-muted transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-text-muted transition-colors">Terms</Link>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-text-dim">
+            <Link href="/privacy" className="hover:text-text-muted transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-text-muted transition-colors">Terms &amp; Conditions</Link>
+            <Link href="/refund" className="hover:text-text-muted transition-colors">Refund Policy</Link>
+            <Link href="/cancellation" className="hover:text-text-muted transition-colors">Cancellation Policy</Link>
+            <Link href="/contact" className="hover:text-text-muted transition-colors">Contact Us</Link>
           </div>
         </div>
       </div>

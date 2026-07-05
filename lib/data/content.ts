@@ -44,7 +44,7 @@ export const defaultContent: WebsiteContent = {
     story: {
       headline: "Our Story",
       body: "AxisMed was founded with a clear belief: that healthcare professionals in the Middle East deserve world-class education and resources that reflect their reality. We started as a small team of clinicians and educators who were frustrated by the gap between international medical standards and regional access.",
-      image: "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=1200&h=700&q=80&auto=format&fit=crop",
+      image: "/images/about-our-story.jpg",
     },
     vision: "To be the defining platform for medical education and healthcare communication across the Middle East and beyond — where every clinician has access to the tools, knowledge and networks they need to advance their practice.",
     mission: "To design and deliver world-class surgical training, scientific events and healthcare media that elevate clinical standards, foster professional community and accelerate innovation in regional healthcare.",
@@ -74,7 +74,7 @@ export const defaultContent: WebsiteContent = {
       headline: "Let's Start a Conversation",
       body: "Whether you're looking to enroll in a program, partner with us or commission healthcare media — we're here to help.",
     },
-    email: "info@axismed.com",
+    email: "admin@theaxismed.com",
     phone: "+971 50 189 7038",
     whatsapp: "971501897038",
     address: "Dubai Healthcare City, Dubai, UAE",

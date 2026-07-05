@@ -197,7 +197,7 @@ export function ContactMain() {
               <h3 className="font-display text-lg font-bold text-white mb-5">Contact Information</h3>
               <div className="space-y-4">
                 {[
-                  { icon: Mail,   label: "Email",    value: "info@axismed.com",    href: "mailto:info@axismed.com" },
+                  { icon: Mail,   label: "Email",    value: "admin@theaxismed.com", href: "mailto:admin@theaxismed.com" },
                   { icon: Phone,  label: "Phone",    value: "+971 50 189 7038",    href: "tel:+971501897038" },
                   { icon: MapPin, label: "Location", value: "Dubai Healthcare City, Dubai, UAE", href: "#" },
                   { icon: MessageCircle, label: "WhatsApp", value: "Message us directly", href: "https://wa.me/971501897038" },

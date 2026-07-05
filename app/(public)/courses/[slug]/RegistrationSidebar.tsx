@@ -13,6 +13,7 @@ import type { Course } from "@/lib/types";
 import { StatusBadge } from "@/components/ui/Badge";
 import { formatDateRange } from "@/lib/utils/formatDate";
 import { StripePaymentForm } from "@/components/payment/StripePaymentForm";
+import { convertPrice, toMinorUnits, formatAmount, type Currency } from "@/lib/currency";
 
 const schema = z.object({
   firstName:   z.string().min(2, "Required"),
@@ -38,8 +39,11 @@ export function RegistrationSidebar({ course }: Props) {
     resolver: zodResolver(schema),
   });
 
+  const baseCurrency: Currency = (course.currency || "").toUpperCase() === "AED" ? "AED" : "USD";
+  const [currency, setCurrency]         = useState<Currency>(baseCurrency);
+
   const payable     = PAYABLE.has(course.status) && course.price > 0;
-  const amountLabel = `$${course.price.toLocaleString()}`;
+  const amountLabel = formatAmount(toMinorUnits(convertPrice(course.price, course.currency, currency)), currency);
   const availPct    = course.seats > 0 ? (course.seatsAvailable / course.seats) * 100 : 100;
 
   const onSubmit = async (data: FormData) => {
@@ -49,7 +53,7 @@ export function RegistrationSidebar({ course }: Props) {
       const res = await fetch("/api/stripe/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, courseId: course.id }),
+        body: JSON.stringify({ ...data, courseId: course.id, currency }),
       });
       const json = await res.json();
       if (!res.ok || !json.clientSecret) {
@@ -80,7 +84,7 @@ export function RegistrationSidebar({ course }: Props) {
             <span className="font-display text-4xl font-bold text-white">
               {course.price > 0 ? amountLabel : "Contact for Pricing"}
             </span>
-            {course.price > 0 && <span className="text-text-muted">{course.currency} per Participant</span>}
+            {course.price > 0 && <span className="text-text-muted">{currency} per Participant</span>}
           </div>
           <div className="flex items-center gap-2">
             <StatusBadge status={course.status} />
@@ -120,6 +124,28 @@ export function RegistrationSidebar({ course }: Props) {
                 />
               </div>
             </div>
+
+            {payable && (
+              <div className="mb-4">
+                <div className="text-text-dim text-xs font-semibold tracking-widest uppercase mb-2">Pay in</div>
+                <div className="grid grid-cols-2 gap-2">
+                  {(["USD", "AED"] as const).map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setCurrency(c)}
+                      className={`py-2.5 rounded-lg text-sm font-semibold border transition-all ${
+                        currency === c
+                          ? "bg-purple-500/15 border-purple-500 text-purple-700"
+                          : "border-border text-text-secondary hover:border-purple-500/40"
+                      }`}
+                    >
+                      {c === "USD" ? "USD ($)" : "AED (د.إ)"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {payable ? (
               <>
@@ -223,7 +249,7 @@ export function RegistrationSidebar({ course }: Props) {
                 <span className="text-text-secondary line-clamp-1 pr-2">{course.title}</span>
                 <span className="font-semibold text-white whitespace-nowrap">{amountLabel}</span>
               </div>
-              <div className="text-text-dim text-xs">{course.currency} · {course.duration}</div>
+              <div className="text-text-dim text-xs">{currency} · {course.duration}</div>
             </div>
 
             <StripePaymentForm clientSecret={clientSecret} amountLabel={amountLabel} />

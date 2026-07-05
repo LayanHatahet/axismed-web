@@ -3,6 +3,7 @@ import { getStripe } from "@/lib/stripe.server";
 import { readJSON } from "@/lib/db.server";
 import { courses as seed } from "@/lib/data/courses";
 import type { Course } from "@/lib/types";
+import { chargeAmountMinor, isSupportedCurrency, type Currency } from "@/lib/currency";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,6 +19,7 @@ interface Body {
   phone?: string;
   specialty?: string;
   institution?: string;
+  currency?: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -29,6 +31,12 @@ export async function POST(req: NextRequest) {
   }
 
   const { courseId, firstName, lastName, email, phone, specialty, institution } = body;
+
+  // Customer's chosen currency (USD or AED). Falls back to the course's base
+  // currency, then USD. Validated here — never trusted for the amount.
+  const chosenCurrency: Currency = isSupportedCurrency(body.currency)
+    ? (body.currency!.toUpperCase() as Currency)
+    : "USD";
 
   if (!courseId || !email || !firstName || !lastName) {
     return NextResponse.json(
@@ -60,8 +68,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const stripe = getStripe();
-    const currency = (course.currency || "usd").toLowerCase();
-    const amount = Math.round(course.price * 100); // smallest currency unit (USD cents)
+    // Amount is always derived server-side from the course's real base price,
+    // converted into the customer's chosen currency (USD or AED).
+    const amount = chargeAmountMinor(course.price, course.currency, chosenCurrency);
+    const currency = chosenCurrency.toLowerCase();
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
@@ -75,6 +85,9 @@ export async function POST(req: NextRequest) {
         courseId: course.id,
         courseSlug: course.slug,
         courseName: course.title,
+        basePrice: String(course.price),
+        baseCurrency: course.currency || "USD",
+        chargedCurrency: chosenCurrency,
         firstName,
         lastName,
         email,
@@ -87,7 +100,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
       amount,
-      currency: course.currency || "USD",
+      currency: chosenCurrency,
     });
   } catch (err) {
     console.error("[stripe] create-payment-intent failed:", err);

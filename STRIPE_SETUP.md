@@ -20,18 +20,23 @@ Never commit these; `.env*` is git-ignored.
 
 ## 2. Webhook (Stripe Dashboard → Developers → Webhooks → Add endpoint)
 
-- **Endpoint URL:** `https://theaxismed.com/api/stripe/webhook`
+- **Endpoint URL (MUST use the www host):** `https://www.theaxismed.com/api/stripe/webhook`
+  - ⚠️ Do NOT use `https://theaxismed.com/...` — the apex 307-redirects to www and
+    Stripe does not follow redirects, so every delivery fails with a non-2xx.
 - **Events to send:**
   - `payment_intent.succeeded`
   - `payment_intent.payment_failed`
+  - `charge.refunded`
+  - (defensive, only if you ever use Stripe Checkout) `checkout.session.completed`,
+    `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`
 - After creating it, copy the **Signing secret** (`whsec_…`) into
-  `STRIPE_WEBHOOK_SECRET` in Vercel, then redeploy.
+  `STRIPE_WEBHOOK_SECRET` in Vercel (it must be the LIVE endpoint's secret), then redeploy.
 
 ## 3. Apple Pay / Google Pay
 
 `automatic_payment_methods` is enabled, so cards, Apple Pay and Google Pay appear
 automatically when eligible. For Apple Pay on Safari, verify the domain in
-**Stripe → Settings → Payments → Payment methods → Apple Pay** (add `theaxismed.com`).
+**Stripe → Settings → Payments → Payment methods → Apple Pay** (add `www.theaxismed.com`).
 
 ## 4. Where payments are recorded
 

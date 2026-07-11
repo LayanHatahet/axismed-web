@@ -10,7 +10,7 @@ const pillars = [
     title: "Medical Education", tagline: "Train. Certify. Advance.",
     description: "We design and deliver accredited CME programs, cadaveric training workshops, simulation-based courses, and hands-on surgical training for healthcare professionals at every career stage. Every program is built around measurable clinical outcomes — not just attendance hours.",
     includes: ["Cadaveric Labs","CME Programs","Simulation Training","Surgical Workshops","Digital Courses"],
-    activities: ["Orthognathic Surgery Programs","Advanced Laparoscopy Workshops","Anatomy Dissection Labs","Specialty Masterclasses"],
+    activities: ["Orthopedic – CMF Surgery programs","Advanced Laparoscopy Workshops","Anatomy Dissection Labs","Specialty Masterclasses"],
     accent: "#8880b8", light: "#f0eef8",
   },
   {
@@ -38,6 +38,15 @@ const pillars = [
     accent: "#9d4ed6", light: "#f3eef9",
   },
 ];
+
+// Map each pillar to a real, existing route (the old auto-generated
+// /medical-education etc. slugs did not exist and 404'd).
+const PILLAR_HREFS: Record<string, string> = {
+  "Medical Education": "/courses",
+  "Scientific Events": "/events",
+  "Medical Media": "/media",
+  "Strategic Partnerships": "/partners",
+};
 
 export function CorePillars() {
   const [active, setActive] = useState(0);
@@ -136,7 +145,7 @@ export function CorePillars() {
 
                   <p className="leading-relaxed mb-8 text-[15px]" style={{ color: "#484575" }}>{p.description}</p>
 
-                  <a href={`/${p.title.toLowerCase().replace(/\s+/g, "-")}`}
+                  <a href={PILLAR_HREFS[p.title] ?? "/courses"}
                     className="inline-flex items-center gap-2 text-sm font-semibold group/link"
                     style={{ color: p.accent }}>
                     <span>Explore {p.title}</span>

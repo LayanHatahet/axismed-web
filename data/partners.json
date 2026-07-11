@@ -1,64 +1,28 @@
 [
   {
     "id": "p1",
+    "name": "Galmed",
+    "logo": "/images/partners/galmed.svg",
+    "category": "Industry Partner",
+    "website": "https://www.galmed-group.com",
+    "featured": true,
+    "description": "Regional partner supplying advanced surgical, regenerative, and diagnostic solutions to healthcare professionals across the UAE and the region."
+  },
+  {
+    "id": "p2",
+    "name": "AIM Academy",
+    "logo": "/images/partners/aim-academy.svg",
+    "category": "Scientific Collaborator",
+    "featured": true,
+    "description": "Medical education and hands-on clinical training collaborator."
+  },
+  {
+    "id": "p3",
     "name": "Materialise",
     "logo": "/images/partners/materialise.svg",
     "category": "Industry Partner",
     "website": "https://www.materialise.com",
     "featured": true,
     "description": "Global leader in 3D printing and personalised surgical planning, including virtual surgical planning and patient-specific guides."
-  },
-  {
-    "id": "p2",
-    "name": "aimaxademy",
-    "logo": "/images/partners/aimaxademy.svg",
-    "category": "Training Facility",
-    "featured": true,
-    "description": "Medical education and hands-on training partner."
-  },
-  {
-    "id": "p3",
-    "name": "ImplantSwiss",
-    "logo": "/images/partners/implantswiss.svg",
-    "category": "Industry Partner",
-    "website": "https://www.implantswiss.com",
-    "featured": true,
-    "description": "Swiss manufacturer of precision dental implant systems, engineered in Yverdon-les-Bains, Switzerland."
-  },
-  {
-    "id": "p4",
-    "name": "Abanza",
-    "logo": "/images/partners/abanza.png",
-    "category": "Industry Partner",
-    "website": "https://www.abanzamed.com",
-    "featured": true,
-    "description": "Biomedical innovator specialising in soft-tissue fixation and surgical device technology."
-  },
-  {
-    "id": "p5",
-    "name": "MCTBIO",
-    "logo": "/images/partners/mctbio.svg",
-    "category": "Industry Partner",
-    "website": "https://mctbio.com",
-    "featured": true,
-    "description": "Manufacturer of dental implants, surgical instruments and regenerative solutions."
-  },
-  {
-    "id": "p6",
-    "name": "Novomed",
-    "logo": "/images/partners/novomed.png",
-    "category": "Healthcare Institution",
-    "website": "https://www.novomed.com",
-    "featured": true,
-    "description": "Leading multi-specialty healthcare group with centres across the UAE and the region."
-  },
-  {
-    "id": "p7",
-    "name": "Maxxeus",
-    "logo": "/images/partners/maxxeus.png",
-    "category": "Industry Partner",
-    "website": "https://maxxeus.com",
-    "featured": true,
-    "description": "Provider of high-quality allograft and biologic solutions for dental and surgical procedures."
   }
 ]

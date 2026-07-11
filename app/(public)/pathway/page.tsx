@@ -18,12 +18,13 @@ const QUESTIONS: Question[] = [
     headline: "What is your primary surgical specialty?",
     sub: "We'll match programs built for your exact discipline.",
     options: [
-      { label: "Oral & Maxillofacial Surgery",   icon: "🦷", sub: "OMFS" },
-      { label: "CMF / Craniofacial Surgery",     icon: "🧠", sub: "Reconstruction & trauma" },
-      { label: "Implantology / Prosthodontics",  icon: "⚙️", sub: "Guided & digital implant" },
-      { label: "Robotic / MIS Surgery",          icon: "🤖", sub: "Minimally invasive" },
-      { label: "Digital Surgery",                icon: "💡", sub: "Technology-first practice" },
-      { label: "General Surgery",                icon: "🔬", sub: "Broad surgical practice" },
+      { label: "Orthopedic",                  icon: "🦴", sub: "Sport · Spine · Trauma · Arthroplasty · Regenerative" },
+      { label: "Oral & Maxillofacial / CMF",  icon: "🦷", sub: "OMFS · Craniofacial · Orthognathic" },
+      { label: "Aesthetic",                   icon: "✨", sub: "Dermatology · Plastic Surgery" },
+      { label: "ENT",                         icon: "👂", sub: "Otolaryngology" },
+      { label: "Cardiovascular",              icon: "🫀", sub: "Cardiac & vascular" },
+      { label: "Urology",                     icon: "🩺", sub: "Urological surgery" },
+      { label: "Ob-Gyne",                     icon: "🤰", sub: "Obstetrics & gynecology" },
     ],
   },
   {
@@ -382,10 +383,12 @@ export default function PathwayPage() {
                     AI Pathway Intelligence
                   </div>
                   <h1 className="text-3xl sm:text-4xl font-bold mb-3" style={{ color: "#12082C" }}>
-                    Find Your Pathway
+                    Find Your Learning Pathway
                   </h1>
-                  <p className="text-sm" style={{ color: "#726da0" }}>
-                    6 questions. A precision-matched program recommendation, built for you.
+                  <p className="text-sm max-w-lg mx-auto leading-relaxed" style={{ color: "#726da0" }}>
+                    Answer a few short questions about your specialty, clinical interests, and preferred
+                    learning format, and AxisMed will guide you toward the most relevant programmes,
+                    hands-on workshops, and educational opportunities.
                   </p>
                 </motion.div>
 

@@ -199,7 +199,7 @@ export function ContactMain() {
                 {[
                   { icon: Mail,   label: "Email",    value: "admin@theaxismed.com", href: "mailto:admin@theaxismed.com" },
                   { icon: Phone,  label: "Phone",    value: "+971 50 189 7038",    href: "tel:+971501897038" },
-                  { icon: MapPin, label: "Location", value: "Dubai Healthcare City, Dubai, UAE", href: "#" },
+                  { icon: MapPin, label: "Location", value: "Dubai Science Park, South Tower, Dubai, United Arab Emirates", href: "#" },
                   { icon: MessageCircle, label: "WhatsApp", value: "Message us directly", href: "https://wa.me/971501897038" },
                 ].map(({ icon: Icon, label, value, href }) => (
                   <a key={label} href={href} className="flex items-start gap-4 group">
@@ -219,9 +219,9 @@ export function ContactMain() {
               <h3 className="font-display text-lg font-bold text-white mb-4">Follow AxisMed</h3>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { Icon: Globe, href: "#", label: "Instagram" },
-                  { Icon: Link2, href: "#", label: "LinkedIn" },
-                  { Icon: Play,  href: "#", label: "YouTube" },
+                  { Icon: Globe, href: "https://instagram.com/axismed",         label: "Instagram" },
+                  { Icon: Link2, href: "https://linkedin.com/company/axismed",   label: "LinkedIn" },
+                  { Icon: Play,  href: "https://youtube.com/@axismed",           label: "YouTube" },
                 ].map(({ Icon, href, label }) => (
                   <a
                     key={label}

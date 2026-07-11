@@ -29,11 +29,20 @@ export function PartnersHero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.16 }}
-          className="text-text-secondary text-xl leading-relaxed"
+          className="text-text-secondary text-lg leading-relaxed"
         >
-          AxisMed collaborates with leading healthcare institutions, industry
-          partners, and medical experts to deliver impactful educational experiences
-          across the region.
+          AxisMed works with healthcare institutions, universities, professional societies,
+          clinical faculty, and industry organisations to develop and deliver high-quality
+          medical education programmes across the region.
+        </motion.p>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.22 }}
+          className="text-text-secondary text-lg leading-relaxed mt-4"
+        >
+          Our collaborations are built around practical learning, scientific relevance,
+          operational excellence, and meaningful professional engagement.
         </motion.p>
       </div>
     </section>

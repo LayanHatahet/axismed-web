@@ -47,8 +47,8 @@ export function EventsGrid({ events }: Props) {
       <section className="py-32 section-white">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <CalendarDays className="w-12 h-12 text-text-dim mx-auto mb-4" />
-          <h2 className="font-display text-2xl font-bold text-white mb-2">No events yet</h2>
-          <p className="text-text-muted">Check back soon â€” upcoming events will appear here.</p>
+          <h2 className="font-display text-2xl font-bold text-white mb-2">Upcoming events will be announced soon</h2>
+          <p className="text-text-muted">Our first programmes are being scheduled — please check back shortly.</p>
         </div>
       </section>
     );

@@ -8,23 +8,23 @@ import { BookOpen, Award, Handshake } from "lucide-react";
 const opportunities = [
   {
     icon: BookOpen,
-    title: "Sponsor a Course",
+    title: "Support Medical Education",
     description:
-      "Partner with AxisMed to sponsor an existing program or create a branded educational event. Reach hundreds of healthcare professionals with your brand and message in a credible, clinical context.",
-    cta: "Explore Sponsorship",
+      "Organisations can support independent educational programmes, hands-on training, and scientific initiatives designed to advance clinical knowledge and professional development.",
+    cta: "Start a Conversation",
   },
   {
     icon: Award,
-    title: "Organize Workshops",
+    title: "Design & Deliver Training Programmes",
     description:
-      "Leverage our network, facilities, and organizational expertise to run product training, clinical workshops, or investigator meetings in the region. We handle all logistics end to end.",
-    cta: "Plan a Workshop",
+      "AxisMed supports healthcare institutions and organisations in planning and delivering tailored workshops, clinical education programmes, surgical training, and professional meetings. Our team manages programme design, faculty coordination, participant experience, logistics, and delivery.",
+    cta: "Plan a Programme",
   },
   {
     icon: Handshake,
-    title: "Educational Partnerships",
+    title: "Strategic Educational Partnerships",
     description:
-      "Establish a long-term educational partnership with AxisMed for recurring programs, joint scientific initiatives, or digital content collaboration that builds sustained engagement.",
+      "We establish long-term collaborations for recurring educational programmes, scientific initiatives, regional faculty engagement, and medical content development.",
     cta: "Discuss Partnership",
   },
 ];
@@ -37,9 +37,9 @@ export function CollaborationOpportunities() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Work With Us"
-          title="Collaboration"
-          titleHighlight="Opportunities"
-          subtitle="Three ways your organization can work with AxisMed to deliver meaningful educational impact across the region."
+          title="How We"
+          titleHighlight="Collaborate"
+          subtitle="The ways organisations and institutions can work with AxisMed to develop and deliver meaningful medical education."
           className="mb-14"
         />
 
@@ -73,6 +73,22 @@ export function CollaborationOpportunities() {
             );
           })}
         </div>
+
+        {/* Our Commitment */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mt-16 max-w-3xl mx-auto text-center"
+        >
+          <h3 className="font-display text-2xl font-bold text-white mb-3">Our Commitment</h3>
+          <p className="text-text-secondary leading-relaxed">
+            AxisMed maintains a clear focus on educational value, clinical relevance, and responsible
+            collaboration. Each programme is designed to support healthcare professionals through
+            credible, practical, and outcome-focused learning experiences.
+          </p>
+        </motion.div>
       </div>
     </section>
   );

@@ -77,7 +77,7 @@ export const defaultContent: WebsiteContent = {
     email: "admin@theaxismed.com",
     phone: "+971 50 189 7038",
     whatsapp: "971501897038",
-    address: "Dubai Healthcare City, Dubai, UAE",
+    address: "Dubai Science Park, South Tower, Dubai, United Arab Emirates",
   },
   partners: {
     hero: {

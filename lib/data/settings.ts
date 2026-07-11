@@ -6,7 +6,7 @@ export const siteSettings: SiteSettings = {
   email: "admin@theaxismed.com",
   phone: "+971 50 189 7038",
   whatsapp: "+971 50 189 7038",
-  address: "Dubai Healthcare City",
+  address: "Dubai Science Park, South Tower",
   city: "Dubai",
   country: "United Arab Emirates",
   socialLinks: {

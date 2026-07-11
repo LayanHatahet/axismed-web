@@ -219,7 +219,7 @@ export function ContactMain() {
               <h3 className="font-display text-lg font-bold text-white mb-4">Follow AxisMed</h3>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { Icon: Globe, href: "https://instagram.com/axismed",         label: "Instagram" },
+                  { Icon: Globe, href: "https://www.instagram.com/theaxismed",   label: "Instagram" },
                   { Icon: Link2, href: "https://linkedin.com/company/axismed",   label: "LinkedIn" },
                   { Icon: Play,  href: "https://youtube.com/@axismed",           label: "YouTube" },
                 ].map(({ Icon, href, label }) => (

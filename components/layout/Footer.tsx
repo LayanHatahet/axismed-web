@@ -27,7 +27,7 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { Icon: Globe,   href: "https://instagram.com/axismed",        label: "Instagram" },
+  { Icon: Globe,   href: "https://www.instagram.com/theaxismed", label: "Instagram" },
   { Icon: Link2,   href: "https://linkedin.com/company/axismed", label: "LinkedIn" },
   { Icon: Share2,  href: "https://twitter.com/axismed",          label: "Twitter/X" },
   { Icon: Play,    href: "https://youtube.com/@axismed",         label: "YouTube" },

@@ -2,7 +2,7 @@
   {
     "id": "p1",
     "name": "Galmed",
-    "logo": "/images/partners/galmed.svg",
+    "logo": "/images/partners/galmed.png",
     "category": "Industry Partner",
     "website": "https://www.galmed-group.com",
     "featured": true,
@@ -24,5 +24,23 @@
     "website": "https://www.materialise.com",
     "featured": true,
     "description": "Global leader in 3D printing and personalised surgical planning, including virtual surgical planning and patient-specific guides."
+  },
+  {
+    "id": "p4",
+    "name": "Abanza",
+    "logo": "/images/partners/abanza.png",
+    "category": "Industry Partner",
+    "website": "https://www.abanzamed.com",
+    "featured": true,
+    "description": "Biomedical innovator specialising in soft-tissue fixation and surgical device technology."
+  },
+  {
+    "id": "p5",
+    "name": "MCTBIO",
+    "logo": "/images/partners/mctbio.svg",
+    "category": "Industry Partner",
+    "website": "https://mctbio.com",
+    "featured": true,
+    "description": "Manufacturer of dental implants, surgical instruments and regenerative solutions."
   }
 ]

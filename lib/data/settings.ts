@@ -10,7 +10,7 @@ export const siteSettings: SiteSettings = {
   city: "Dubai",
   country: "United Arab Emirates",
   socialLinks: {
-    instagram: "https://instagram.com/axismed",
+    instagram: "https://www.instagram.com/theaxismed",
     linkedin: "https://linkedin.com/company/axismed",
     twitter: "https://twitter.com/axismed",
     youtube: "https://youtube.com/@axismed",

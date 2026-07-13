@@ -53,9 +53,9 @@ export function WhoWeAre() {
                 initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
                 animate={isInView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
                 transition={{ duration: 0.45, delay: i * 0.032, ease: [0.22,1,0.36,1] }}
-                className="inline-block"
-                style={{ marginRight: "0.28em", color: HIGHLIGHT.has(word) ? "#8880b8" : "#12082C" }}>
-                {word}
+                className="inline-block whitespace-pre"
+                style={{ color: HIGHLIGHT.has(word) ? "#8880b8" : "#12082C" }}>
+                {i < WORDS.length - 1 ? word + " " : word}
               </motion.span>
             ))}
           </p>

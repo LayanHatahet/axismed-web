@@ -35,6 +35,18 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // On Vercel without Blob configured, fail with a clear message — the
+  // deployment filesystem is read-only, so the local write below would 500.
+  if (process.env.VERCEL) {
+    return NextResponse.json(
+      {
+        error:
+          "Image storage isn't configured yet. Connect a Vercel Blob store and add BLOB_READ_WRITE_TOKEN, then redeploy.",
+      },
+      { status: 503 }
+    );
+  }
+
   // Local dev — write into /public.
   const dir = path.join(process.cwd(), "public", folder);
   await mkdir(dir, { recursive: true });

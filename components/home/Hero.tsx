@@ -12,16 +12,15 @@ const HeroScene = dynamic(
 
 type Phase = "text" | "forming" | "complete";
 
-const TEXT_CUES = [
-  { text: "Three pillars.",                showAt:  400, hideAt: 1700 },
-  { text: "One ecosystem.",                showAt: 2000, hideAt: 3100 },
-  { text: "Courses.",                      showAt: 3300, hideAt: 4300 },
-  { text: "Media.",                        showAt: 4500, hideAt: 5450 },
-  { text: "Events.",                       showAt: 5650, hideAt: 6600 },
-  { text: "Connected through innovation.", showAt: 6800, hideAt: 7800 },
+// One intro scene: all lines shown together, then the logo draws.
+const INTRO_LINES = [
+  "Three pillars. One ecosystem.",
+  "Courses · Media · Events.",
+  "Connected through innovation.",
 ] as const;
 
-const ACTIVATE_MS = 8200;
+const TEXT_IN_MS  = 250;   // fade the whole block in
+const ACTIVATE_MS = 3250;  // ~3s of text on screen, then start the logo draw
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 const NAV_LINKS = [
@@ -33,7 +32,6 @@ const NAV_LINKS = [
 export function Hero() {
   const [phase,       setPhase]       = useState<Phase>("text");
   const [active,      setActive]      = useState(false);
-  const [currentText, setCurrentText] = useState("");
   const [textVisible, setTextVisible] = useState(false);
   const [mounted,     setMounted]     = useState(false);
 
@@ -43,14 +41,11 @@ export function Hero() {
 
   // 3D knot runs on all screen sizes — no mobile shortcut needed
 
-  /* ── Cinematic text intro ── */
+  /* ── Single-scene intro: all text together for ~3s, then the logo draws ── */
   useEffect(() => {
     const t: ReturnType<typeof setTimeout>[] = [];
-    TEXT_CUES.forEach(({ text, showAt, hideAt }) => {
-      t.push(setTimeout(() => { setCurrentText(text); setTextVisible(true);  }, showAt));
-      t.push(setTimeout(() => setTextVisible(false), hideAt));
-    });
-    t.push(setTimeout(() => { setPhase("forming"); setActive(true); }, ACTIVATE_MS));
+    t.push(setTimeout(() => setTextVisible(true), TEXT_IN_MS));
+    t.push(setTimeout(() => { setTextVisible(false); setPhase("forming"); setActive(true); }, ACTIVATE_MS));
     introTimers.current = t;
     return () => t.forEach(clearTimeout);
   }, []);
@@ -104,29 +99,30 @@ export function Hero() {
         }}
       />
 
-      {/* Cinematic text */}
+      {/* Cinematic text — one scene, all lines together */}
       <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none select-none">
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           {textVisible && !isComplete && (
-            <motion.p
-              key={currentText}
+            <motion.div
               initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
               animate={{ opacity: 1, y: 0,  filter: "blur(0px)"  }}
               exit={{    opacity: 0, y: -10, filter: "blur(6px)"  }}
-              transition={{ duration: 0.70, ease: EASE }}
-              className="text-center px-6"
+              transition={{ duration: 0.7, ease: EASE }}
+              className="text-center px-6 space-y-2"
               style={{
                 fontFamily:    "var(--font-display, Georgia, serif)",
                 fontSize:      "clamp(1.4rem, 5vw, 2.9rem)",
                 fontWeight:    300,
                 letterSpacing: "0.06em",
                 color:         "#F5F0FF",
-                lineHeight:    1.25,
+                lineHeight:    1.3,
                 textShadow:    "0 0 80px rgba(167,139,250,0.45), 0 2px 40px rgba(136,128,184,0.25)",
               }}
             >
-              {currentText}
-            </motion.p>
+              {INTRO_LINES.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
+            </motion.div>
           )}
         </AnimatePresence>
       </div>

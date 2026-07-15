@@ -20,7 +20,7 @@ const INTRO_LINES = [
 ] as const;
 
 const TEXT_IN_MS  = 250;   // fade the whole block in
-const ACTIVATE_MS = 3250;  // ~3s of text on screen, then start the logo draw
+const ACTIVATE_MS = 6250;  // ~6s of text on screen, then start the logo draw
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 const NAV_LINKS = [

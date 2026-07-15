@@ -13,9 +13,10 @@ const S        = 1.52;
 const SEG      = 600;
 const RIB_W    = 0.30;
 const RIB_T    = 0.052;
-const DRAW_SEC = 9.2;
-const BRANCH_S = 2.8;
+const DRAW_SEC = 5.0;   // faster logo draw-in (was 9.2)
+const BRANCH_S = 1.6;   // faster branch draw (was 2.8)
 const B_SEG    = 90;
+const INTRO_SPEED = 1.8; // speeds up the camera / scale / glow choreography to match
 // Shift whole scene down so knot doesn't overlap the navbar
 const Y_OFFSET = -1.2;
 
@@ -504,7 +505,7 @@ function Scene({
   const [branches,   setBranches]   = useState(false);
   const [showLabels, setShowLabels] = useState(false);
 
-  useFrame((_, dt) => { if (active) drawElapsed.current += dt; });
+  useFrame((_, dt) => { if (active) drawElapsed.current += dt * INTRO_SPEED; });
 
   const handleKnotDone = useCallback(() => {
     onKnotComplete();

@@ -13,10 +13,10 @@ const S        = 1.52;
 const SEG      = 600;
 const RIB_W    = 0.30;
 const RIB_T    = 0.052;
-const DRAW_SEC = 2.6;   // faster logo draw-in (was 9.2 → 5.0 → 3.5 → 2.6)
-const BRANCH_S = 0.9;   // faster branch draw
+const DRAW_SEC = 1.9;   // faster logo draw-in (9.2 → 5.0 → 3.5 → 2.6 → 1.9)
+const BRANCH_S = 0.7;   // faster branch draw
 const B_SEG    = 90;
-const INTRO_SPEED = 3.2; // speeds up the camera / scale / glow choreography to match
+const INTRO_SPEED = 4.2; // speeds up the camera / scale / glow choreography to match
 // Shift whole scene down so knot doesn't overlap the navbar
 const Y_OFFSET = -1.2;
 

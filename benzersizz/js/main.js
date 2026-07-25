@@ -2051,7 +2051,36 @@ const phoneState = {
   bizName: '', vibe: -1, genAt: 0, genDone: false, appBuilt: false, builtAt: 0, splashAt: 0,
   ordersStart: 0, orderSeq: 0, lastOrderAt: 0, orders: [], revenue: 0, revShown: 0,
   slideP: 0, slideDraw: 0, slideActive: false, ordered: false, orderedAt: 0,
+  // feel: lock screen, screen transitions, tap feedback, coach mark, arcade
+  lockState: 'locked', scanAt: 0, unlockAt: 0,
+  trans: null, fx: [], flash: null, everTapped: false,
+  game: null, gameBest: 0,
 };
+
+/* pointer position (−1..1) — tilts the handset and parallaxes the wallpaper */
+const phPointer = { x: 0, y: 0 };
+const phTilt = { x: 0, y: 0 };   // eased copy, applied per frame
+window.addEventListener('pointermove', (e) => {
+  phPointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+  phPointer.y = (e.clientY / window.innerHeight) * 2 - 1;
+}, { passive: true });
+
+/* offscreen buffers for iOS-style screen-to-screen transitions */
+let phBufA = null, phBufACtx = null, phBufB = null, phBufBCtx = null;
+function ensurePhoneBufs() {
+  if (phBufA) return;
+  [phBufA, phBufACtx] = makeCanvas(512, 1080);
+  [phBufB, phBufBCtx] = makeCanvas(512, 1080);
+}
+
+const PH_TRANS_MS = 360;
+/* navigate between screens with a slide; dir 1 = forward, −1 = back */
+function phoneGo(to, dir = 1) {
+  const ph = phoneState;
+  if (RM) { ph.app = to; ph.trans = null; return; }
+  if (ph.trans) ph.app = ph.trans.to;          // settle any in-flight transition
+  ph.trans = { from: ph.app, to, at: performance.now(), dir };
+}
 
 /* brand vibes the client picks from */
 const VIBES = [
@@ -2171,10 +2200,10 @@ function phoneIconTile(c, cx, cy, g0, g1) {
 function phoneIcons(c, ar, now) {
   const ph = phoneState;
   const spots = [
-    { act: 'shop', cx: 168, cy: 360, key: 'phone.app.shop' },
-    { act: 'bank', cx: 344, cy: 360, key: 'phone.app.bank' },
-    { act: 'book', cx: 168, cy: 600, key: 'phone.app.book' },
-    { act: 'yours', cx: 344, cy: 600, key: 'phone.app.yours' },
+    { act: 'shop', cx: 168, cy: 330, key: 'phone.app.shop' },
+    { act: 'bank', cx: 344, cy: 330, key: 'phone.app.bank' },
+    { act: 'book', cx: 168, cy: 545, key: 'phone.app.book' },
+    { act: 'yours', cx: 344, cy: 545, key: 'phone.app.yours' },
   ];
   for (const s of spots) {
     if (s.act === 'shop') {
@@ -2525,7 +2554,7 @@ function phoneBuilderGen(c, now, ar) {
   c.fillText(bizInitial(), PH_W / 2, 484);
   // rotating status lines
   const lines = ['phone.b.gen1', 'phone.b.gen2', 'phone.b.gen3', 'phone.b.gen4'];
-  const li = Math.min(lines.length - 1, Math.floor(el / 660));
+  const li = Math.min(lines.length - 1, Math.max(0, Math.floor(el / 660)));
   c.fillStyle = '#58ff8a';
   c.font = ar ? `700 25px ${AR_BODY}` : `600 20px ${MONO}`;
   c.fillText(i18n.t(lines[li]), PH_W / 2, 662);
@@ -2700,14 +2729,44 @@ function phoneHome(c, now, ar) {
   c.fillText(i18n.t('phone.hello'), PH_W / 2, 192);
   c.textAlign = 'left';
   const hots = phoneIcons(c, ar, now);
-  // demo caption — after the build, it celebrates THEIR app instead
+  // BENZ ARCADE — marching-ants banner card
+  const ay = 662;
+  roundedPath(c, 40, ay, PH_W - 80, 96, 24);
+  c.fillStyle = 'rgba(255,215,94,0.09)'; c.fill();
+  c.save();
+  c.setLineDash([12, 8]);
+  c.lineDashOffset = RM ? 0 : -now / 40;
+  c.strokeStyle = '#ffd75e'; c.lineWidth = 2.5;
+  roundedPath(c, 40, ay, PH_W - 80, 96, 24); c.stroke();
+  c.restore();
+  const jx = ar ? PH_W - 92 : 92;
+  c.fillStyle = '#ffd75e';
+  roundedPath(c, jx - 22, ay + 60, 44, 12, 6); c.fill();
+  c.fillRect(jx - 4, ay + 36, 8, 26);
+  c.beginPath(); c.arc(jx, ay + 32, 11, 0, Math.PI * 2); c.fill();
+  c.fillStyle = '#ffe9b0';
+  const gcTxt = i18n.t('phone.game.card');
+  fitFont(c, gcTxt, PH_W - 200, ar ? 22 : 17, ar ? 700 : 600, ar ? AR_BODY : MONO, 11);
   c.textAlign = 'center';
-  c.fillStyle = ph.appBuilt ? '#58ff8a' : 'rgba(143,181,227,0.85)';
-  c.font = ar ? `700 21px ${AR_BODY}` : `600 17px ${MONO}`;
-  const cap = ph.appBuilt
-    ? `${ph.bizName.trim()} ${i18n.t('phone.hint.built')}`
-    : i18n.t('phone.demo');
+  c.fillText(gcTxt, PH_W / 2 + (ar ? -32 : 32), ay + 56);
+  hots.push({ x: 40, y: ay, w: PH_W - 80, h: 96, act: 'game', label: i18n.t('phone.game.title') });
+  // demo caption — coaches first, then celebrates THEIR app
+  const coach = !ph.everTapped && ph.unlockAt > 0 && now - ph.unlockAt > 4500;
+  if (coach && !RM) {
+    // pulsing ring around the first icon: "this is tappable"
+    const pr = 66 + Math.sin(now / 260) * 8;
+    c.strokeStyle = `rgba(88,255,138,${(0.5 + 0.3 * Math.sin(now / 260)).toFixed(2)})`;
+    c.lineWidth = 4;
+    c.beginPath(); c.arc(168, 330, pr, 0, Math.PI * 2); c.stroke();
+  }
+  c.fillStyle = coach ? '#58ff8a' : ph.appBuilt ? '#58ff8a' : 'rgba(143,181,227,0.85)';
+  const cap = coach
+    ? i18n.t('phone.coach')
+    : ph.appBuilt
+      ? `${ph.bizName.trim()} ${i18n.t('phone.hint.built')}`
+      : i18n.t('phone.demo');
   fitFont(c, cap, PH_W - 60, ar ? 21 : 17, ar ? 700 : 600, ar ? AR_BODY : MONO, 12);
+  c.textAlign = 'center';
   c.fillText(cap, PH_W / 2, 830);
   // dock — the standing offer
   roundedPath(c, 40, 880, PH_W - 80, 82, 41);
@@ -2756,6 +2815,200 @@ function phoneHome(c, now, ar) {
   return hots;
 }
 
+/* ---- lock screen with the Face-ID-for-seriousness gag ---- */
+function phoneLock(c, now, ar) {
+  const ph = phoneState;
+  const bg = c.createLinearGradient(0, 0, 0, PH_H);
+  bg.addColorStop(0, '#121a26'); bg.addColorStop(0.55, '#0b1118'); bg.addColorStop(1, '#151d29');
+  c.fillStyle = bg; c.fillRect(0, 0, PH_W, PH_H);
+  c.fillStyle = 'rgba(122,166,214,0.05)';
+  c.font = `400 430px ${DISPLAY}`;
+  c.textAlign = 'center';
+  c.fillText('b', PH_W / 2, 780);
+  const d = new Date();
+  if (ph.lockState === 'scan') {
+    // scanning ring: rotating arc + dots + verdict
+    const el = now - ph.scanAt;
+    const ok = el > 700;
+    c.strokeStyle = ok ? '#58ff8a' : '#8fb5e3';
+    c.lineWidth = 7; c.lineCap = 'round';
+    c.beginPath();
+    if (ok) c.arc(PH_W / 2, 440, 96, 0, Math.PI * 2);
+    else c.arc(PH_W / 2, 440, 96, now / 180, now / 180 + 4.2);
+    c.stroke();
+    if (ok) {
+      c.beginPath();
+      c.moveTo(PH_W / 2 - 40, 440); c.lineTo(PH_W / 2 - 10, 474); c.lineTo(PH_W / 2 + 46, 404);
+      c.lineWidth = 11; c.stroke();
+    } else {
+      for (let i = 0; i < 5; i++) {
+        c.fillStyle = `rgba(143,181,227,${(0.25 + 0.7 * Math.abs(Math.sin(now / 200 + i))).toFixed(2)})`;
+        c.beginPath(); c.arc(PH_W / 2 - 44 + i * 22, 440, 5, 0, Math.PI * 2); c.fill();
+      }
+    }
+    c.fillStyle = ok ? '#58ff8a' : '#8fb5e3';
+    c.font = ar ? `700 25px ${AR_BODY}` : `600 20px ${MONO}`;
+    c.fillText(i18n.t(ok ? 'phone.lock.ok' : 'phone.lock.scan'), PH_W / 2, 616);
+    c.textAlign = 'left';
+    if (el > 1250) {
+      ph.lockState = 'open';
+      ph.unlockAt = now;
+      sound.chime();
+    }
+    return [];
+  }
+  // big clock + date
+  const hh = String(d.getHours()).padStart(2, '0'), mm = String(d.getMinutes()).padStart(2, '0');
+  c.fillStyle = '#eef4fb';
+  c.font = `400 110px ${DISPLAY}`;
+  c.fillText(`${hh}:${mm}`, PH_W / 2, 330);
+  c.fillStyle = '#8fb5e3';
+  let dateLine = '';
+  try { dateLine = d.toLocaleDateString(ar ? 'ar' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' }); } catch {}
+  c.font = ar ? `700 26px ${AR_BODY}` : `600 20px ${MONO}`;
+  c.fillText(dateLine, PH_W / 2, 386);
+  // one teasing notification card
+  roundedPath(c, 40, 470, PH_W - 80, 96, 24);
+  c.fillStyle = 'rgba(255,255,255,0.07)'; c.fill();
+  c.strokeStyle = 'rgba(143,181,227,0.35)'; c.lineWidth = 2; c.stroke();
+  c.fillStyle = '#ffd75e';
+  c.font = `700 28px ${MONO}`;
+  c.fillText('●', ar ? PH_W - 76 : 76, 528);
+  c.fillStyle = '#f6f1e6';
+  const nsub = i18n.t('phone.lock.sub');
+  fitFont(c, nsub, PH_W - 190, ar ? 22 : 17, ar ? 700 : 600, ar ? AR_BODY : MONO, 12);
+  c.textAlign = ar ? 'right' : 'left';
+  c.fillText(nsub, ar ? PH_W - 108 : 108, 526);
+  // pulsing unlock hint
+  c.textAlign = 'center';
+  c.globalAlpha = 0.55 + 0.4 * Math.sin(now / 320);
+  c.fillStyle = '#58ff8a';
+  c.font = ar ? `800 27px ${AR_BODY}` : `700 23px ${MONO}`;
+  c.fillText(i18n.t('phone.lock.unlock'), PH_W / 2, 870);
+  c.globalAlpha = 1;
+  c.fillText('▲', PH_W / 2, 920);
+  c.textAlign = 'left';
+  return [{ x: 20, y: 80, w: PH_W - 40, h: 940, act: 'unlock', label: i18n.t('phone.lock.unlock') }];
+}
+
+/* ---- BENZ ARCADE: catch the golden floppies ---- */
+const GAME_MS = 20000;
+function phoneGame(c, now, ar) {
+  const ph = phoneState;
+  if (!ph.game) ph.game = { t0: now + 500, score: 0, items: [], nextAt: now + 900, over: false, seed: (now | 0) % 2147483 + 7 };
+  const g = ph.game;
+  const hots = [phoneAppHeader(c, 'phone.game.title', ar)];
+  const played = now - g.t0;
+  const left = Math.max(0, GAME_MS - played);
+  if (g.over) {
+    c.textAlign = 'center';
+    c.fillStyle = '#8fb5e3';
+    c.font = ar ? `700 24px ${AR_BODY}` : `600 19px ${MONO}`;
+    c.fillText(i18n.t('phone.game.over'), PH_W / 2, 250);
+    c.fillStyle = '#ffd75e';
+    c.font = `400 96px ${DISPLAY}`;
+    c.fillText(String(g.score), PH_W / 2, 380);
+    c.fillStyle = '#eafff0';
+    c.font = ar ? `700 26px ${AR_BODY}` : `600 20px ${MONO}`;
+    c.fillText(i18n.t('phone.game.grade'), PH_W / 2, 450);
+    c.fillStyle = 'rgba(234,255,240,0.6)';
+    c.font = ar ? `600 22px ${AR_BODY}` : `500 17px ${MONO}`;
+    c.fillText(`${i18n.t('phone.game.best')}: ${ph.gameBest}`, PH_W / 2, 500);
+    // claim prize (real WhatsApp link) + play again
+    roundedPath(c, 72, 590, PH_W - 144, 84, 42);
+    const gg = c.createLinearGradient(72, 590, PH_W - 72, 674);
+    gg.addColorStop(0, '#ffd75e'); gg.addColorStop(1, '#d9a441');
+    c.fillStyle = gg; c.fill();
+    c.fillStyle = '#241c10';
+    c.font = ar ? `800 27px ${AR_BODY}` : `700 24px ${MONO}`;
+    c.fillText(i18n.t('phone.game.claim'), PH_W / 2, 644);
+    roundedPath(c, 132, 716, PH_W - 264, 72, 36);
+    c.strokeStyle = '#58ff8a'; c.lineWidth = 3; c.stroke();
+    c.fillStyle = '#baffd0';
+    c.font = ar ? `700 24px ${AR_BODY}` : `600 20px ${MONO}`;
+    c.fillText(i18n.t('phone.game.again'), PH_W / 2, 762);
+    c.textAlign = 'left';
+    hots.push({ x: 72, y: 578, w: PH_W - 144, h: 108, act: 'order', label: i18n.t('phone.game.claim'), link: true });
+    hots.push({ x: 132, y: 704, w: PH_W - 264, h: 96, act: 'again', label: i18n.t('phone.game.again') });
+    return hots;
+  }
+  // HUD
+  c.textAlign = ar ? 'right' : 'left';
+  c.fillStyle = '#8fb5e3';
+  c.font = ar ? `700 21px ${AR_BODY}` : `600 17px ${MONO}`;
+  c.fillText(i18n.t('phone.game.score'), ar ? PH_W - 48 : 48, 188);
+  c.fillStyle = '#ffd75e';
+  c.font = `700 40px ${MONO}`;
+  c.fillText(String(g.score), ar ? PH_W - 48 : 48, 234);
+  c.textAlign = ar ? 'left' : 'right';
+  c.fillStyle = '#8fb5e3';
+  c.font = ar ? `700 21px ${AR_BODY}` : `600 17px ${MONO}`;
+  c.fillText(i18n.t('phone.game.time'), ar ? 48 : PH_W - 48, 188);
+  c.fillStyle = '#eafff0';
+  c.font = `700 40px ${MONO}`;
+  c.fillText((left / 1000).toFixed(1), ar ? 48 : PH_W - 48, 234);
+  c.textAlign = 'left';
+  roundedPath(c, 48, 252, PH_W - 96, 10, 5);
+  c.fillStyle = 'rgba(255,255,255,0.1)'; c.fill();
+  roundedPath(c, 48, 252, Math.max(10, (PH_W - 96) * (left / GAME_MS)), 10, 5);
+  c.fillStyle = left < 5000 ? '#ff6b5e' : '#58ff8a'; c.fill();
+  if (played < 0) {
+    c.textAlign = 'center';
+    c.fillStyle = '#ffd75e';
+    c.font = ar ? `800 34px ${AR_DISPLAY}` : `400 30px ${DISPLAY}`;
+    c.fillText(i18n.t('phone.game.go'), PH_W / 2, 540);
+    c.textAlign = 'left';
+    return hots;
+  }
+  // spawn + fall
+  const ramp = 1 + (played / GAME_MS) * 1.5;
+  if (now >= g.nextAt && g.items.filter((i) => !i.hit).length < 3) {
+    g.seed = (g.seed * 16807) % 2147483647;
+    g.items.push({
+      id: g.seed, x: 96 + (g.seed % 320), y: 300,
+      v: (0.14 + ((g.seed >> 4) % 10) * 0.014) * ramp,
+      rot: (g.seed % 628) / 100, hit: false,
+    });
+    g.nextAt = now + Math.max(380, 860 - played * 0.02);
+  }
+  const dt = Math.min(60, ph.lastNow ? now - ph.lastNow : 16);
+  for (const it of g.items) if (!it.hit) { it.y += it.v * dt; it.rot += dt * 0.001; }
+  g.items = g.items.filter((it) => !it.hit && it.y < 1000);
+  for (const it of g.items) {
+    c.save();
+    c.translate(it.x, it.y);
+    c.rotate(RM ? 0 : Math.sin(it.rot) * 0.3);
+    roundedPath(c, -44, -44, 88, 88, 10);
+    c.fillStyle = '#d4a017'; c.fill();
+    c.fillStyle = '#c9c9c9'; c.fillRect(-20, -40, 40, 30);
+    c.fillStyle = '#17130e'; c.fillRect(-6, -36, 12, 22);
+    c.fillStyle = '#f3ead8'; c.fillRect(-32, 4, 64, 34);
+    c.restore();
+    hots.push({ x: it.x - 58, y: it.y - 58, w: 116, h: 116, act: 'fc' + it.id, label: 'floppy' });
+  }
+  if (left <= 0) {
+    g.over = true;
+    g.items = [];
+    ph.gameBest = Math.max(ph.gameBest, g.score);
+    sound.chime();
+  }
+  return hots;
+}
+
+/* screen router — lets transitions render any two screens into buffers */
+function phoneScreenPaint(name, c, now, ar) {
+  if (name === 'home') return phoneHome(c, now, ar);
+  if (name === 'shop') return phoneShop(c, now, ar);
+  if (name === 'bank') return phoneBank(c, now, ar);
+  if (name === 'book') return phoneBook(c, now, ar);
+  if (name === 'b-name') return phoneBuilderName(c, now, ar);
+  if (name === 'b-color') return phoneBuilderColor(c, now, ar);
+  if (name === 'b-gen') return phoneBuilderGen(c, now, ar);
+  if (name === 'myapp') return phoneMyApp(c, now, ar);
+  if (name === 'game') return phoneGame(c, now, ar);
+  return [];
+}
+
 function drawPhoneUI(t, now) {
   const c = phoneCtx, ar = i18n.lang === 'ar';
   const ph = phoneState;
@@ -2769,35 +3022,95 @@ function drawPhoneUI(t, now) {
   let hots = [];
   if (boot < 1) {
     drawPhoneBoot(c, boot, ar);
+  } else if (ph.lockState !== 'open') {
+    hots = phoneLock(c, now, ar);
   } else {
+    // wallpaper — parallaxes gently with the handset tilt
     const bg = c.createLinearGradient(0, 0, 0, PH_H);
     bg.addColorStop(0, '#111823'); bg.addColorStop(0.5, '#0b1118'); bg.addColorStop(1, '#141b26');
     c.fillStyle = bg; c.fillRect(0, 0, PH_W, PH_H);
-    // faint monogram wallpaper
     c.fillStyle = 'rgba(122,166,214,0.05)';
     c.font = `400 430px ${DISPLAY}`;
     c.textAlign = 'center';
-    c.fillText('b', PH_W / 2, 760);
+    c.fillText('b', PH_W / 2 - phTilt.x * 22, 760 - phTilt.y * 16);
     c.textAlign = 'left';
+    if (ph.trans) {
+      // iOS-style push: old screen eases out 30% and dims, new one slides in
+      const e = smooth(0, 1, clamp01((now - ph.trans.at) / PH_TRANS_MS));
+      ensurePhoneBufs();
+      phBufACtx.clearRect(0, 0, PH_W, PH_H);
+      phBufBCtx.clearRect(0, 0, PH_W, PH_H);
+      try { phBufACtx.direction = c.direction; phBufBCtx.direction = c.direction; } catch {}
+      phoneScreenPaint(ph.trans.from, phBufACtx, now, ar);
+      phoneScreenPaint(ph.trans.to, phBufBCtx, now, ar);
+      const d = (ar ? -1 : 1) * (ph.trans.dir < 0 ? -1 : 1);
+      c.save();
+      c.translate(-d * e * PH_W * 0.3, 0);
+      c.drawImage(phBufA, 0, 0);
+      c.restore();
+      c.fillStyle = `rgba(0,0,0,${(0.4 * e).toFixed(2)})`;
+      c.fillRect(0, 0, PH_W, PH_H);
+      c.save();
+      c.translate(d * (1 - e) * PH_W, 0);
+      c.drawImage(phBufB, 0, 0);
+      c.restore();
+      if (now - ph.trans.at >= PH_TRANS_MS) { ph.app = ph.trans.to; ph.trans = null; }
+    } else {
+      hots = phoneScreenPaint(ph.app, c, now, ar);
+    }
+    // the unlock reveal: the lock screen lifts away like a curtain
+    if (ph.unlockAt && now - ph.unlockAt < 420 && !RM) {
+      const e = smooth(0, 1, (now - ph.unlockAt) / 420);
+      ensurePhoneBufs();
+      phBufACtx.clearRect(0, 0, PH_W, PH_H);
+      const saved = ph.lockState;
+      ph.lockState = 'locked';
+      phoneLock(phBufACtx, now, ar);
+      ph.lockState = saved;
+      c.drawImage(phBufA, 0, -e * PH_H);
+      hots = [];
+    }
     phoneStatusBar(c, now, ar);
-    if (ph.app === 'home') hots = phoneHome(c, now, ar);
-    else if (ph.app === 'shop') hots = phoneShop(c, now, ar);
-    else if (ph.app === 'bank') hots = phoneBank(c, now, ar);
-    else if (ph.app === 'book') hots = phoneBook(c, now, ar);
-    else if (ph.app === 'b-name') hots = phoneBuilderName(c, now, ar);
-    else if (ph.app === 'b-color') hots = phoneBuilderColor(c, now, ar);
-    else if (ph.app === 'b-gen') hots = phoneBuilderGen(c, now, ar);
-    else if (ph.app === 'myapp') hots = phoneMyApp(c, now, ar);
     // home indicator
     roundedPath(c, PH_W / 2 - 80, 1040, 160, 8, 4);
     c.fillStyle = 'rgba(246,241,230,0.28)'; c.fill();
   }
-  // punch-hole camera + glass sheen
+  // tap feedback: ripples, control flash, floppy bursts
+  if (ph.fx.length || ph.flash) {
+    ph.fx = ph.fx.filter((f) => now - f.at < 520);
+    for (const f of ph.fx) {
+      const a = (now - f.at) / (f.type === 'burst' ? 520 : 420);
+      if (a >= 1) continue;
+      if (f.type === 'burst') {
+        for (let i = 0; i < 8; i++) {
+          const ang = (i / 8) * Math.PI * 2;
+          const r = 14 + a * 120;
+          c.fillStyle = i % 2 ? `rgba(255,215,94,${(1 - a).toFixed(2)})` : `rgba(244,241,234,${(1 - a).toFixed(2)})`;
+          c.fillRect(f.x + Math.cos(ang) * r - 5, f.y + Math.sin(ang) * r - 5, 10, 10);
+        }
+      } else {
+        c.strokeStyle = `rgba(255,255,255,${(0.4 * (1 - a)).toFixed(2)})`;
+        c.lineWidth = 3;
+        c.beginPath(); c.arc(f.x, f.y, 22 + a * 130, 0, Math.PI * 2); c.stroke();
+      }
+    }
+    if (ph.flash) {
+      const a = (now - ph.flash.at) / 240;
+      if (a >= 1) ph.flash = null;
+      else {
+        roundedPath(c, ph.flash.x, ph.flash.y, ph.flash.w, ph.flash.h, 20);
+        c.fillStyle = `rgba(255,255,255,${(0.22 * (1 - a)).toFixed(2)})`;
+        c.fill();
+      }
+    }
+  }
+  // punch-hole camera + glass sheen (sheen follows the tilt)
   c.beginPath(); c.arc(PH_W / 2, 40, 11, 0, Math.PI * 2);
   c.fillStyle = '#020304'; c.fill();
   c.strokeStyle = 'rgba(255,255,255,0.14)'; c.lineWidth = 2; c.stroke();
-  const sheen = c.createLinearGradient(0, 0, PH_W, PH_H * 0.7);
-  sheen.addColorStop(0, 'rgba(255,255,255,0.035)');
+  const shx = phTilt.x * 160;
+  const sheen = c.createLinearGradient(shx, 0, PH_W + shx, PH_H * 0.7);
+  sheen.addColorStop(0, 'rgba(255,255,255,0.045)');
   sheen.addColorStop(0.4, 'rgba(255,255,255,0)');
   c.fillStyle = sheen;
   c.fillRect(0, 0, PH_W, PH_H);
@@ -2820,7 +3133,10 @@ function ensurePhoneHots() {
     b.className = 'ph-hot';
     b.addEventListener('click', (e) => {
       e.stopPropagation();
-      phoneTap(b.dataset.act || '');
+      phoneTap(b.dataset.act || '', {
+        x: +b.dataset.rx || 0, y: +b.dataset.ry || 0,
+        w: +b.dataset.rw || 0, h: +b.dataset.rh || 0,
+      });
     });
     document.body.appendChild(b);
     PH_POOL.push(b);
@@ -2900,41 +3216,66 @@ function ensurePhoneExtras() {
   document.body.appendChild(phSlide);
 }
 
-function phoneTap(act) {
+function phoneTap(act, rect) {
   const ph = phoneState;
   sound.unlock();
   ph.battery = Math.min(100, ph.battery + 1);
   ph.boltAt = performance.now();
+  if (act !== 'unlock') ph.everTapped = true;
+  // instant feedback: ripple from the tapped spot + a quick flash on the control
+  if (rect && !RM) {
+    ph.fx.push({ type: 'ripple', x: rect.x + rect.w / 2, y: rect.y + rect.h / 2, at: performance.now() });
+    ph.flash = { ...rect, at: performance.now() };
+  }
+  if (act.startsWith('fc') && ph.game && !ph.game.over) {
+    const id = +act.slice(2);
+    const it = ph.game.items.find((i) => i.id === id && !i.hit);
+    if (it) {
+      it.hit = true;
+      ph.game.score += 100;
+      ph.fx.push({ type: 'burst', x: it.x, y: it.y, at: performance.now() });
+      if (ph.game.score % 500 === 0) sound.chime(); else sound.key();
+    }
+    return;
+  }
   switch (act) {
+    case 'unlock':
+      if (ph.lockState === 'locked') { ph.lockState = 'scan'; ph.scanAt = performance.now(); sound.key(); }
+      break;
     case 'shop': case 'bank': case 'book':
-      ph.app = act; sound.flip(); break;
+      phoneGo(act); sound.flip(); break;
+    case 'game':
+      ph.game = null; phoneGo('game'); sound.flip(); break;
+    case 'again':
+      ph.game = null; sound.flip(); break;
     case 'yours':
       // the vacant icon starts the builder; once built it opens THEIR app
-      if (ph.appBuilt) { ph.app = 'myapp'; }
-      else { ph.app = 'b-name'; ensurePhoneExtras(); if (phInput) phInput.focus(); }
+      if (ph.appBuilt) { phoneGo('myapp'); }
+      else { phoneGo('b-name'); ensurePhoneExtras(); if (phInput) phInput.focus(); }
       sound.flip();
       break;
     case 'bnext':
       if (ph.bizName.trim().length >= 2) {
-        ph.app = 'b-color'; sound.flip();
+        phoneGo('b-color'); sound.flip();
         if (phInput) phInput.blur();
       }
       break;
     case 'vibe0': case 'vibe1': case 'vibe2':
       ph.vibe = +act[4];
-      ph.app = 'b-gen'; ph.genAt = performance.now(); ph.genDone = false;
+      ph.genAt = performance.now() + PH_TRANS_MS; ph.genDone = false;
+      phoneGo('b-gen');
       sound.flip();
       break;
     case 'back':
-      ph.app = 'home'; ph.checkoutAt = 0; sound.flip();
+      ph.checkoutAt = 0; phoneGo('home', -1); sound.flip();
       if (phInput) phInput.blur();
       break;
     case 'notif':
-      if (ph.notifKind === 2) { ph.app = 'myapp'; ph.notifUsed2 = true; }
+      if (ph.notifKind === 2) { phoneGo('myapp'); ph.notifUsed2 = true; }
       else {
         ph.notifUsed1 = true;
-        if (ph.appBuilt) ph.app = 'myapp';
-        else { ph.app = 'b-name'; ensurePhoneExtras(); if (phInput) phInput.focus(); }
+        if (ph.appBuilt) phoneGo('myapp');
+        else { phoneGo('b-name'); ensurePhoneExtras(); if (phInput) phInput.focus(); }
       }
       ph.notifOn = false; sound.flip();
       break;
@@ -2965,10 +3306,10 @@ function placePhoneRect(el, bx, by, bw, bh) {
   const x1 = (v3pa.x * 0.5 + 0.5) * window.innerWidth, y1 = (-v3pa.y * 0.5 + 0.5) * window.innerHeight;
   const x2 = (v3pb.x * 0.5 + 0.5) * window.innerWidth, y2 = (-v3pb.y * 0.5 + 0.5) * window.innerHeight;
   el.style.display = 'block';
-  el.style.left = `${Math.min(x1, x2).toFixed(0)}px`;
-  el.style.top = `${Math.min(y1, y2).toFixed(0)}px`;
-  el.style.width = `${Math.abs(x2 - x1).toFixed(0)}px`;
-  el.style.height = `${Math.abs(y2 - y1).toFixed(0)}px`;
+  el.style.left = `${(Math.min(x1, x2) - 6).toFixed(0)}px`;      // padded hit area
+  el.style.top = `${(Math.min(y1, y2) - 6).toFixed(0)}px`;
+  el.style.width = `${(Math.abs(x2 - x1) + 12).toFixed(0)}px`;
+  el.style.height = `${(Math.abs(y2 - y1) + 12).toFixed(0)}px`;
 }
 
 function hidePhoneHots() {
@@ -3038,9 +3379,12 @@ function updatePhoneScene(pt, t, now) {
   const lift = smooth(0.045, 0.2, pt) * (1 - smooth(0.86, 0.975, pt));
   const bob = RM ? 0 : Math.sin(t * 1.3) * 0.008 * lift;
   const sway = RM ? 0 : Math.sin(t * 0.6) * 0.009 * lift;
+  // the handset leans toward the cursor — it feels touchable before you touch it
+  phTilt.x = lerp(phTilt.x, RM ? 0 : phPointer.x, 0.06);
+  phTilt.y = lerp(phTilt.y, RM ? 0 : phPointer.y, 0.06);
   phoneGroup.position.y = lerp(PHONE_LIE_Y, PHONE_HOVER_Y, lift) + bob;
-  phoneGroup.rotation.x = lerp(Math.PI / 2, 0, lift);
-  phoneGroup.rotation.y = (RM ? 0 : lerp(-Math.PI * 2, 0, lift)) + sway;
+  phoneGroup.rotation.x = lerp(Math.PI / 2, 0, lift) - phTilt.y * 0.045 * lift;
+  phoneGroup.rotation.y = (RM ? 0 : lerp(-Math.PI * 2, 0, lift)) + sway + phTilt.x * 0.085 * lift;
   // lights breathe with the levitation
   phonePadLight.intensity = lift * 5 + (RM ? 0 : Math.sin(t * 2.2) * 0.4 * lift);
   phonePadRing.material.opacity = 0.22 + lift * 0.3 + (RM ? 0 : Math.sin(t * 2.2) * 0.08 * lift);
@@ -3063,6 +3407,7 @@ function updatePhoneScene(pt, t, now) {
       const b = PH_POOL[bi++];
       if (!b) continue;
       b.dataset.act = h.act;
+      b.dataset.rx = h.x; b.dataset.ry = h.y; b.dataset.rw = h.w; b.dataset.rh = h.h;
       b.setAttribute('aria-label', h.label || h.act);
       placePhoneRect(b, h.x, h.y, h.w, h.h);
     }

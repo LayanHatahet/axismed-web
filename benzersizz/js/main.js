@@ -2045,9 +2045,34 @@ const phoneState = {
   app: 'home', wakeAt: 0, awake: false,
   cart: 0, added: {}, checkoutAt: 0,
   balance: 1984000, lastNow: 0, wireAt: 0, wirePaid: false, wireChimed: false,
-  booked: -1, notifOn: false, notifUsed: false, notifShownAt: 0,
+  booked: -1, notifOn: false, notifKind: 1, notifShownAt: 0, notifUsed1: false, notifUsed2: false,
   battery: 84, boltAt: 0,
+  // the app builder — the client's own app, made before their eyes
+  bizName: '', vibe: -1, genAt: 0, genDone: false, appBuilt: false, builtAt: 0, splashAt: 0,
+  ordersStart: 0, orderSeq: 0, lastOrderAt: 0, orders: [], revenue: 0, revShown: 0,
+  slideP: 0, slideDraw: 0, slideActive: false, ordered: false, orderedAt: 0,
 };
+
+/* brand vibes the client picks from */
+const VIBES = [
+  { g0: '#2fbf71', g1: '#0e8f6f' },   // fresh
+  { g0: '#4a79ab', g1: '#2b4d84' },   // corporate
+  { g0: '#d9a441', g1: '#8a6420' },   // luxury
+];
+const vibeOf = () => VIBES[Math.max(0, phoneState.vibe)];
+const bizInitial = () => (phoneState.bizName.trim()[0] || 'B').toUpperCase();
+
+/* canvas rects that real DOM controls must sit on */
+const PH_NAME_FIELD = { x: 48, y: 330, w: 416, h: 96 };
+const PH_SLIDE_RECT = { x: 48, y: 880, w: 416, h: 84 };
+
+function phoneWaLink() {
+  const n = phoneState.bizName.trim();
+  const msg = n
+    ? `Hello BENZERSIZ — I want an app for "${n}".`
+    : 'Hello BENZERSIZ — I want an app like this.';
+  return 'https://wa.me/905343388448?text=' + encodeURIComponent(msg);
+}
 
 function roundedPath(c, x, y, w, h, r) {
   c.beginPath();
@@ -2174,6 +2199,22 @@ function phoneIcons(c, ar, now) {
       c.fillStyle = '#a9722a';
       for (let r = 0; r < 2; r++) for (let q = 0; q < 3; q++)
         c.fillRect(s.cx - 20 + q * 17, s.cy + 2 + r * 13, 9, 8);
+    } else if (ph.appBuilt) {
+      // the client's own app now lives in the once-vacant slot
+      const v = vibeOf();
+      const g = c.createLinearGradient(s.cx - 59, s.cy - 59, s.cx + 59, s.cy + 59);
+      g.addColorStop(0, v.g0); g.addColorStop(1, v.g1);
+      roundedPath(c, s.cx - 59, s.cy - 59, 118, 118, 30);
+      c.fillStyle = g; c.fill();
+      c.fillStyle = '#ffffff';
+      c.font = `400 58px ${DISPLAY}`; c.textAlign = 'center';
+      c.fillText(bizInitial(), s.cx, s.cy + 20);
+      // a "1" badge — their first customer is already waiting
+      if (!ph.ordered) {
+        c.fillStyle = '#ff5e4d'; c.beginPath(); c.arc(s.cx + 46, s.cy - 46, 18, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#fff'; c.font = `700 20px ${MONO}`;
+        c.fillText('1', s.cx + 46, s.cy - 39);
+      }
     } else {
       // the vacant slot — dashed, waiting for the client's logo
       c.save();
@@ -2187,13 +2228,16 @@ function phoneIcons(c, ar, now) {
       c.fillText('+', s.cx, s.cy + 18);
     }
     c.fillStyle = '#dfe9f5';
-    const lbl = i18n.t(s.key);
-    c.font = ar ? `700 22px ${AR_BODY}` : `600 19px ${MONO}`;
+    const lbl = s.act === 'yours' && ph.appBuilt ? ph.bizName.trim() : i18n.t(s.key);
+    fitFont(c, lbl, 150, ar ? 22 : 19, ar ? 700 : 600, ar ? AR_BODY : MONO, 12);
     c.textAlign = 'center';
     c.fillText(lbl, s.cx, s.cy + 96);
   }
   c.textAlign = 'left';
-  return spots.map((s) => ({ x: s.cx - 70, y: s.cy - 70, w: 140, h: 176, act: s.act, label: i18n.t(s.key) }));
+  return spots.map((s) => ({
+    x: s.cx - 70, y: s.cy - 70, w: 140, h: 176, act: s.act,
+    label: s.act === 'yours' && ph.appBuilt ? ph.bizName.trim() : i18n.t(s.key),
+  }));
 }
 
 function phoneAppHeader(c, titleKey, ar) {
@@ -2382,32 +2426,266 @@ function phoneBook(c, now, ar) {
   return hots;
 }
 
-function phoneYours(c, now, ar) {
+/* ---- STEP 1: name the business (a real keyboard input sits on the field) ---- */
+function phoneBuilderName(c, now, ar) {
+  const ph = phoneState;
   const hots = [phoneAppHeader(c, 'phone.yours.title', ar)];
-  c.save();
-  c.setLineDash([14, 10]);
-  c.strokeStyle = 'rgba(246,241,230,0.7)'; c.lineWidth = 5;
-  roundedPath(c, PH_W / 2 - 105, 220, 210, 210, 46); c.stroke();
-  c.restore();
-  const pulse = 0.5 + 0.4 * Math.sin(now / 380);
-  c.fillStyle = `rgba(255,215,94,${pulse.toFixed(2)})`;
-  c.font = `400 92px ${DISPLAY}`; c.textAlign = 'center';
-  c.fillText('+', PH_W / 2, 358);
+  c.textAlign = 'center';
+  c.fillStyle = '#8fb5e3';
+  c.font = ar ? `700 21px ${AR_BODY}` : `600 17px ${MONO}`;
+  c.fillText(i18n.t('phone.b.step1'), PH_W / 2, 212);
   c.fillStyle = '#eafff0';
-  c.font = ar ? `800 36px ${AR_DISPLAY}` : `400 31px ${DISPLAY}`;
-  c.fillText(i18n.t('phone.yours.line1'), PH_W / 2, 530);
-  c.fillStyle = 'rgba(234,255,240,0.7)';
-  c.font = ar ? `600 28px ${AR_BODY}` : `italic 500 28px ${SERIF}`;
-  c.fillText(i18n.t('phone.yours.line2'), PH_W / 2, 584);
-  roundedPath(c, 96, 680, PH_W - 192, 86, 43);
-  const g = c.createLinearGradient(96, 680, PH_W - 96, 766);
-  g.addColorStop(0, '#ffd75e'); g.addColorStop(1, '#d9a441');
-  c.fillStyle = g; c.fill();
-  c.fillStyle = '#241c10';
+  c.font = ar ? `800 40px ${AR_DISPLAY}` : `400 36px ${DISPLAY}`;
+  c.fillText(i18n.t('phone.b.name'), PH_W / 2, 280);
+  // the field
+  const f = PH_NAME_FIELD;
+  roundedPath(c, f.x, f.y, f.w, f.h, 20);
+  c.fillStyle = 'rgba(255,255,255,0.07)'; c.fill();
+  c.strokeStyle = Math.floor(now / 500) % 2 ? '#58ff8a' : 'rgba(88,255,138,0.45)';
+  c.lineWidth = 3; c.stroke();
+  const nm = ph.bizName;
+  if (nm) {
+    c.fillStyle = '#eafff0';
+    fitFont(c, nm, f.w - 60, 40, 700, ar ? AR_DISPLAY : MONO, 20);
+    const cur = Math.floor(now / 420) % 2 ? '▮' : '';
+    c.fillText(nm + cur, PH_W / 2, f.y + 62);
+  } else {
+    c.fillStyle = 'rgba(143,181,227,0.55)';
+    c.font = ar ? `600 26px ${AR_BODY}` : `500 22px ${MONO}`;
+    c.fillText(i18n.t('phone.b.ph') + (Math.floor(now / 420) % 2 ? ' ▮' : ''), PH_W / 2, f.y + 60);
+  }
+  c.fillStyle = 'rgba(234,255,240,0.45)';
+  c.font = ar ? `600 19px ${AR_BODY}` : `500 14px ${MONO}`;
+  c.fillText(i18n.t('phone.b.fine'), PH_W / 2, 486);
+  // BUILD IT →
+  const on = nm.trim().length >= 2;
+  roundedPath(c, 96, 560, PH_W - 192, 86, 43);
+  c.fillStyle = on ? '#2fbf71' : 'rgba(255,255,255,0.07)'; c.fill();
+  c.fillStyle = on ? '#06130b' : 'rgba(234,255,240,0.35)';
   c.font = ar ? `800 28px ${AR_BODY}` : `700 25px ${MONO}`;
-  c.fillText(i18n.t('phone.yours.btn'), PH_W / 2, 734);
+  c.fillText(i18n.t('phone.b.next'), PH_W / 2, 614);
   c.textAlign = 'left';
-  hots.push({ x: 96, y: 668, w: PH_W - 192, h: 110, act: 'order', label: i18n.t('phone.yours.btn'), link: true });
+  if (on) hots.push({ x: 96, y: 548, w: PH_W - 192, h: 110, act: 'bnext', label: i18n.t('phone.b.next') });
+  return hots;
+}
+
+/* ---- STEP 2: pick the vibe ---- */
+function phoneBuilderColor(c, now, ar) {
+  const hots = [phoneAppHeader(c, 'phone.yours.title', ar)];
+  c.textAlign = 'center';
+  c.fillStyle = '#8fb5e3';
+  c.font = ar ? `700 21px ${AR_BODY}` : `600 17px ${MONO}`;
+  c.fillText(i18n.t('phone.b.step2'), PH_W / 2, 212);
+  c.fillStyle = '#eafff0';
+  c.font = ar ? `800 40px ${AR_DISPLAY}` : `400 36px ${DISPLAY}`;
+  c.fillText(i18n.t('phone.b.color'), PH_W / 2, 280);
+  ['phone.b.v1', 'phone.b.v2', 'phone.b.v3'].forEach((k, i) => {
+    const y = 330 + i * 172;
+    const v = VIBES[i];
+    roundedPath(c, 48, y, PH_W - 96, 140, 28);
+    const g = c.createLinearGradient(48, y, PH_W - 48, y + 140);
+    g.addColorStop(0, v.g0); g.addColorStop(1, v.g1);
+    c.fillStyle = g; c.fill();
+    // mini preview: their initial on a white tile
+    const tx = ar ? PH_W - 118 : 118;
+    roundedPath(c, tx - 34, y + 36, 68, 68, 18);
+    c.fillStyle = 'rgba(255,255,255,0.92)'; c.fill();
+    c.fillStyle = v.g1;
+    c.font = `400 40px ${DISPLAY}`;
+    c.fillText(bizInitial(), tx, y + 86);
+    c.fillStyle = '#ffffff';
+    c.font = ar ? `800 30px ${AR_BODY}` : `700 27px ${MONO}`;
+    c.fillText(i18n.t(k), ar ? tx - 160 : tx + 160, y + 82);
+    hots.push({ x: 48, y, w: PH_W - 96, h: 140, act: 'vibe' + i, label: i18n.t(k) });
+  });
+  c.textAlign = 'left';
+  return hots;
+}
+
+/* ---- STEP 3: manufacturing — no way back, the future is being built ---- */
+function phoneBuilderGen(c, now, ar) {
+  const ph = phoneState;
+  const el = now - ph.genAt;
+  c.textAlign = 'center';
+  c.fillStyle = '#8fb5e3';
+  c.font = ar ? `700 21px ${AR_BODY}` : `600 17px ${MONO}`;
+  c.fillText(i18n.t('phone.b.step3'), PH_W / 2, 212);
+  // spinning assembly ring around their tile
+  const v = vibeOf();
+  c.strokeStyle = v.g0; c.lineWidth = 8; c.lineCap = 'round';
+  c.beginPath(); c.arc(PH_W / 2, 460, 120, now / 300, now / 300 + 4.2); c.stroke();
+  c.strokeStyle = 'rgba(255,255,255,0.14)';
+  c.beginPath(); c.arc(PH_W / 2, 460, 120, 0, Math.PI * 2); c.stroke();
+  roundedPath(c, PH_W / 2 - 60, 400, 120, 120, 30);
+  const g = c.createLinearGradient(PH_W / 2 - 60, 400, PH_W / 2 + 60, 520);
+  g.addColorStop(0, v.g0); g.addColorStop(1, v.g1);
+  c.fillStyle = g; c.fill();
+  c.fillStyle = '#ffffff';
+  c.font = `400 64px ${DISPLAY}`;
+  c.fillText(bizInitial(), PH_W / 2, 484);
+  // rotating status lines
+  const lines = ['phone.b.gen1', 'phone.b.gen2', 'phone.b.gen3', 'phone.b.gen4'];
+  const li = Math.min(lines.length - 1, Math.floor(el / 660));
+  c.fillStyle = '#58ff8a';
+  c.font = ar ? `700 25px ${AR_BODY}` : `600 20px ${MONO}`;
+  c.fillText(i18n.t(lines[li]), PH_W / 2, 662);
+  // progress
+  const pr = clamp01(el / 2600);
+  roundedPath(c, 88, 710, PH_W - 176, 16, 8);
+  c.fillStyle = 'rgba(255,255,255,0.1)'; c.fill();
+  roundedPath(c, 88, 710, Math.max(16, (PH_W - 176) * pr), 16, 8);
+  c.fillStyle = v.g0; c.fill();
+  c.textAlign = 'left';
+  if (el > 2600 && !ph.genDone) {
+    ph.genDone = true;
+    ph.appBuilt = true;
+    ph.builtAt = now;
+    ph.splashAt = now;
+    ph.app = 'myapp';
+    ph.ordersStart = now;
+    ph.orders = [];
+    ph.orderSeq = 0;
+    ph.revenue = 0;
+    ph.revShown = 0;
+    ph.lastOrderAt = now + 600;
+    sound.chime();
+  }
+  return [];
+}
+
+/* ---- THEIR app: splash, live orders, climbing revenue, slide-to-order ---- */
+function phoneMyApp(c, now, ar) {
+  const ph = phoneState;
+  const v = vibeOf();
+  const name = ph.bizName.trim() || 'YOUR APP';
+  if (now - ph.splashAt < 1400) {
+    const g = c.createLinearGradient(0, 0, 0, PH_H);
+    g.addColorStop(0, v.g0); g.addColorStop(1, v.g1);
+    c.fillStyle = g; c.fillRect(0, 0, PH_W, PH_H);
+    const s = smooth(0, 1, clamp01((now - ph.splashAt) / 450));
+    roundedPath(c, PH_W / 2 - 75 * s, 380 - 75 * s + 75, 150 * s, 150 * s, 36 * s);
+    c.fillStyle = 'rgba(255,255,255,0.95)'; c.fill();
+    c.fillStyle = v.g1;
+    c.font = `400 ${Math.max(10, 76 * s)}px ${DISPLAY}`;
+    c.textAlign = 'center';
+    c.fillText(bizInitial(), PH_W / 2, 458);
+    c.fillStyle = '#ffffff';
+    fitFont(c, name, PH_W - 100, 46, ar ? 800 : 400, ar ? AR_DISPLAY : DISPLAY, 24);
+    c.fillText(name, PH_W / 2, 620);
+    c.fillStyle = 'rgba(255,255,255,0.75)';
+    c.font = ar ? `700 20px ${AR_BODY}` : `600 16px ${MONO}`;
+    c.fillText(i18n.t('phone.my.powered'), PH_W / 2, 668);
+    c.textAlign = 'left';
+    return [];
+  }
+  const hots = [phoneAppHeader(c, 'phone.yours.title', ar)];
+  // header re-brand: their tile + name over the generic title
+  c.fillStyle = '#0b1118';
+  c.fillRect(PH_W / 2 - 150, 84, 300, 52);
+  roundedPath(c, PH_W / 2 - (ar ? -96 : 148), 86, 44, 44, 12);
+  const hg = c.createLinearGradient(0, 86, 0, 130);
+  hg.addColorStop(0, v.g0); hg.addColorStop(1, v.g1);
+  c.fillStyle = hg; c.fill();
+  c.fillStyle = '#fff';
+  c.font = `400 26px ${DISPLAY}`;
+  c.textAlign = 'center';
+  c.fillText(bizInitial(), PH_W / 2 - (ar ? -118 : 126), 120);
+  c.fillStyle = '#eafff0';
+  fitFont(c, name, 230, 30, ar ? 800 : 400, ar ? AR_DISPLAY : DISPLAY, 16);
+  c.fillText(name, PH_W / 2 + (ar ? -36 : 36), 120);
+  // live orders roll in
+  if (now - ph.lastOrderAt > 1900 && ph.orderSeq < 60) {
+    ph.lastOrderAt = now;
+    ph.orderSeq++;
+    ph.orders.unshift({ key: 'phone.my.o' + (1 + ((ph.orderSeq - 1) % 5)), num: 100 + ph.orderSeq, at: now });
+    ph.orders = ph.orders.slice(0, 4);
+    ph.revenue += 140 + ((ph.orderSeq * 97) % 730);
+    sound.key();
+  }
+  ph.revShown = lerp(ph.revShown, ph.revenue, 0.09);
+  // revenue card
+  roundedPath(c, 48, 170, PH_W - 96, 150, 24);
+  const rg = c.createLinearGradient(48, 170, PH_W - 48, 320);
+  rg.addColorStop(0, v.g0); rg.addColorStop(1, v.g1);
+  c.fillStyle = rg; c.fill();
+  c.textAlign = 'center';
+  c.fillStyle = 'rgba(255,255,255,0.8)';
+  c.font = ar ? `700 21px ${AR_BODY}` : `600 17px ${MONO}`;
+  c.fillText(i18n.t('phone.my.rev'), PH_W / 2, 216);
+  c.fillStyle = '#ffffff';
+  c.font = `400 54px ${DISPLAY}`;
+  c.fillText('$' + Math.floor(ph.revShown).toLocaleString('en-US'), PH_W / 2, 288);
+  // feed
+  c.fillStyle = '#8fb5e3';
+  c.font = ar ? `700 21px ${AR_BODY}` : `600 17px ${MONO}`;
+  c.fillText(i18n.t('phone.my.orders') + '  ●', PH_W / 2, 372);
+  ph.orders.forEach((o, i) => {
+    const age = now - o.at;
+    const slide = smooth(0, 1, clamp01(age / 380));
+    const y = 396 + i * 100 + (1 - slide) * -26;
+    c.globalAlpha = slide;
+    roundedPath(c, 48, y, PH_W - 96, 84, 20);
+    c.fillStyle = 'rgba(255,255,255,0.06)'; c.fill();
+    c.strokeStyle = 'rgba(143,181,227,0.3)'; c.lineWidth = 2; c.stroke();
+    const nx = ar ? PH_W - 76 : 76;
+    c.textAlign = ar ? 'right' : 'left';
+    c.fillStyle = '#ffd75e';
+    c.font = `700 22px ${MONO}`;
+    c.fillText('#' + o.num, nx, y + 52);
+    c.fillStyle = '#eafff0';
+    c.font = ar ? `700 24px ${AR_BODY}` : `600 21px ${MONO}`;
+    c.fillText(i18n.t(o.key), ar ? nx - 100 : nx + 100, y + 52);
+    c.globalAlpha = 1;
+  });
+  // slide-to-order
+  const s = PH_SLIDE_RECT;
+  ph.slideDraw = ph.slideActive ? ph.slideP : lerp(ph.slideDraw, ph.slideP, 0.25);
+  roundedPath(c, s.x, s.y, s.w, s.h, s.h / 2);
+  c.fillStyle = ph.ordered ? '#2fbf71' : 'rgba(255,255,255,0.08)'; c.fill();
+  if (!ph.ordered && ph.slideDraw > 0.02) {
+    c.save();
+    roundedPath(c, s.x, s.y, s.w, s.h, s.h / 2); c.clip();
+    const fw = s.w * ph.slideDraw;
+    c.fillStyle = 'rgba(88,255,138,0.25)';
+    c.fillRect(ar ? s.x + s.w - fw : s.x, s.y, fw, s.h);
+    c.restore();
+  }
+  c.textAlign = 'center';
+  if (ph.ordered) {
+    c.fillStyle = '#06130b';
+    fitFont(c, i18n.t('phone.my.slid'), s.w - 60, ar ? 24 : 19, ar ? 800 : 700, ar ? AR_BODY : MONO, 12);
+    c.fillText(i18n.t('phone.my.slid'), s.x + s.w / 2, s.y + 52);
+    // celebration
+    const age = now - ph.orderedAt;
+    if (age < 2600) {
+      for (let i = 0; i < 30; i++) {
+        const fy = s.y - ((age * (0.1 + (i % 5) * 0.045)) + i * 61) % 700;
+        const fx = (i * 167.7) % (PH_W - 40) + 20;
+        c.fillStyle = ['#58ff8a', '#ffd75e', '#8fb5e3', '#ffffff'][i % 4];
+        c.save(); c.translate(fx, fy); c.rotate(i + age / 260); c.fillRect(-6, -4, 12, 8); c.restore();
+      }
+    }
+  } else {
+    const tw = 1 - clamp01(ph.slideDraw * 1.6);
+    c.globalAlpha = 0.4 + 0.35 * Math.sin(now / 350);
+    c.fillStyle = '#eafff0';
+    fitFont(c, i18n.t('phone.my.slide'), s.w - 130, ar ? 23 : 18, ar ? 700 : 600, ar ? AR_BODY : MONO, 12);
+    c.globalAlpha = tw * (0.55 + 0.3 * Math.sin(now / 350));
+    c.fillText(i18n.t('phone.my.slide'), s.x + s.w / 2 + (ar ? -26 : 26), s.y + 52);
+    c.globalAlpha = 1;
+    // thumb
+    const pad = 6, tr = (s.h - pad * 2) / 2;
+    const x0 = s.x + pad + tr, x1 = s.x + s.w - pad - tr;
+    const tx = ar ? lerp(x1, x0, ph.slideDraw) : lerp(x0, x1, ph.slideDraw);
+    c.beginPath(); c.arc(tx, s.y + s.h / 2, tr, 0, Math.PI * 2);
+    const tg = c.createLinearGradient(tx - tr, 0, tx + tr, 0);
+    tg.addColorStop(0, v.g0); tg.addColorStop(1, v.g1);
+    c.fillStyle = tg; c.fill();
+    c.fillStyle = '#ffffff';
+    c.font = `700 30px ${MONO}`;
+    c.fillText(ar ? '←' : '→', tx, s.y + 54);
+  }
+  c.textAlign = 'left';
   return hots;
 }
 
@@ -2422,11 +2700,15 @@ function phoneHome(c, now, ar) {
   c.fillText(i18n.t('phone.hello'), PH_W / 2, 192);
   c.textAlign = 'left';
   const hots = phoneIcons(c, ar, now);
-  // demo caption
+  // demo caption — after the build, it celebrates THEIR app instead
   c.textAlign = 'center';
-  c.fillStyle = 'rgba(143,181,227,0.85)';
+  c.fillStyle = ph.appBuilt ? '#58ff8a' : 'rgba(143,181,227,0.85)';
   c.font = ar ? `700 21px ${AR_BODY}` : `600 17px ${MONO}`;
-  c.fillText(i18n.t('phone.demo'), PH_W / 2, 830);
+  const cap = ph.appBuilt
+    ? `${ph.bizName.trim()} ${i18n.t('phone.hint.built')}`
+    : i18n.t('phone.demo');
+  fitFont(c, cap, PH_W - 60, ar ? 21 : 17, ar ? 700 : 600, ar ? AR_BODY : MONO, 12);
+  c.fillText(cap, PH_W / 2, 830);
   // dock — the standing offer
   roundedPath(c, 40, 880, PH_W - 80, 82, 41);
   const dg = c.createLinearGradient(40, 880, 40, 962);
@@ -2437,26 +2719,34 @@ function phoneHome(c, now, ar) {
   c.fillText(i18n.t('phone.order'), PH_W / 2, 932);
   c.textAlign = 'left';
   hots.push({ x: 40, y: 868, w: PH_W - 80, h: 106, act: 'order', label: i18n.t('phone.order'), link: true });
-  // the passive-aggressive memo
-  if (!ph.notifUsed && !ph.notifOn && ph.wakeAt && now - ph.wakeAt > 6000) {
-    ph.notifOn = true; ph.notifShownAt = now;
-    sound.beep();
+  // the passive-aggressive memos: first the competitor, later THEIR first customer
+  if (!ph.notifOn) {
+    if (ph.appBuilt && !ph.notifUsed2 && now - ph.builtAt > 2500) {
+      ph.notifOn = true; ph.notifKind = 2; ph.notifShownAt = now; sound.beep();
+    } else if (!ph.appBuilt && !ph.notifUsed1 && ph.wakeAt && now - ph.wakeAt > 6000) {
+      ph.notifOn = true; ph.notifKind = 1; ph.notifShownAt = now; sound.beep();
+    }
   }
-  if (ph.notifOn && now - ph.notifShownAt > 7000) { ph.notifOn = false; ph.notifUsed = true; }
+  if (ph.notifOn && now - ph.notifShownAt > 7000) {
+    ph.notifOn = false;
+    if (ph.notifKind === 2) ph.notifUsed2 = true; else ph.notifUsed1 = true;
+  }
   if (ph.notifOn) {
     const slide = smooth(0, 1, clamp01((now - ph.notifShownAt) / 380));
     const ny = -110 + slide * 194;
     roundedPath(c, 24, ny, PH_W - 48, 104, 24);
     c.fillStyle = 'rgba(23,26,32,0.97)'; c.fill();
-    c.strokeStyle = '#ffd75e'; c.lineWidth = 2.5; c.stroke();
-    c.fillStyle = '#ffd75e';
+    c.strokeStyle = ph.notifKind === 2 ? '#58ff8a' : '#ffd75e'; c.lineWidth = 2.5; c.stroke();
+    c.fillStyle = ph.notifKind === 2 ? '#58ff8a' : '#ffd75e';
     c.font = `700 30px ${MONO}`;
     const ix = ar ? PH_W - 62 : 62;
     c.textAlign = 'center';
-    c.fillText('⚠', ix, ny + 64);
+    c.fillText(ph.notifKind === 2 ? '●' : '⚠', ix, ny + 64);
     c.textAlign = ar ? 'right' : 'left';
     c.fillStyle = '#f6f1e6';
-    const nt = i18n.t('phone.notif');
+    const nt = ph.notifKind === 2
+      ? `${ph.bizName.trim()}: ${i18n.t('phone.notif2')}`
+      : i18n.t('phone.notif');
     fitFont(c, nt, PH_W - 160, ar ? 23 : 19, ar ? 700 : 600, ar ? AR_BODY : MONO, 13);
     const tx0 = ar ? PH_W - 100 : 100;
     c.fillText(nt, tx0, ny + 62);
@@ -2494,7 +2784,10 @@ function drawPhoneUI(t, now) {
     else if (ph.app === 'shop') hots = phoneShop(c, now, ar);
     else if (ph.app === 'bank') hots = phoneBank(c, now, ar);
     else if (ph.app === 'book') hots = phoneBook(c, now, ar);
-    else if (ph.app === 'yours') hots = phoneYours(c, now, ar);
+    else if (ph.app === 'b-name') hots = phoneBuilderName(c, now, ar);
+    else if (ph.app === 'b-color') hots = phoneBuilderColor(c, now, ar);
+    else if (ph.app === 'b-gen') hots = phoneBuilderGen(c, now, ar);
+    else if (ph.app === 'myapp') hots = phoneMyApp(c, now, ar);
     // home indicator
     roundedPath(c, PH_W / 2 - 80, 1040, 160, 8, 4);
     c.fillStyle = 'rgba(246,241,230,0.28)'; c.fill();
@@ -2517,6 +2810,7 @@ function drawPhoneUI(t, now) {
 /* ---- DOM hotspots that track the canvas-drawn buttons ---- */
 const PH_POOL = [];
 const phoneOrderEl = document.getElementById('phone-order');
+let phInput = null, phSlide = null;
 
 function ensurePhoneHots() {
   if (PH_POOL.length) return;
@@ -2533,18 +2827,117 @@ function ensurePhoneHots() {
   }
 }
 
+/* the two REAL controls: a keyboard input on the name field,
+   and a drag zone for slide-to-order */
+function updateSlideP(e) {
+  const r = phSlide.getBoundingClientRect();
+  if (!r.width) return;
+  let p = (e.clientX - r.left) / r.width;
+  if (i18n.lang === 'ar') p = 1 - p;
+  phoneState.slideP = clamp01(p);
+}
+
+function ensurePhoneExtras() {
+  if (phInput) return;
+  phInput = document.createElement('input');
+  phInput.id = 'ph-input';
+  phInput.type = 'text';
+  phInput.maxLength = 18;
+  phInput.autocomplete = 'off';
+  phInput.autocapitalize = 'characters';
+  phInput.setAttribute('aria-label', 'Business name');
+  phInput.className = 'ph-hot';
+  // invisible glass over the drawn field — 16px stops iOS zoom-on-focus
+  phInput.style.cssText = 'opacity:0.02;font-size:16px;color:transparent;caret-color:transparent;background:transparent;border:0;outline:none;';
+  phInput.addEventListener('input', () => {
+    phoneState.bizName = phInput.value.toUpperCase().slice(0, 18);
+    sound.key();
+  });
+  phInput.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter') phoneTap('bnext');
+  });
+  document.body.appendChild(phInput);
+
+  phSlide = document.createElement('div');
+  phSlide.id = 'ph-slide';
+  phSlide.className = 'ph-hot';
+  phSlide.style.touchAction = 'none';
+  phSlide.setAttribute('role', 'button');
+  phSlide.setAttribute('aria-label', 'Slide to order your app');
+  phSlide.addEventListener('pointerdown', (e) => {
+    if (phoneState.ordered) return;
+    phoneState.slideActive = true;
+    try { phSlide.setPointerCapture(e.pointerId); } catch {}
+    if (lenis) lenis.stop();
+    sound.unlock();
+    updateSlideP(e);
+    e.preventDefault();
+  });
+  phSlide.addEventListener('pointermove', (e) => {
+    if (!phoneState.slideActive) return;
+    updateSlideP(e);
+    e.preventDefault();
+  });
+  const endSlide = () => {
+    const ph = phoneState;
+    if (!ph.slideActive) return;
+    ph.slideActive = false;
+    if (lenis) lenis.start();
+    if (ph.slideP > 0.85) {
+      ph.ordered = true;
+      ph.orderedAt = performance.now();
+      ph.slideP = 1;
+      sound.chime();
+      const w = window.open(phoneWaLink(), '_blank', 'noopener');
+      if (!w) window.location.href = phoneWaLink();
+    } else {
+      ph.slideP = 0;   // spring home
+    }
+  };
+  phSlide.addEventListener('pointerup', endSlide);
+  phSlide.addEventListener('pointercancel', endSlide);
+  document.body.appendChild(phSlide);
+}
+
 function phoneTap(act) {
   const ph = phoneState;
   sound.unlock();
   ph.battery = Math.min(100, ph.battery + 1);
   ph.boltAt = performance.now();
   switch (act) {
-    case 'shop': case 'bank': case 'book': case 'yours':
+    case 'shop': case 'bank': case 'book':
       ph.app = act; sound.flip(); break;
+    case 'yours':
+      // the vacant icon starts the builder; once built it opens THEIR app
+      if (ph.appBuilt) { ph.app = 'myapp'; }
+      else { ph.app = 'b-name'; ensurePhoneExtras(); if (phInput) phInput.focus(); }
+      sound.flip();
+      break;
+    case 'bnext':
+      if (ph.bizName.trim().length >= 2) {
+        ph.app = 'b-color'; sound.flip();
+        if (phInput) phInput.blur();
+      }
+      break;
+    case 'vibe0': case 'vibe1': case 'vibe2':
+      ph.vibe = +act[4];
+      ph.app = 'b-gen'; ph.genAt = performance.now(); ph.genDone = false;
+      sound.flip();
+      break;
     case 'back':
-      ph.app = 'home'; ph.checkoutAt = 0; sound.flip(); break;
+      ph.app = 'home'; ph.checkoutAt = 0; sound.flip();
+      if (phInput) phInput.blur();
+      break;
     case 'notif':
-      ph.app = 'yours'; ph.notifOn = false; ph.notifUsed = true; sound.flip(); break;
+      if (ph.notifKind === 2) { ph.app = 'myapp'; ph.notifUsed2 = true; }
+      else {
+        ph.notifUsed1 = true;
+        if (ph.appBuilt) ph.app = 'myapp';
+        else { ph.app = 'b-name'; ensurePhoneExtras(); if (phInput) phInput.focus(); }
+      }
+      ph.notifOn = false; sound.flip();
+      break;
     case 'buy0': case 'buy1': {
       const i = +act[3];
       if (!ph.added[i]) { ph.added[i] = true; ph.cart++; sound.key(); }
@@ -2581,6 +2974,11 @@ function placePhoneRect(el, bx, by, bw, bh) {
 function hidePhoneHots() {
   for (const b of PH_POOL) if (b.style.display !== 'none') b.style.display = 'none';
   if (phoneOrderEl && phoneOrderEl.style.display !== 'none') phoneOrderEl.style.display = 'none';
+  if (phInput && phInput.style.display !== 'none') {
+    if (document.activeElement === phInput) phInput.blur();
+    phInput.style.display = 'none';
+  }
+  if (phSlide && !phoneState.slideActive && phSlide.style.display !== 'none') phSlide.style.display = 'none';
 }
 
 /* ---- the DOM overlay for this section (driven manually — the
@@ -2655,9 +3053,10 @@ function updatePhoneScene(pt, t, now) {
   if (ph.awake) hots = drawPhoneUI(t, now);
   // interactive only while the camera is parked on it
   const w = phoneCamW(pt);
-  if (ph.awake && w > 0.92 && started && hots.length) {
+  if (ph.awake && w > 0.92 && started) {
     phoneScreen.updateWorldMatrix(true, false);
     ensurePhoneHots();
+    ensurePhoneExtras();
     let bi = 0, linkRect = null;
     for (const h of hots) {
       if (h.link) { linkRect = h; continue; }
@@ -2672,6 +3071,20 @@ function updatePhoneScene(pt, t, now) {
     }
     if (linkRect && phoneOrderEl) placePhoneRect(phoneOrderEl, linkRect.x, linkRect.y, linkRect.w, linkRect.h);
     else if (phoneOrderEl && phoneOrderEl.style.display !== 'none') phoneOrderEl.style.display = 'none';
+    // the REAL controls: keyboard input on the name field, drag zone on the slider
+    if (ph.app === 'b-name') {
+      placePhoneRect(phInput, PH_NAME_FIELD.x, PH_NAME_FIELD.y, PH_NAME_FIELD.w, PH_NAME_FIELD.h);
+    } else if (phInput.style.display !== 'none') {
+      if (document.activeElement === phInput) phInput.blur();
+      phInput.style.display = 'none';
+    }
+    const sliderLive = ph.app === 'myapp' && !ph.ordered && now - ph.splashAt >= 1400;
+    if (sliderLive) {
+      placePhoneRect(phSlide, PH_SLIDE_RECT.x, PH_SLIDE_RECT.y, PH_SLIDE_RECT.w, PH_SLIDE_RECT.h);
+    } else if (!ph.slideActive && phSlide.style.display !== 'none') {
+      phSlide.style.display = 'none';
+    }
+    if (phoneOrderEl) phoneOrderEl.href = phoneWaLink();
   } else {
     hidePhoneHots();
   }
@@ -2983,5 +3396,6 @@ window.__bz = {
     smoothPT = pt;
   },
   tap: (act) => phoneTap(act),
+  ph: phoneState,
   start,
 };

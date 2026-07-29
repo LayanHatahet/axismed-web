@@ -137,11 +137,17 @@ const P_TELE     = 0.578;    // glitch-out flash → the tower shaft
    after the computer gets 40% more scroll so people can read.
    ------------------------------------------------------------ */
 const P_PIN = 0.5565;                                   // right after the last record
+const P_HERO = 0.1;                                     // end of the hero → CRT dive
 const OLD_PAGES = 24;                                   // the original spacer height
-const PHONE_PAGES = 4.0;                                // scroll room for the phone scene
-const TAIL_STRETCH = 1.4;                               // slower reading after the computer
-const PIN_PAGES = P_PIN * OLD_PAGES;
-const TAIL_PAGES = (1 - P_PIN) * OLD_PAGES * TAIL_STRETCH;
+/* touch scrolls 1:1 with the finger, so touch devices get more runway
+   everywhere EXCEPT the hero dive — that transition stays quick */
+const IS_TOUCH = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+const TOUCH_STRETCH = IS_TOUCH ? 1.5 : 1.0;
+const HERO_PAGES = P_HERO * OLD_PAGES;
+const MID_PAGES = (P_PIN - P_HERO) * OLD_PAGES * TOUCH_STRETCH;
+const PHONE_PAGES = 4.0 * TOUCH_STRETCH;
+const TAIL_PAGES = (1 - P_PIN) * OLD_PAGES * 1.4 * TOUCH_STRETCH;
+const PIN_PAGES = HERO_PAGES + MID_PAGES;
 const TOTAL_PAGES = PIN_PAGES + PHONE_PAGES + TAIL_PAGES;
 document.documentElement.style.setProperty('--pages', TOTAL_PAGES.toFixed(3));
 
@@ -226,12 +232,39 @@ function start() {
 window.addEventListener('pointerdown', () => sound.unlock(), { passive: true });
 window.addEventListener('keydown', () => sound.unlock());
 
-/* sound toggle */
+/* sound toggle — a speaker everyone understands (CSS swaps waves/mute) */
 const sndBtn = document.getElementById('sound-toggle');
 if (sndBtn) {
-  const label = () => { sndBtn.textContent = sound.enabled ? 'SND ON' : 'SND OFF'; sndBtn.setAttribute('aria-pressed', String(sound.enabled)); };
+  const label = () => sndBtn.setAttribute('aria-pressed', String(sound.enabled));
   label();
   sndBtn.addEventListener('click', (e) => { e.stopPropagation(); sound.toggle(); label(); });
+}
+
+/* mobile menu */
+const burgerBtn = document.getElementById('nav-burger');
+const navLinksEl = document.querySelector('.nav-links');
+if (burgerBtn && navLinksEl) {
+  burgerBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = navLinksEl.classList.toggle('open');
+    burgerBtn.setAttribute('aria-expanded', String(open));
+  });
+  navLinksEl.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => {
+    navLinksEl.classList.remove('open');
+    burgerBtn.setAttribute('aria-expanded', 'false');
+  }));
+}
+
+/* open WhatsApp WITHOUT leaving the page — always a new tab, never a redirect */
+function openWa(url) {
+  const w = window.open(url, '_blank', 'noopener');
+  if (!w) {
+    const a = document.createElement('a');
+    a.href = url; a.target = '_blank'; a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
 }
 
 /* language toggle — EN primary, AR transcreation */
@@ -329,7 +362,15 @@ window.addEventListener('keydown', (e) => {
    ------------------------------------------------------------ */
 let lenis = null;
 if (window.Lenis && !RM) {
-  lenis = new window.Lenis({ lerp: 0.09, wheelMultiplier: 1.0, syncTouch: true });
+  lenis = new window.Lenis({
+    lerp: 0.09,
+    wheelMultiplier: 1.0,
+    // touch tracks the finger 1:1 — no acceleration, gentle release
+    syncTouch: true,
+    touchMultiplier: 1.0,
+    syncTouchLerp: 0.5,
+    touchInertiaMultiplier: 6,
+  });
   lenis.stop();
 }
 
@@ -343,7 +384,8 @@ function scrollRaw() {
 /* raw scroll → legacy timeline position (the phone scene is a plateau at P_PIN) */
 function scrollP() {
   const x = scrollRaw() * TOTAL_PAGES;
-  if (x <= PIN_PAGES) return x / OLD_PAGES;
+  if (x <= HERO_PAGES) return (x / HERO_PAGES) * P_HERO;
+  if (x <= PIN_PAGES) return P_HERO + ((x - HERO_PAGES) / MID_PAGES) * (P_PIN - P_HERO);
   if (x <= PIN_PAGES + PHONE_PAGES) return P_PIN;
   return P_PIN + ((x - PIN_PAGES - PHONE_PAGES) / TAIL_PAGES) * (1 - P_PIN);
 }
@@ -354,8 +396,11 @@ function phoneRaw() {
 }
 /* legacy timeline position → raw scroll fraction, for scrollTo targets */
 function rawOf(p) {
-  if (p <= P_PIN) return (p * OLD_PAGES) / TOTAL_PAGES;
-  return (PIN_PAGES + PHONE_PAGES + ((p - P_PIN) / (1 - P_PIN)) * TAIL_PAGES) / TOTAL_PAGES;
+  let x;
+  if (p <= P_HERO) x = (p / P_HERO) * HERO_PAGES;
+  else if (p <= P_PIN) x = HERO_PAGES + ((p - P_HERO) / (P_PIN - P_HERO)) * MID_PAGES;
+  else x = PIN_PAGES + PHONE_PAGES + ((p - P_PIN) / (1 - P_PIN)) * TAIL_PAGES;
+  return x / TOTAL_PAGES;
 }
 const rawOfPhone = (pt) => (PIN_PAGES + pt * PHONE_PAGES) / TOTAL_PAGES;
 
@@ -1664,9 +1709,7 @@ function startDialSequence() {
         dialSeq.mode = 'connect';
         sound.chime();
         dialTimers.push(setTimeout(() => {
-          // new tab if the browser allows it this far from the gesture, else same tab
-          const w = window.open(WA_LINK, '_blank', 'noopener');
-          if (!w) window.location.href = WA_LINK;
+          openWa(WA_LINK);   // always a new tab — the visitor keeps their place
         }, 900));
         dialTimers.push(setTimeout(() => { dialSeq.mode = 'hint'; }, 3200));
       }, 500));
@@ -2055,7 +2098,27 @@ const phoneState = {
   lockState: 'locked', scanAt: 0, unlockAt: 0,
   trans: null, fx: [], flash: null, everTapped: false,
   game: null, gameBest: 0,
+  // realistic apps: checkout sheet, food delivery, booking calendar
+  pay: { open: false, method: 0, adding: false, num: '', payAt: 0, done: '' },
+  eats: { counts: [0, 0, 0], phase: 'menu', orderAt: 0 },
+  meet: { day: -1, slot: -1, sent: false },
+  bizType: -1,
 };
+
+/* the phone speaks the "new" voice: bubbly, no edges */
+const BUBBLE = '"Baloo 2", "Baloo Bhaijaan 2", "Arial Rounded MT Bold", sans-serif';
+const MEET_SLOTS = ['10:00', '13:00', '16:00'];
+const EATS_MENU = [
+  { key: 'phone.eats.i1', price: 9 },
+  { key: 'phone.eats.i2', price: 7 },
+  { key: 'phone.eats.i3', price: 12 },
+];
+const TYPE_FEED = [
+  ['phone.my.r1', 'phone.my.r2', 'phone.my.r3', 'phone.my.r4'],
+  ['phone.my.s1', 'phone.my.s2', 'phone.my.s3', 'phone.my.s4'],
+  ['phone.my.c1', 'phone.my.c2', 'phone.my.c3', 'phone.my.c4'],
+  ['phone.my.o1', 'phone.my.o2', 'phone.my.o3', 'phone.my.o4'],
+];
 
 /* pointer position (−1..1) — tilts the handset and parallaxes the wallpaper */
 const phPointer = { x: 0, y: 0 };
@@ -2150,7 +2213,7 @@ function drawPhoneBoot(c, bootT, ar) {
     c.globalAlpha = lo;
     c.fillStyle = '#eafff0';
     c.textAlign = 'center';
-    c.font = `400 40px ${DISPLAY}`;
+    c.font = `400 40px ${BUBBLE}`;
     c.fillText('BENZERSIZ', PH_W / 2, PH_H / 2 + 10);
     c.font = ar ? `600 22px ${AR_BODY}` : `500 17px ${MONO}`;
     c.fillStyle = '#8fb5e3';
@@ -2217,9 +2280,10 @@ function phoneIcons(c, ar, now) {
         c.fillText(String(ph.cart), s.cx + 46, s.cy - 39);
       }
     } else if (s.act === 'bank') {
-      phoneIconTile(c, s.cx, s.cy, '#4a79ab', '#2b4d84');
-      c.fillStyle = '#eaf4ff'; c.font = `400 56px ${DISPLAY}`; c.textAlign = 'center';
-      c.fillText('$', s.cx, s.cy + 20);
+      phoneIconTile(c, s.cx, s.cy, '#e0663c', '#a93b1e');
+      c.save(); c.translate(s.cx, s.cy); c.scale(0.72, 0.72); c.translate(-s.cx, -s.cy);
+      eatsGlyph(c, 0, s.cx, s.cy);
+      c.restore();
     } else if (s.act === 'book') {
       phoneIconTile(c, s.cx, s.cy, '#d9a441', '#a9722a');
       c.fillStyle = '#fff7e8';
@@ -2236,7 +2300,7 @@ function phoneIcons(c, ar, now) {
       roundedPath(c, s.cx - 59, s.cy - 59, 118, 118, 30);
       c.fillStyle = g; c.fill();
       c.fillStyle = '#ffffff';
-      c.font = `400 58px ${DISPLAY}`; c.textAlign = 'center';
+      c.font = `400 58px ${BUBBLE}`; c.textAlign = 'center';
       c.fillText(bizInitial(), s.cx, s.cy + 20);
       // a "1" badge — their first customer is already waiting
       if (!ph.ordered) {
@@ -2253,7 +2317,7 @@ function phoneIcons(c, ar, now) {
       c.restore();
       const pulse = 0.55 + 0.35 * Math.sin(now / 400);
       c.fillStyle = `rgba(255,215,94,${pulse.toFixed(2)})`;
-      c.font = `400 54px ${DISPLAY}`; c.textAlign = 'center';
+      c.font = `400 54px ${BUBBLE}`; c.textAlign = 'center';
       c.fillText('+', s.cx, s.cy + 18);
     }
     c.fillStyle = '#dfe9f5';
@@ -2280,7 +2344,7 @@ function phoneAppHeader(c, titleKey, ar) {
   else { c.moveTo(bx + 36, 94); c.lineTo(bx + 22, 108); c.lineTo(bx + 36, 122); }
   c.stroke();
   c.fillStyle = '#eafff0';
-  c.font = ar ? `800 34px ${AR_DISPLAY}` : `400 30px ${DISPLAY}`;
+  c.font = ar ? `800 34px ${AR_DISPLAY}` : `400 30px ${BUBBLE}`;
   c.textAlign = 'center';
   c.fillText(title, PH_W / 2, 120);
   c.textAlign = 'left';
@@ -2306,11 +2370,16 @@ function phoneShop(c, now, ar) {
     c.beginPath(); c.moveTo(PH_W / 2 - 34 * s, 420); c.lineTo(PH_W / 2 - 8 * s, 452 * 1); c.lineTo(PH_W / 2 + 40 * s, 388);
     c.stroke();
     c.fillStyle = '#eafff0'; c.textAlign = 'center';
-    c.font = ar ? `800 34px ${AR_DISPLAY}` : `400 28px ${DISPLAY}`;
+    c.font = ar ? `800 34px ${AR_DISPLAY}` : `400 28px ${BUBBLE}`;
     c.fillText(i18n.t('phone.shop.done1'), PH_W / 2, 590);
     c.font = ar ? `600 26px ${AR_BODY}` : `italic 500 26px ${SERIF}`;
     c.fillStyle = 'rgba(234,255,240,0.75)';
     c.fillText(i18n.t('phone.shop.done2'), PH_W / 2, 640);
+    if (ph.pay.done) {
+      c.fillStyle = '#8fb5e3';
+      c.font = ar ? `600 20px ${AR_BODY}` : `600 17px ${MONO}`;
+      c.fillText(`${i18n.t('phone.pay.paidwith')} ${ph.pay.done}`, PH_W / 2, 690);
+    }
     roundedPath(c, 146, 760, 220, 74, 37);
     c.fillStyle = 'rgba(88,255,138,0.16)'; c.fill();
     c.strokeStyle = '#58ff8a'; c.lineWidth = 3; c.stroke();
@@ -2346,7 +2415,7 @@ function phoneShop(c, now, ar) {
     const tx = ar ? PH_W - 196 : 196;
     c.textAlign = ar ? 'right' : 'left';
     c.fillStyle = '#eafff0';
-    c.font = ar ? `800 30px ${AR_DISPLAY}` : `400 27px ${DISPLAY}`;
+    c.font = ar ? `800 30px ${AR_DISPLAY}` : `400 27px ${BUBBLE}`;
     c.fillText(i18n.t(it.key), tx, it.y + 78);
     c.fillStyle = '#ffd75e';
     c.font = `700 15px ${MONO}`;
@@ -2369,89 +2438,400 @@ function phoneShop(c, now, ar) {
   c.textAlign = 'center';
   c.fillText(on ? `${i18n.t('phone.shop.checkout')} (${ph.cart})` : i18n.t('phone.shop.empty'), PH_W / 2, 932);
   c.textAlign = 'left';
-  if (on) hots.push({ x: 40, y: 868, w: PH_W - 80, h: 106, act: 'checkout', label: i18n.t('phone.shop.checkout') });
+  if (on && !ph.pay.open) hots.push({ x: 40, y: 868, w: PH_W - 80, h: 106, act: 'checkout', label: i18n.t('phone.shop.checkout') });
+  // the payment sheet — feels like real money changing hands
+  if (ph.pay.open) return phonePaySheet(c, now, ar);
   return hots;
 }
 
-function phoneBank(c, now, ar) {
-  const ph = phoneState;
-  const hots = [phoneAppHeader(c, 'phone.bank.title', ar)];
-  // balance climbs while you watch — business is going extremely well
-  const dt = ph.lastNow ? Math.min(0.1, (now - ph.lastNow) / 1000) : 0;
-  ph.balance += dt * 137;
-  const phase = ph.wireAt ? (now - ph.wireAt) / 1000 : 99;
-  if (phase >= 0.9 && !ph.wirePaid) { ph.wirePaid = true; ph.balance -= 50000; sound.chime(); }
-  roundedPath(c, 32, 190, PH_W - 64, 230, 24);
-  c.fillStyle = 'rgba(74,121,171,0.16)'; c.fill();
-  c.strokeStyle = 'rgba(143,181,227,0.4)'; c.lineWidth = 2; c.stroke();
+const PH_CARD_FIELD = { x: 40, y: 800, w: 432, h: 78 };
+const shopTotal = () => (phoneState.added[0] ? 1499 : 0) + (phoneState.added[1] ? 89 : 0);
+const cardBrand = (num) => (num[0] === '4' ? 'VISA' : num[0] === '5' ? 'MASTERCARD' : num[0] ? 'CARD' : '');
+
+function phonePaySheet(c, now, ar) {
+  const ph = phoneState, pay = ph.pay;
+  c.fillStyle = 'rgba(0,0,0,0.6)';
+  c.fillRect(0, 0, PH_W, PH_H);
+  const top = 400;
+  roundedPath(c, 14, top, PH_W - 28, PH_H - top - 8, 36);
+  c.fillStyle = '#121a24'; c.fill();
+  c.strokeStyle = 'rgba(143,181,227,0.3)'; c.lineWidth = 2; c.stroke();
+  const hots = [];
+  // grab handle + title + close
+  roundedPath(c, PH_W / 2 - 34, top + 14, 68, 7, 4);
+  c.fillStyle = 'rgba(246,241,230,0.25)'; c.fill();
   c.textAlign = 'center';
+  c.fillStyle = '#eafff0';
+  c.font = ar ? `800 32px ${AR_DISPLAY}` : `700 28px ${BUBBLE}`;
+  c.fillText(i18n.t('phone.pay.title'), PH_W / 2, top + 68);
+  c.strokeStyle = '#8fb5e3'; c.lineWidth = 4; c.lineCap = 'round';
+  const cx0 = ar ? 48 : PH_W - 78;
+  c.beginPath();
+  c.moveTo(cx0, top + 40); c.lineTo(cx0 + 24, top + 64);
+  c.moveTo(cx0 + 24, top + 40); c.lineTo(cx0, top + 64);
+  c.stroke();
+  hots.push({ x: cx0 - 18, y: top + 24, w: 62, h: 62, act: 'pclose', label: 'Close' });
+  const processing = pay.payAt && now - pay.payAt < 1400;
+  // total
+  c.textAlign = ar ? 'right' : 'left';
   c.fillStyle = '#8fb5e3';
   c.font = ar ? `700 22px ${AR_BODY}` : `600 18px ${MONO}`;
-  c.fillText(i18n.t('phone.bank.balance'), PH_W / 2, 248);
-  c.fillStyle = '#eafff0';
-  c.font = `400 52px ${DISPLAY}`;
-  c.fillText('$' + Math.floor(ph.balance).toLocaleString('en-US'), PH_W / 2, 330);
-  c.fillStyle = 'rgba(234,255,240,0.5)';
-  c.font = ar ? `600 20px ${AR_BODY}` : `500 15px ${MONO}`;
-  c.fillText(i18n.t('phone.bank.note'), PH_W / 2, 384);
-  // the chart only goes up
-  for (let i = 0; i < 9; i++) {
-    const h = 24 + i * 14 + Math.abs(Math.sin(now / 900 + i)) * 26;
-    c.fillStyle = i === 8 ? '#ffd75e' : 'rgba(88,255,138,0.75)';
-    c.fillRect(56 + i * 45, 620 - h, 28, h);
+  c.fillText(i18n.t('phone.pay.total'), ar ? PH_W - 48 : 48, top + 132);
+  c.textAlign = ar ? 'left' : 'right';
+  c.fillStyle = '#58ff8a';
+  c.font = `700 42px ${BUBBLE}`;
+  c.fillText('$' + shopTotal().toLocaleString('en-US'), ar ? 48 : PH_W - 48, top + 140);
+  // methods
+  c.textAlign = ar ? 'right' : 'left';
+  c.fillStyle = '#8fb5e3';
+  c.font = ar ? `700 20px ${AR_BODY}` : `600 16px ${MONO}`;
+  c.fillText(i18n.t('phone.pay.method'), ar ? PH_W - 48 : 48, top + 190);
+  [{ key: 'phone.pay.card', m: 0 }, { key: 'phone.pay.paypal', m: 1 }].forEach((r, i) => {
+    const y = top + 208 + i * 88;
+    const sel = pay.method === r.m && !pay.adding;
+    roundedPath(c, 40, y, PH_W - 80, 74, 20);
+    c.fillStyle = sel ? 'rgba(88,255,138,0.12)' : 'rgba(255,255,255,0.05)'; c.fill();
+    c.strokeStyle = sel ? '#58ff8a' : 'rgba(143,181,227,0.3)';
+    c.lineWidth = sel ? 3 : 2; c.stroke();
+    const rx = ar ? PH_W - 78 : 78;
+    c.beginPath(); c.arc(rx, y + 37, 13, 0, Math.PI * 2);
+    c.strokeStyle = sel ? '#58ff8a' : 'rgba(246,241,230,0.4)'; c.lineWidth = 2.5; c.stroke();
+    if (sel) { c.beginPath(); c.arc(rx, y + 37, 7, 0, Math.PI * 2); c.fillStyle = '#58ff8a'; c.fill(); }
+    c.fillStyle = '#eafff0';
+    c.font = ar ? `700 23px ${AR_BODY}` : `600 21px ${MONO}`;
+    c.textAlign = ar ? 'right' : 'left';
+    c.fillText(i18n.t(r.key), ar ? rx - 34 : rx + 34, y + 46);
+    hots.push({ x: 40, y, w: PH_W - 80, h: 74, act: 'method' + r.m, label: i18n.t(r.key) });
+  });
+  // add-a-card — a real keyboard sits on this field while typing
+  const fy = PH_CARD_FIELD.y;
+  if (pay.adding) {
+    roundedPath(c, PH_CARD_FIELD.x, fy, PH_CARD_FIELD.w, PH_CARD_FIELD.h, 20);
+    c.fillStyle = 'rgba(255,255,255,0.07)'; c.fill();
+    c.strokeStyle = Math.floor(now / 480) % 2 ? '#58ff8a' : 'rgba(88,255,138,0.4)';
+    c.lineWidth = 3; c.stroke();
+    const groups = pay.num.replace(/(.{4})/g, '$1 ').trim();
+    try { c.direction = 'ltr'; } catch {}
+    c.textAlign = 'left';
+    if (groups) {
+      c.fillStyle = '#eafff0';
+      c.font = `600 30px ${MONO}`;
+      c.fillText(groups + (Math.floor(now / 420) % 2 ? '▮' : ''), 64, fy + 50);
+    } else {
+      c.fillStyle = 'rgba(143,181,227,0.55)';
+      c.font = `500 20px ${MONO}`;
+      c.fillText(i18n.t('phone.pay.cardnum'), 64, fy + 48);
+    }
+    try { c.direction = ar ? 'rtl' : 'ltr'; } catch {}
+    const brand = cardBrand(pay.num);
+    if (brand) {
+      c.textAlign = 'right';
+      c.fillStyle = '#ffd75e';
+      c.font = `700 19px ${MONO}`;
+      c.fillText(brand, PH_W - 60, fy + 48);
+    }
+    c.textAlign = 'center';
+    c.fillStyle = 'rgba(234,255,240,0.5)';
+    c.font = ar ? `600 18px ${AR_BODY}` : `500 14px ${MONO}`;
+    c.fillText(i18n.t('phone.pay.trust'), PH_W / 2, fy + 106);
+  } else {
+    c.save(); c.setLineDash([10, 8]);
+    roundedPath(c, 40, fy, PH_W - 80, 64, 20);
+    c.strokeStyle = 'rgba(255,215,94,0.7)'; c.lineWidth = 2.5; c.stroke();
+    c.restore();
+    c.textAlign = 'center';
+    c.fillStyle = '#ffd75e';
+    c.font = ar ? `700 22px ${AR_BODY}` : `600 19px ${MONO}`;
+    c.fillText(i18n.t('phone.pay.add'), PH_W / 2, fy + 41);
+    hots.push({ x: 40, y: fy, w: PH_W - 80, h: 64, act: 'addcard', label: i18n.t('phone.pay.add') });
   }
-  c.fillStyle = 'rgba(143,181,227,0.5)';
-  c.fillRect(48, 624, PH_W - 96, 2);
-  // send wire
-  const busy = phase < 0.9;
-  roundedPath(c, 40, 700, PH_W - 80, 84, 42);
-  c.fillStyle = busy ? 'rgba(255,255,255,0.08)' : '#4a79ab'; c.fill();
-  c.fillStyle = busy ? '#8fb5e3' : '#eaf4ff';
-  c.font = ar ? `800 27px ${AR_BODY}` : `700 24px ${MONO}`;
-  c.fillText(i18n.t(busy ? 'phone.bank.sending' : 'phone.bank.send'), PH_W / 2 + (busy ? 20 : 0), 752);
-  if (busy) {
+  // PAY
+  const canPay = !processing && (!pay.adding || pay.num.length >= 12);
+  roundedPath(c, 40, 930, PH_W - 80, 84, 42);
+  c.fillStyle = processing ? 'rgba(255,255,255,0.08)' : canPay ? '#2fbf71' : 'rgba(255,255,255,0.07)';
+  c.fill();
+  c.textAlign = 'center';
+  if (processing) {
     c.strokeStyle = '#8fb5e3'; c.lineWidth = 5;
-    c.beginPath(); c.arc(PH_W / 2 - 130, 742, 16, now / 140, now / 140 + 4.4); c.stroke();
+    c.beginPath(); c.arc(PH_W / 2 - 150, 972, 15, now / 140, now / 140 + 4.4); c.stroke();
+    c.fillStyle = '#8fb5e3';
+    c.font = ar ? `700 23px ${AR_BODY}` : `600 20px ${MONO}`;
+    c.fillText(i18n.t('phone.pay.processing'), PH_W / 2 + 20, 982);
+  } else {
+    c.fillStyle = canPay ? '#06130b' : 'rgba(234,255,240,0.35)';
+    c.font = ar ? `800 27px ${AR_BODY}` : `700 25px ${BUBBLE}`;
+    c.fillText(`${i18n.t('phone.pay.pay')} $${shopTotal().toLocaleString('en-US')}`, PH_W / 2, 984);
+    if (canPay) hots.push({ x: 40, y: 918, w: PH_W - 80, h: 108, act: 'dopay', label: i18n.t('phone.pay.pay') });
   }
-  if (phase >= 0.9 && phase < 3.4) {
-    c.fillStyle = '#58ff8a';
-    c.font = ar ? `700 23px ${AR_BODY}` : `600 18px ${MONO}`;
-    c.fillText(i18n.t('phone.bank.sent'), PH_W / 2, 836);
-  }
+  c.fillStyle = 'rgba(143,181,227,0.55)';
+  c.font = ar ? `600 17px ${AR_BODY}` : `500 13px ${MONO}`;
+  c.fillText(i18n.t('phone.pay.secure'), PH_W / 2, 1032);
   c.textAlign = 'left';
-  if (!busy) hots.push({ x: 40, y: 688, w: PH_W - 80, h: 108, act: 'wire', label: i18n.t('phone.bank.send') });
+  // the bank replies
+  if (pay.payAt && now - pay.payAt >= 1400) {
+    pay.done = pay.adding && pay.num
+      ? `${cardBrand(pay.num)} •••• ${pay.num.slice(-4)}`
+      : pay.method === 1 ? 'PayPal' : i18n.t('phone.pay.card');
+    pay.open = false;
+    pay.payAt = 0;
+    pay.adding = false;
+    ph.checkoutAt = now;
+    sound.chime();
+  }
   return hots;
+}
+
+/* ---- BENZ EATS: order food, watch the courier ride ---- */
+function eatsGlyph(c, i, x, y) {
+  if (i === 0) {          // burger
+    c.fillStyle = '#e8b25a';
+    c.beginPath(); c.arc(x, y - 6, 34, Math.PI, 0); c.fill();
+    c.fillStyle = '#7a4a24'; roundedPath(c, x - 34, y - 2, 68, 12, 6); c.fill();
+    c.fillStyle = '#8fce5a'; roundedPath(c, x - 38, y + 12, 76, 7, 4); c.fill();
+    c.fillStyle = '#e8b25a'; roundedPath(c, x - 34, y + 21, 68, 14, 7); c.fill();
+  } else if (i === 1) {   // fries
+    c.fillStyle = '#f3d06a';
+    for (let f = 0; f < 4; f++) c.fillRect(x - 22 + f * 12, y - 34, 8, 34);
+    c.fillStyle = '#d0492f';
+    roundedPath(c, x - 30, y - 6, 60, 40, 8); c.fill();
+  } else {                 // pizza slice
+    c.fillStyle = '#f3d06a';
+    c.beginPath(); c.moveTo(x - 32, y - 26); c.lineTo(x + 32, y - 26); c.lineTo(x, y + 34); c.closePath(); c.fill();
+    c.fillStyle = '#d0492f';
+    for (const [px2, py2] of [[-12, -12], [10, -14], [0, 6]]) {
+      c.beginPath(); c.arc(x + px2, y + py2, 6, 0, Math.PI * 2); c.fill();
+    }
+  }
+}
+
+function phoneEats(c, now, ar) {
+  const ph = phoneState, e = ph.eats;
+  const hots = [phoneAppHeader(c, 'phone.eats.title', ar)];
+  if (e.phase === 'track') {
+    const el = now - e.orderAt;
+    const T = 14000;
+    const pr = clamp01(el / T);
+    c.textAlign = 'center';
+    c.fillStyle = '#8fb5e3';
+    c.font = ar ? `700 22px ${AR_BODY}` : `600 18px ${MONO}`;
+    c.fillText(i18n.t('phone.eats.track'), PH_W / 2, 210);
+    // step timeline
+    const steps = ['phone.eats.s1', 'phone.eats.s2', 'phone.eats.s3'];
+    const active = pr >= 1 ? 2 : el > 5500 ? 1 : 0;
+    steps.forEach((k, i) => {
+      const y = 290 + i * 110;
+      const on = i <= active;
+      const lx = ar ? PH_W - 96 : 96;
+      if (i < 2) {
+        c.strokeStyle = i < active ? '#58ff8a' : 'rgba(246,241,230,0.2)';
+        c.lineWidth = 4;
+        c.beginPath(); c.moveTo(lx, y + 20); c.lineTo(lx, y + 92); c.stroke();
+      }
+      c.beginPath(); c.arc(lx, y, 16, 0, Math.PI * 2);
+      c.fillStyle = on ? '#58ff8a' : 'rgba(246,241,230,0.15)'; c.fill();
+      if (i === active && pr < 1 && !RM) {
+        c.strokeStyle = 'rgba(88,255,138,0.5)'; c.lineWidth = 3;
+        c.beginPath(); c.arc(lx, y, 24 + Math.sin(now / 200) * 4, 0, Math.PI * 2); c.stroke();
+      }
+      c.textAlign = ar ? 'right' : 'left';
+      c.fillStyle = on ? '#eafff0' : 'rgba(234,255,240,0.4)';
+      c.font = ar ? `700 26px ${AR_BODY}` : `600 22px ${MONO}`;
+      c.fillText(i18n.t(k), ar ? lx - 44 : lx + 44, y + 9);
+    });
+    // the courier's journey
+    const rx0 = 90, rx1 = 422, ry0 = 700, ry1 = 790;
+    c.save();
+    c.setLineDash([10, 10]);
+    c.strokeStyle = 'rgba(143,181,227,0.5)'; c.lineWidth = 3;
+    c.beginPath(); c.moveTo(rx0, ry0); c.quadraticCurveTo(PH_W / 2, ry1 + 60, rx1, ry1 - 40); c.stroke();
+    c.restore();
+    // home flag at the end
+    c.fillStyle = '#8fb5e3';
+    c.fillRect(rx1 - 2, ry1 - 90, 4, 40);
+    c.fillStyle = '#58ff8a';
+    c.beginPath(); c.moveTo(rx1 + 2, ry1 - 90); c.lineTo(rx1 + 30, ry1 - 80); c.lineTo(rx1 + 2, ry1 - 70); c.closePath(); c.fill();
+    const tq = pr, mt = 1 - tq;
+    const cxq = mt * mt * rx0 + 2 * mt * tq * (PH_W / 2) + tq * tq * rx1;
+    const cyq = mt * mt * ry0 + 2 * mt * tq * (ry1 + 60) + tq * tq * (ry1 - 40);
+    c.beginPath(); c.arc(cxq, cyq, 15, 0, Math.PI * 2);
+    c.fillStyle = '#ffd75e'; c.fill();
+    c.fillStyle = '#17130e';
+    c.font = `700 16px ${MONO}`;
+    c.textAlign = 'center';
+    c.fillText('≡', cxq, cyq + 6);
+    // ETA / delivered
+    if (pr >= 1) {
+      c.fillStyle = '#58ff8a';
+      c.font = ar ? `800 30px ${AR_DISPLAY}` : `700 27px ${BUBBLE}`;
+      c.fillText(i18n.t('phone.eats.s3'), PH_W / 2, 880);
+      c.fillStyle = 'rgba(234,255,240,0.65)';
+      c.font = ar ? `600 20px ${AR_BODY}` : `500 16px ${MONO}`;
+      c.fillText(i18n.t('phone.eats.done'), PH_W / 2, 922);
+      roundedPath(c, 136, 950, PH_W - 272, 64, 32);
+      c.strokeStyle = '#58ff8a'; c.lineWidth = 3; c.stroke();
+      c.fillStyle = '#baffd0';
+      c.font = ar ? `700 22px ${AR_BODY}` : `600 18px ${MONO}`;
+      c.fillText(i18n.t('phone.game.again'), PH_W / 2, 991);
+      hots.push({ x: 136, y: 938, w: PH_W - 272, h: 88, act: 'eagain', label: i18n.t('phone.game.again') });
+    } else {
+      c.fillStyle = '#ffd75e';
+      c.font = `700 34px ${BUBBLE}`;
+      c.fillText(`${i18n.t('phone.eats.eta')} ${Math.ceil((T - el) / 1000)}s`, PH_W / 2, 890);
+    }
+    c.textAlign = 'left';
+    return hots;
+  }
+  // menu
+  let total = 0, count = 0;
+  EATS_MENU.forEach((it, i) => { total += it.price * e.counts[i]; count += e.counts[i]; });
+  EATS_MENU.forEach((it, i) => {
+    const y = 180 + i * 158;
+    roundedPath(c, 32, y, PH_W - 64, 138, 24);
+    c.fillStyle = 'rgba(255,255,255,0.055)'; c.fill();
+    c.strokeStyle = e.counts[i] ? '#58ff8a' : 'rgba(143,181,227,0.35)';
+    c.lineWidth = e.counts[i] ? 3 : 2; c.stroke();
+    eatsGlyph(c, i, ar ? PH_W - 96 : 96, y + 68);
+    const tx = ar ? PH_W - 168 : 168;
+    c.textAlign = ar ? 'right' : 'left';
+    c.fillStyle = '#eafff0';
+    c.font = ar ? `800 27px ${AR_DISPLAY}` : `700 24px ${BUBBLE}`;
+    c.fillText(i18n.t(it.key), tx, y + 62);
+    c.fillStyle = '#58ff8a';
+    c.font = `700 26px ${MONO}`;
+    c.fillText('$' + it.price, tx, y + 102);
+    // add chip
+    const chx = ar ? 46 : PH_W - 46 - 92;
+    roundedPath(c, chx, y + 40, 92, 56, 28);
+    c.fillStyle = e.counts[i] ? '#2fbf71' : 'rgba(88,255,138,0.14)'; c.fill();
+    c.strokeStyle = '#58ff8a'; c.lineWidth = 2; c.stroke();
+    c.textAlign = 'center';
+    c.fillStyle = e.counts[i] ? '#06130b' : '#baffd0';
+    c.font = ar ? `700 22px ${AR_BODY}` : `700 19px ${MONO}`;
+    c.fillText(e.counts[i] ? '×' + e.counts[i] : i18n.t('phone.eats.add'), chx + 46, y + 76);
+    hots.push({ x: 32, y, w: PH_W - 64, h: 138, act: 'eat' + i, label: i18n.t(it.key) });
+  });
+  // place order
+  const on = count > 0;
+  roundedPath(c, 40, 880, PH_W - 80, 82, 41);
+  c.fillStyle = on ? '#2fbf71' : 'rgba(255,255,255,0.07)'; c.fill();
+  c.textAlign = 'center';
+  c.fillStyle = on ? '#06130b' : 'rgba(234,255,240,0.4)';
+  c.font = ar ? `800 26px ${AR_BODY}` : `700 23px ${BUBBLE}`;
+  c.fillText(on ? `${i18n.t('phone.eats.order')} — $${total}` : i18n.t('phone.eats.empty'), PH_W / 2, 932);
+  c.textAlign = 'left';
+  if (on) hots.push({ x: 40, y: 868, w: PH_W - 80, h: 106, act: 'eorder', label: i18n.t('phone.eats.order') });
+  return hots;
+}
+
+/* ---- MEET: a real calendar for a real meeting (confirmed on WhatsApp) ---- */
+function calLayout() {
+  const d = new Date();
+  const y = d.getFullYear(), m = d.getMonth();
+  const first = new Date(y, m, 1).getDay();
+  const days = new Date(y, m + 1, 0).getDate();
+  const rows = Math.ceil((first + days) / 7);
+  return { y, m, first, days, rows, today: d.getDate() };
+}
+const PH_CAL = { x: 48, w: 416, top: 292, rh: 56 };
+const phCalRect = { x: 0, y: 0, w: 0, h: 0 };   // set while the calendar paints
+
+function pickCalendarDay(fx, fy) {
+  const L = calLayout();
+  const col = Math.min(6, Math.max(0, Math.floor(fx * 7)));
+  const row = Math.min(L.rows - 1, Math.max(0, Math.floor(fy * L.rows)));
+  const day = row * 7 + col - L.first + 1;
+  if (day >= L.today && day <= L.days) {
+    phoneState.meet.day = day;
+    phoneState.meet.slot = -1;
+    phoneState.meet.sent = false;
+    sound.key();
+    phoneState.everTapped = true;
+  }
 }
 
 function phoneBook(c, now, ar) {
-  const ph = phoneState;
+  const ph = phoneState, me = ph.meet;
   const hots = [phoneAppHeader(c, 'phone.book.title', ar)];
-  const slots = ['phone.book.slot1', 'phone.book.slot2', 'phone.book.slot3'];
-  slots.forEach((k, i) => {
-    const y = 210 + i * 150;
-    const on = ph.booked === i;
-    roundedPath(c, 32, y, PH_W - 64, 118, 22);
-    c.fillStyle = on ? 'rgba(88,255,138,0.14)' : 'rgba(255,255,255,0.055)'; c.fill();
-    c.strokeStyle = on ? '#58ff8a' : 'rgba(143,181,227,0.35)';
-    c.lineWidth = on ? 4 : 2; c.stroke();
-    const tx = ar ? PH_W - 62 : 62;
-    c.textAlign = ar ? 'right' : 'left';
-    c.fillStyle = '#eafff0';
-    c.font = ar ? `700 27px ${AR_BODY}` : `600 24px ${MONO}`;
-    c.fillText(i18n.t(k), tx, y + 52);
-    c.fillStyle = on ? '#58ff8a' : '#8fb5e3';
-    c.font = ar ? `700 21px ${AR_BODY}` : `600 17px ${MONO}`;
-    c.fillText(i18n.t(on ? 'phone.book.done' : 'phone.book.free'), tx, y + 92);
-    c.textAlign = 'left';
-    hots.push({ x: 32, y, w: PH_W - 64, h: 118, act: 'slot' + i, label: i18n.t(k) });
-  });
-  if (ph.booked >= 0) {
-    c.textAlign = 'center';
-    c.fillStyle = '#ffd75e';
-    c.font = ar ? `700 24px ${AR_BODY}` : `600 19px ${MONO}`;
-    c.fillText(i18n.t('phone.book.note'), PH_W / 2, 740);
-    c.textAlign = 'left';
+  const L = calLayout();
+  const loc = ar ? 'ar' : 'en-GB';
+  // month title
+  c.textAlign = 'center';
+  c.fillStyle = '#eafff0';
+  let month = '';
+  try { month = new Date(L.y, L.m, 1).toLocaleDateString(loc, { month: 'long', year: 'numeric' }); } catch {}
+  c.font = ar ? `800 30px ${AR_DISPLAY}` : `700 27px ${BUBBLE}`;
+  c.fillText(month, PH_W / 2, 200);
+  c.fillStyle = '#8fb5e3';
+  c.font = ar ? `700 19px ${AR_BODY}` : `600 15px ${MONO}`;
+  c.fillText(i18n.t(me.day > 0 ? 'phone.meet.time' : 'phone.meet.pick'), PH_W / 2, 238);
+  // weekday letters (Sunday-first)
+  const cw = PH_CAL.w / 7;
+  c.font = `600 15px ${MONO}`;
+  c.fillStyle = 'rgba(143,181,227,0.6)';
+  for (let i = 0; i < 7; i++) {
+    let wd = '';
+    try { wd = new Date(2024, 8, 1 + i).toLocaleDateString(loc, { weekday: 'narrow' }); } catch {}
+    c.fillText(wd, PH_CAL.x + cw * i + cw / 2, 272);
   }
+  // the grid
+  for (let d = 1; d <= L.days; d++) {
+    const idx = L.first + d - 1;
+    const col = idx % 7, row = Math.floor(idx / 7);
+    const cx = PH_CAL.x + cw * col + cw / 2;
+    const cy = PH_CAL.top + row * PH_CAL.rh + PH_CAL.rh / 2;
+    const past = d < L.today;
+    const sel = me.day === d;
+    if (sel) {
+      c.beginPath(); c.arc(cx, cy, 24, 0, Math.PI * 2);
+      c.fillStyle = '#2fbf71'; c.fill();
+    } else if (d === L.today) {
+      c.beginPath(); c.arc(cx, cy, 24, 0, Math.PI * 2);
+      c.strokeStyle = '#ffd75e'; c.lineWidth = 2.5; c.stroke();
+    }
+    c.fillStyle = sel ? '#06130b' : past ? 'rgba(234,255,240,0.25)' : '#eafff0';
+    c.font = `${sel ? 700 : 500} 22px ${MONO}`;
+    c.fillText(String(d), cx, cy + 8);
+  }
+  const gridH = L.rows * PH_CAL.rh;
+  phCalRect.x = PH_CAL.x; phCalRect.y = PH_CAL.top;
+  phCalRect.w = PH_CAL.w; phCalRect.h = gridH;
+  // time slots
+  const sy = PH_CAL.top + gridH + 34;
+  if (me.day > 0) {
+    MEET_SLOTS.forEach((s, i) => {
+      const bx = 56 + i * 138;
+      const on = me.slot === i;
+      roundedPath(c, bx, sy, 122, 64, 32);
+      c.fillStyle = on ? '#2fbf71' : 'rgba(255,255,255,0.06)'; c.fill();
+      c.strokeStyle = on ? '#58ff8a' : 'rgba(143,181,227,0.35)'; c.lineWidth = 2; c.stroke();
+      c.fillStyle = on ? '#06130b' : '#eafff0';
+      c.font = `700 24px ${MONO}`;
+      c.fillText(s, bx + 61, sy + 41);
+      hots.push({ x: bx, y: sy, w: 122, h: 64, act: 'slot' + i, label: s });
+    });
+  }
+  // confirm — a REAL request, lands on WhatsApp in a new tab
+  const cy2 = sy + 100;
+  if (me.day > 0 && me.slot >= 0) {
+    if (me.sent) {
+      c.fillStyle = '#58ff8a';
+      c.font = ar ? `800 26px ${AR_BODY}` : `700 22px ${BUBBLE}`;
+      c.fillText(i18n.t('phone.meet.sent'), PH_W / 2, cy2 + 46);
+    } else {
+      roundedPath(c, 56, cy2, PH_W - 112, 80, 40);
+      const g = c.createLinearGradient(56, cy2, PH_W - 56, cy2 + 80);
+      g.addColorStop(0, '#37d67a'); g.addColorStop(1, '#1fae5e');
+      c.fillStyle = g; c.fill();
+      c.fillStyle = '#06130b';
+      c.font = ar ? `800 25px ${AR_BODY}` : `700 22px ${BUBBLE}`;
+      c.fillText(i18n.t('phone.meet.confirm'), PH_W / 2, cy2 + 50);
+      hots.push({ x: 56, y: cy2 - 12, w: PH_W - 112, h: 104, act: 'order', label: i18n.t('phone.meet.confirm'), link: true });
+    }
+    c.fillStyle = 'rgba(234,255,240,0.5)';
+    c.font = ar ? `600 18px ${AR_BODY}` : `500 14px ${MONO}`;
+    c.fillText(i18n.t('phone.meet.note'), PH_W / 2, cy2 + 124);
+  }
+  c.textAlign = 'left';
   return hots;
 }
 
@@ -2464,7 +2844,7 @@ function phoneBuilderName(c, now, ar) {
   c.font = ar ? `700 21px ${AR_BODY}` : `600 17px ${MONO}`;
   c.fillText(i18n.t('phone.b.step1'), PH_W / 2, 212);
   c.fillStyle = '#eafff0';
-  c.font = ar ? `800 40px ${AR_DISPLAY}` : `400 36px ${DISPLAY}`;
+  c.font = ar ? `800 40px ${AR_DISPLAY}` : `400 36px ${BUBBLE}`;
   c.fillText(i18n.t('phone.b.name'), PH_W / 2, 280);
   // the field
   const f = PH_NAME_FIELD;
@@ -2499,6 +2879,57 @@ function phoneBuilderName(c, now, ar) {
 }
 
 /* ---- STEP 2: pick the vibe ---- */
+/* ---- STEP 2: what do they actually do? the app tailors itself ---- */
+function phoneBuilderType(c, now, ar) {
+  const ph = phoneState;
+  const hots = [phoneAppHeader(c, 'phone.yours.title', ar)];
+  c.textAlign = 'center';
+  c.fillStyle = '#8fb5e3';
+  c.font = ar ? `700 21px ${AR_BODY}` : `600 17px ${MONO}`;
+  c.fillText(i18n.t('phone.b.stepT'), PH_W / 2, 212);
+  c.fillStyle = '#eafff0';
+  c.font = ar ? `800 38px ${AR_DISPLAY}` : `700 32px ${BUBBLE}`;
+  c.fillText(i18n.t('phone.b.type'), PH_W / 2, 278);
+  const glyphs = [
+    (x, y) => eatsGlyph(c, 0, x, y),                                     // restaurant
+    (x, y) => {                                                          // shop bag
+      c.strokeStyle = '#eafff0'; c.lineWidth = 5; c.lineJoin = 'round';
+      c.strokeRect(x - 22, y - 8, 44, 30);
+      c.beginPath(); c.arc(x, y - 12, 13, Math.PI, 0); c.stroke();
+    },
+    (x, y) => {                                                          // clinic cross
+      c.fillStyle = '#eafff0';
+      c.fillRect(x - 6, y - 22, 12, 44); c.fillRect(x - 22, y - 6, 44, 12);
+    },
+    (x, y) => {                                                          // spark
+      c.fillStyle = '#ffd75e';
+      c.font = `400 44px ${BUBBLE}`; c.textAlign = 'center';
+      c.fillText('✦', x, y + 15);
+    },
+  ];
+  ['phone.b.t0', 'phone.b.t1', 'phone.b.t2', 'phone.b.t3'].forEach((k, i) => {
+    const y = 320 + i * 132;
+    const sel = ph.bizType === i;
+    roundedPath(c, 48, y, PH_W - 96, 112, 26);
+    c.fillStyle = sel ? 'rgba(88,255,138,0.13)' : 'rgba(255,255,255,0.055)'; c.fill();
+    c.strokeStyle = sel ? '#58ff8a' : 'rgba(143,181,227,0.35)';
+    c.lineWidth = sel ? 3 : 2; c.stroke();
+    const gx = ar ? PH_W - 106 : 106;
+    c.save(); c.translate(0, 0); c.scale(0.8, 0.8);
+    glyphs[i](gx / 0.8, (y + 56) / 0.8);
+    c.restore();
+    c.fillStyle = '#eafff0';
+    const lbl = i18n.t(k);
+    fitFont(c, lbl, PH_W - 250, ar ? 26 : 21, ar ? 700 : 600, ar ? AR_BODY : MONO, 14);
+    c.textAlign = ar ? 'right' : 'left';
+    c.fillText(lbl, ar ? gx - 62 : gx + 62, y + 66);
+    c.textAlign = 'center';
+    hots.push({ x: 48, y, w: PH_W - 96, h: 112, act: 'btype' + i, label: lbl });
+  });
+  c.textAlign = 'left';
+  return hots;
+}
+
 function phoneBuilderColor(c, now, ar) {
   const hots = [phoneAppHeader(c, 'phone.yours.title', ar)];
   c.textAlign = 'center';
@@ -2506,7 +2937,7 @@ function phoneBuilderColor(c, now, ar) {
   c.font = ar ? `700 21px ${AR_BODY}` : `600 17px ${MONO}`;
   c.fillText(i18n.t('phone.b.step2'), PH_W / 2, 212);
   c.fillStyle = '#eafff0';
-  c.font = ar ? `800 40px ${AR_DISPLAY}` : `400 36px ${DISPLAY}`;
+  c.font = ar ? `800 40px ${AR_DISPLAY}` : `400 36px ${BUBBLE}`;
   c.fillText(i18n.t('phone.b.color'), PH_W / 2, 280);
   ['phone.b.v1', 'phone.b.v2', 'phone.b.v3'].forEach((k, i) => {
     const y = 330 + i * 172;
@@ -2520,7 +2951,7 @@ function phoneBuilderColor(c, now, ar) {
     roundedPath(c, tx - 34, y + 36, 68, 68, 18);
     c.fillStyle = 'rgba(255,255,255,0.92)'; c.fill();
     c.fillStyle = v.g1;
-    c.font = `400 40px ${DISPLAY}`;
+    c.font = `400 40px ${BUBBLE}`;
     c.fillText(bizInitial(), tx, y + 86);
     c.fillStyle = '#ffffff';
     c.font = ar ? `800 30px ${AR_BODY}` : `700 27px ${MONO}`;
@@ -2550,7 +2981,7 @@ function phoneBuilderGen(c, now, ar) {
   g.addColorStop(0, v.g0); g.addColorStop(1, v.g1);
   c.fillStyle = g; c.fill();
   c.fillStyle = '#ffffff';
-  c.font = `400 64px ${DISPLAY}`;
+  c.font = `400 64px ${BUBBLE}`;
   c.fillText(bizInitial(), PH_W / 2, 484);
   // rotating status lines
   const lines = ['phone.b.gen1', 'phone.b.gen2', 'phone.b.gen3', 'phone.b.gen4'];
@@ -2595,7 +3026,7 @@ function phoneMyApp(c, now, ar) {
     roundedPath(c, PH_W / 2 - 75 * s, 380 - 75 * s + 75, 150 * s, 150 * s, 36 * s);
     c.fillStyle = 'rgba(255,255,255,0.95)'; c.fill();
     c.fillStyle = v.g1;
-    c.font = `400 ${Math.max(10, 76 * s)}px ${DISPLAY}`;
+    c.font = `400 ${Math.max(10, 76 * s)}px ${BUBBLE}`;
     c.textAlign = 'center';
     c.fillText(bizInitial(), PH_W / 2, 458);
     c.fillStyle = '#ffffff';
@@ -2616,18 +3047,19 @@ function phoneMyApp(c, now, ar) {
   hg.addColorStop(0, v.g0); hg.addColorStop(1, v.g1);
   c.fillStyle = hg; c.fill();
   c.fillStyle = '#fff';
-  c.font = `400 26px ${DISPLAY}`;
+  c.font = `400 26px ${BUBBLE}`;
   c.textAlign = 'center';
   c.fillText(bizInitial(), PH_W / 2 - (ar ? -118 : 126), 120);
   c.fillStyle = '#eafff0';
   fitFont(c, name, 230, 30, ar ? 800 : 400, ar ? AR_DISPLAY : DISPLAY, 16);
   c.fillText(name, PH_W / 2 + (ar ? -36 : 36), 120);
-  // live orders roll in
+  // live orders roll in — in the client's own line of business
+  const feed = TYPE_FEED[ph.bizType >= 0 ? ph.bizType : 3];
   if (now - ph.lastOrderAt > 1900 && ph.orderSeq < 60) {
     ph.lastOrderAt = now;
     ph.orderSeq++;
-    ph.orders.unshift({ key: 'phone.my.o' + (1 + ((ph.orderSeq - 1) % 5)), num: 100 + ph.orderSeq, at: now });
-    ph.orders = ph.orders.slice(0, 4);
+    ph.orders.unshift({ key: feed[(ph.orderSeq - 1) % feed.length], num: 100 + ph.orderSeq, at: now });
+    ph.orders = ph.orders.slice(0, 3);
     ph.revenue += 140 + ((ph.orderSeq * 97) % 730);
     sound.key();
   }
@@ -2642,16 +3074,21 @@ function phoneMyApp(c, now, ar) {
   c.font = ar ? `700 21px ${AR_BODY}` : `600 17px ${MONO}`;
   c.fillText(i18n.t('phone.my.rev'), PH_W / 2, 216);
   c.fillStyle = '#ffffff';
-  c.font = `400 54px ${DISPLAY}`;
+  c.font = `400 54px ${BUBBLE}`;
   c.fillText('$' + Math.floor(ph.revShown).toLocaleString('en-US'), PH_W / 2, 288);
+  // a status line in their trade
+  c.fillStyle = '#ffd75e';
+  const xline = i18n.t('phone.my.x' + (ph.bizType >= 0 ? ph.bizType : 3));
+  fitFont(c, xline, PH_W - 80, ar ? 21 : 16, ar ? 700 : 600, ar ? AR_BODY : MONO, 11);
+  c.fillText(xline, PH_W / 2, 356);
   // feed
   c.fillStyle = '#8fb5e3';
   c.font = ar ? `700 21px ${AR_BODY}` : `600 17px ${MONO}`;
-  c.fillText(i18n.t('phone.my.orders') + '  ●', PH_W / 2, 372);
+  c.fillText(i18n.t('phone.my.orders') + '  ●', PH_W / 2, 404);
   ph.orders.forEach((o, i) => {
     const age = now - o.at;
     const slide = smooth(0, 1, clamp01(age / 380));
-    const y = 396 + i * 100 + (1 - slide) * -26;
+    const y = 428 + i * 100 + (1 - slide) * -26;
     c.globalAlpha = slide;
     roundedPath(c, 48, y, PH_W - 96, 84, 20);
     c.fillStyle = 'rgba(255,255,255,0.06)'; c.fill();
@@ -2662,8 +3099,9 @@ function phoneMyApp(c, now, ar) {
     c.font = `700 22px ${MONO}`;
     c.fillText('#' + o.num, nx, y + 52);
     c.fillStyle = '#eafff0';
-    c.font = ar ? `700 24px ${AR_BODY}` : `600 21px ${MONO}`;
-    c.fillText(i18n.t(o.key), ar ? nx - 100 : nx + 100, y + 52);
+    const line = i18n.t(o.key);
+    fitFont(c, line, PH_W - 260, ar ? 24 : 20, ar ? 700 : 600, ar ? AR_BODY : MONO, 13);
+    c.fillText(line, ar ? nx - 100 : nx + 100, y + 52);
     c.globalAlpha = 1;
   });
   // slide-to-order
@@ -2725,7 +3163,7 @@ function phoneHome(c, now, ar) {
   c.font = ar ? `700 21px ${AR_BODY}` : `600 17px ${MONO}`;
   c.fillText(i18n.t('phone.os'), PH_W / 2, 140);
   c.fillStyle = '#eafff0';
-  c.font = ar ? `800 36px ${AR_DISPLAY}` : `400 30px ${DISPLAY}`;
+  c.font = ar ? `800 36px ${AR_DISPLAY}` : `400 30px ${BUBBLE}`;
   c.fillText(i18n.t('phone.hello'), PH_W / 2, 192);
   c.textAlign = 'left';
   const hots = phoneIcons(c, ar, now);
@@ -2822,7 +3260,7 @@ function phoneLock(c, now, ar) {
   bg.addColorStop(0, '#121a26'); bg.addColorStop(0.55, '#0b1118'); bg.addColorStop(1, '#151d29');
   c.fillStyle = bg; c.fillRect(0, 0, PH_W, PH_H);
   c.fillStyle = 'rgba(122,166,214,0.05)';
-  c.font = `400 430px ${DISPLAY}`;
+  c.font = `400 430px ${BUBBLE}`;
   c.textAlign = 'center';
   c.fillText('b', PH_W / 2, 780);
   const d = new Date();
@@ -2860,7 +3298,7 @@ function phoneLock(c, now, ar) {
   // big clock + date
   const hh = String(d.getHours()).padStart(2, '0'), mm = String(d.getMinutes()).padStart(2, '0');
   c.fillStyle = '#eef4fb';
-  c.font = `400 110px ${DISPLAY}`;
+  c.font = `400 110px ${BUBBLE}`;
   c.fillText(`${hh}:${mm}`, PH_W / 2, 330);
   c.fillStyle = '#8fb5e3';
   let dateLine = '';
@@ -2906,7 +3344,7 @@ function phoneGame(c, now, ar) {
     c.font = ar ? `700 24px ${AR_BODY}` : `600 19px ${MONO}`;
     c.fillText(i18n.t('phone.game.over'), PH_W / 2, 250);
     c.fillStyle = '#ffd75e';
-    c.font = `400 96px ${DISPLAY}`;
+    c.font = `400 96px ${BUBBLE}`;
     c.fillText(String(g.score), PH_W / 2, 380);
     c.fillStyle = '#eafff0';
     c.font = ar ? `700 26px ${AR_BODY}` : `600 20px ${MONO}`;
@@ -2955,7 +3393,7 @@ function phoneGame(c, now, ar) {
   if (played < 0) {
     c.textAlign = 'center';
     c.fillStyle = '#ffd75e';
-    c.font = ar ? `800 34px ${AR_DISPLAY}` : `400 30px ${DISPLAY}`;
+    c.font = ar ? `800 34px ${AR_DISPLAY}` : `400 30px ${BUBBLE}`;
     c.fillText(i18n.t('phone.game.go'), PH_W / 2, 540);
     c.textAlign = 'left';
     return hots;
@@ -2999,9 +3437,10 @@ function phoneGame(c, now, ar) {
 function phoneScreenPaint(name, c, now, ar) {
   if (name === 'home') return phoneHome(c, now, ar);
   if (name === 'shop') return phoneShop(c, now, ar);
-  if (name === 'bank') return phoneBank(c, now, ar);
+  if (name === 'bank') return phoneEats(c, now, ar);
   if (name === 'book') return phoneBook(c, now, ar);
   if (name === 'b-name') return phoneBuilderName(c, now, ar);
+  if (name === 'b-type') return phoneBuilderType(c, now, ar);
   if (name === 'b-color') return phoneBuilderColor(c, now, ar);
   if (name === 'b-gen') return phoneBuilderGen(c, now, ar);
   if (name === 'myapp') return phoneMyApp(c, now, ar);
@@ -3030,7 +3469,7 @@ function drawPhoneUI(t, now) {
     bg.addColorStop(0, '#111823'); bg.addColorStop(0.5, '#0b1118'); bg.addColorStop(1, '#141b26');
     c.fillStyle = bg; c.fillRect(0, 0, PH_W, PH_H);
     c.fillStyle = 'rgba(122,166,214,0.05)';
-    c.font = `400 430px ${DISPLAY}`;
+    c.font = `400 430px ${BUBBLE}`;
     c.textAlign = 'center';
     c.fillText('b', PH_W / 2 - phTilt.x * 22, 760 - phTilt.y * 16);
     c.textAlign = 'left';
@@ -3123,7 +3562,30 @@ function drawPhoneUI(t, now) {
 /* ---- DOM hotspots that track the canvas-drawn buttons ---- */
 const PH_POOL = [];
 const phoneOrderEl = document.getElementById('phone-order');
-let phInput = null, phSlide = null;
+let phInput = null, phSlide = null, phGrid = null;
+
+/* the CTA link speaks for whatever the visitor is doing right now */
+function phoneCtaLink() {
+  const ph = phoneState;
+  if (ph.app === 'book' && ph.meet.day > 0 && ph.meet.slot >= 0) {
+    const d = new Date();
+    const when = `${ph.meet.day}/${d.getMonth() + 1}/${d.getFullYear()} at ${MEET_SLOTS[ph.meet.slot]}`;
+    return 'https://wa.me/905343388448?text=' + encodeURIComponent(`Hello BENZERSIZ — I'd like to book a meeting on ${when}.`);
+  }
+  if (ph.app === 'game' && ph.game && ph.game.over) {
+    return 'https://wa.me/905343388448?text=' + encodeURIComponent(`Hello BENZERSIZ — I scored ${ph.game.score} in Floppy Catch. I believe I am owed an app.`);
+  }
+  return phoneWaLink();
+}
+if (phoneOrderEl) {
+  phoneOrderEl.addEventListener('click', () => {
+    const ph = phoneState;
+    if (ph.app === 'book' && ph.meet.day > 0 && ph.meet.slot >= 0) {
+      ph.meet.sent = true;
+      sound.chime();
+    }
+  });
+}
 
 function ensurePhoneHots() {
   if (PH_POOL.length) return;
@@ -3165,15 +3627,36 @@ function ensurePhoneExtras() {
   phInput.className = 'ph-hot';
   // invisible glass over the drawn field — 16px stops iOS zoom-on-focus
   phInput.style.cssText = 'opacity:0.02;font-size:16px;color:transparent;caret-color:transparent;background:transparent;border:0;outline:none;';
+  phInput.dataset.mode = 'name';
   phInput.addEventListener('input', () => {
-    phoneState.bizName = phInput.value.toUpperCase().slice(0, 18);
+    if (phInput.dataset.mode === 'card') {
+      const digits = phInput.value.replace(/\D/g, '').slice(0, 16);
+      phInput.value = digits;
+      phoneState.pay.num = digits;
+    } else {
+      phoneState.bizName = phInput.value.toUpperCase().slice(0, 18);
+    }
     sound.key();
   });
   phInput.addEventListener('keydown', (e) => {
     e.stopPropagation();
-    if (e.key === 'Enter') phoneTap('bnext');
+    if (e.key === 'Enter') phoneTap(phInput.dataset.mode === 'card' ? 'dopay' : 'bnext');
   });
   document.body.appendChild(phInput);
+
+  // the calendar grid — one glass pane, taps resolved to day cells
+  phGrid = document.createElement('div');
+  phGrid.id = 'ph-grid';
+  phGrid.className = 'ph-hot';
+  phGrid.setAttribute('role', 'grid');
+  phGrid.setAttribute('aria-label', 'Calendar');
+  phGrid.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const r = phGrid.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    pickCalendarDay((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height);
+  });
+  document.body.appendChild(phGrid);
 
   phSlide = document.createElement('div');
   phSlide.id = 'ph-slide';
@@ -3205,8 +3688,7 @@ function ensurePhoneExtras() {
       ph.orderedAt = performance.now();
       ph.slideP = 1;
       sound.chime();
-      const w = window.open(phoneWaLink(), '_blank', 'noopener');
-      if (!w) window.location.href = phoneWaLink();
+      openWa(phoneWaLink());   // new tab — their built app stays on screen
     } else {
       ph.slideP = 0;   // spring home
     }
@@ -3256,9 +3738,13 @@ function phoneTap(act, rect) {
       break;
     case 'bnext':
       if (ph.bizName.trim().length >= 2) {
-        phoneGo('b-color'); sound.flip();
+        phoneGo('b-type'); sound.flip();
         if (phInput) phInput.blur();
       }
+      break;
+    case 'btype0': case 'btype1': case 'btype2': case 'btype3':
+      ph.bizType = +act[5];
+      phoneGo('b-color'); sound.flip();
       break;
     case 'vibe0': case 'vibe1': case 'vibe2':
       ph.vibe = +act[4];
@@ -3267,7 +3753,10 @@ function phoneTap(act, rect) {
       sound.flip();
       break;
     case 'back':
-      ph.checkoutAt = 0; phoneGo('home', -1); sound.flip();
+      if (ph.checkoutAt) { ph.cart = 0; ph.added = {}; }
+      ph.checkoutAt = 0;
+      ph.pay.open = false; ph.pay.payAt = 0; ph.pay.adding = false;
+      phoneGo('home', -1); sound.flip();
       if (phInput) phInput.blur();
       break;
     case 'notif':
@@ -3285,12 +3774,46 @@ function phoneTap(act, rect) {
       break;
     }
     case 'checkout':
-      if (ph.cart > 0 && !ph.checkoutAt) { ph.checkoutAt = performance.now(); sound.chime(); }
+      if (ph.cart > 0 && !ph.checkoutAt) {
+        ph.pay = { open: true, method: 0, adding: false, num: '', payAt: 0, done: '' };
+        sound.flip();
+      }
       break;
-    case 'wire':
-      ph.wireAt = performance.now(); ph.wirePaid = false; sound.key(); break;
+    case 'pclose':
+      ph.pay.open = false; ph.pay.adding = false;
+      if (phInput) phInput.blur();
+      sound.flip();
+      break;
+    case 'method0': case 'method1':
+      ph.pay.method = +act[6]; ph.pay.adding = false;
+      if (phInput) phInput.blur();
+      sound.key();
+      break;
+    case 'addcard':
+      ph.pay.adding = true; ph.pay.num = '';
+      ensurePhoneExtras();
+      if (phInput) { phInput.dataset.mode = 'card'; phInput.value = ''; phInput.focus(); }
+      sound.key();
+      break;
+    case 'dopay':
+      if (!ph.pay.payAt && (!ph.pay.adding || ph.pay.num.length >= 12)) {
+        ph.pay.payAt = performance.now();
+        if (phInput) phInput.blur();
+        sound.key();
+      }
+      break;
+    case 'eat0': case 'eat1': case 'eat2': {
+      const i = +act[3];
+      ph.eats.counts[i] = Math.min(9, ph.eats.counts[i] + 1);
+      sound.key();
+      break;
+    }
+    case 'eorder':
+      ph.eats.phase = 'track'; ph.eats.orderAt = performance.now(); sound.chime(); break;
+    case 'eagain':
+      ph.eats = { counts: [0, 0, 0], phase: 'menu', orderAt: 0 }; sound.flip(); break;
     case 'slot0': case 'slot1': case 'slot2':
-      ph.booked = +act[4]; sound.chime(); break;
+      ph.meet.slot = +act[4]; ph.meet.sent = false; sound.chime(); break;
   }
 }
 
@@ -3320,6 +3843,7 @@ function hidePhoneHots() {
     phInput.style.display = 'none';
   }
   if (phSlide && !phoneState.slideActive && phSlide.style.display !== 'none') phSlide.style.display = 'none';
+  if (phGrid && phGrid.style.display !== 'none') phGrid.style.display = 'none';
 }
 
 /* ---- the DOM overlay for this section (driven manually — the
@@ -3416,12 +3940,26 @@ function updatePhoneScene(pt, t, now) {
     }
     if (linkRect && phoneOrderEl) placePhoneRect(phoneOrderEl, linkRect.x, linkRect.y, linkRect.w, linkRect.h);
     else if (phoneOrderEl && phoneOrderEl.style.display !== 'none') phoneOrderEl.style.display = 'none';
-    // the REAL controls: keyboard input on the name field, drag zone on the slider
-    if (ph.app === 'b-name') {
-      placePhoneRect(phInput, PH_NAME_FIELD.x, PH_NAME_FIELD.y, PH_NAME_FIELD.w, PH_NAME_FIELD.h);
+    // the REAL controls: keyboard input (name or card), calendar grid, slide zone
+    const wantCard = ph.app === 'shop' && ph.pay.open && ph.pay.adding;
+    const wantName = ph.app === 'b-name';
+    if (wantCard || wantName) {
+      const mode = wantCard ? 'card' : 'name';
+      if (phInput.dataset.mode !== mode) {
+        phInput.dataset.mode = mode;
+        phInput.value = wantCard ? phoneState.pay.num : phoneState.bizName;
+        phInput.setAttribute('inputmode', wantCard ? 'numeric' : 'text');
+      }
+      const f = wantCard ? PH_CARD_FIELD : PH_NAME_FIELD;
+      placePhoneRect(phInput, f.x, f.y, f.w, f.h);
     } else if (phInput.style.display !== 'none') {
       if (document.activeElement === phInput) phInput.blur();
       phInput.style.display = 'none';
+    }
+    if (ph.app === 'book' && !ph.trans && phCalRect.w) {
+      placePhoneRect(phGrid, phCalRect.x, phCalRect.y, phCalRect.w, phCalRect.h);
+    } else if (phGrid.style.display !== 'none') {
+      phGrid.style.display = 'none';
     }
     const sliderLive = ph.app === 'myapp' && !ph.ordered && now - ph.splashAt >= 1400;
     if (sliderLive) {
@@ -3429,7 +3967,7 @@ function updatePhoneScene(pt, t, now) {
     } else if (!ph.slideActive && phSlide.style.display !== 'none') {
       phSlide.style.display = 'none';
     }
-    if (phoneOrderEl) phoneOrderEl.href = phoneWaLink();
+    if (phoneOrderEl) phoneOrderEl.href = phoneCtaLink();
   } else {
     hidePhoneHots();
   }

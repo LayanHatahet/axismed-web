@@ -23,6 +23,9 @@
   --ar-display: "Baloo Bhaijaan 2", "Rubik", sans-serif;
   --serif-ar: "Rubik", "Baloo Bhaijaan 2", sans-serif;
   --mono: "Courier Prime", "Courier New", Courier, monospace;
+  /* the two voices: bubbly tomorrow / CRT-terminal yesterday */
+  --bubble: "Baloo 2", "Baloo Bhaijaan 2", "Arial Rounded MT Bold", sans-serif;
+  --vintage: "VT323", "Courier Prime", monospace;
   --pages: 24;
 }
 
@@ -198,7 +201,22 @@ body.ar .nav-cta { font-family: var(--serif-ar); letter-spacing: 0; font-size: 1
 }
 #lang-toggle { font-size: 13px; padding: 6px 12px; line-height: 1.4; }
 #lang-toggle:hover, #sound-toggle:hover { border-color: var(--gold); color: var(--amber); }
+#sound-toggle { display: inline-flex; align-items: center; justify-content: center; }
+#sound-toggle svg { display: block; }
+#sound-toggle .spk-mute { display: none; }
 #sound-toggle[aria-pressed="false"] { color: rgba(244, 241, 234, 0.4); border-color: var(--line); }
+#sound-toggle[aria-pressed="false"] .spk-wave { display: none; }
+#sound-toggle[aria-pressed="false"] .spk-mute { display: block; }
+
+/* mobile menu — three honest lines */
+#nav-burger {
+  display: none; background: transparent; border: 1px solid var(--line);
+  padding: 9px 10px; cursor: pointer; flex-direction: column; gap: 4px;
+}
+#nav-burger span { display: block; width: 18px; height: 2px; background: var(--cream); transition: transform 0.25s, opacity 0.25s; }
+#nav-burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+#nav-burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+#nav-burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
 .nav-cta {
   font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
@@ -250,15 +268,39 @@ body.live #hud { opacity: 1; }
 .overline.gold { color: var(--real-gold); }
 
 .hero-stack { display: flex; flex-direction: column; align-items: center; transform: translateY(-21vh); }
-.hero-title {
-  font-family: var(--display);
-  font-weight: 400; font-size: clamp(30px, 5.4vw, 78px);
-  line-height: 1.12; letter-spacing: 0;
-  text-transform: uppercase;
+/* two eras, one headline — both clickable gateways */
+.hero-title { line-height: 1.3; letter-spacing: 0; }
+.ht-row { position: relative; display: inline-block; }
+.hero-title a { text-decoration: none; display: inline-block; transition: transform 0.3s cubic-bezier(0.22,1,0.36,1); }
+.hero-title a:hover, .hero-title a:focus-visible { transform: translateY(-2px) scale(1.02); }
+.ht-new {
+  font-family: var(--bubble);
+  font-weight: 800; font-size: clamp(24px, 3.6vw, 52px);
+  color: var(--cream);
+  text-shadow: 0 3px 24px rgba(156, 192, 234, 0.25);
 }
-.hero-title .em { font-family: var(--serif); font-style: italic; text-transform: none; color: var(--gold); font-size: 1.08em; }
-.hero-sub { margin-top: 30px; font-size: 12px; letter-spacing: 0.22em; color: var(--cream-dim); }
-.hero-sub .arrow { display: inline-block; animation: bob 1.6s ease-in-out infinite; color: var(--gold); }
+.ht-old {
+  font-family: var(--vintage);
+  font-weight: 400; font-size: clamp(26px, 3.9vw, 56px);
+  text-transform: uppercase;
+  color: var(--crt);
+  text-shadow: 0 0 14px rgba(109, 255, 143, 0.4);
+}
+/* the doodle hints — a dashed arrow that says "this is a door" */
+.ht-hint {
+  position: absolute; top: 50%; white-space: nowrap;
+  font-size: 10px; letter-spacing: 0.18em; color: var(--cream-dim);
+  display: flex; align-items: center; gap: 8px;
+  pointer-events: none;
+}
+.ht-row:nth-of-type(1) .ht-hint { left: calc(100% + 14px); transform: translateY(-40%); color: var(--amber); }
+.ht-row:nth-of-type(2) .ht-hint { left: calc(100% + 14px); transform: translateY(-40%); color: var(--crt); flex-direction: row; }
+.ht-arrow { width: 56px; height: 36px; overflow: visible; animation: htbob 2s ease-in-out infinite; }
+.ht-arrow-crt { width: 22px; height: 40px; }
+@keyframes htbob { 50% { transform: translateY(4px); } }
+body.ar .ht-hint { left: auto; right: calc(100% + 14px); }
+body.ar .ht-arrow { transform: scaleX(-1); }
+#ov-hero.on .hero-title a { pointer-events: auto; cursor: pointer; }
 @keyframes bob { 50% { transform: translateY(5px); } }
 
 /* animated scroll cue — clear, universal, prominent on mobile */
@@ -287,10 +329,7 @@ body.live .reveal:nth-child(1) { transition-delay: 0.25s; }
 body.live .hero-sub { transition-delay: 0.85s; }
 
 .corner { position: absolute; bottom: 26px; font-size: 10px; letter-spacing: 0.14em; color: rgba(244,241,234,0.4); }
-.corner-bl { left: clamp(18px, 4vw, 48px); }
-.corner-br { right: clamp(18px, 4vw, 48px); text-align: right; }
-body.ar .corner-bl { left: auto; right: clamp(18px, 4vw, 48px); text-align: right; }
-body.ar .corner-br { right: auto; left: clamp(18px, 4vw, 48px); text-align: left; }
+.corner-c { left: 50%; transform: translateX(-50%); text-align: center; white-space: nowrap; max-width: 94vw; }
 
 .giant-word {
   font-family: var(--serif);
@@ -446,8 +485,19 @@ a.cc-big:hover { color: var(--gold); border-color: var(--gold); }
 
 /* ============ RESPONSIVE — restudied for portrait phones ============ */
 @media (max-width: 760px) {
-  .nav-links { display: none; }
-  #nav { padding: 14px 14px; }
+  /* the menu collapses behind the burger — links become a tap-friendly panel */
+  #nav-burger { display: flex; }
+  .nav-links {
+    display: none;
+    position: absolute; top: 100%; left: 0; right: 0;
+    flex-direction: column; gap: 0;
+    background: rgba(23, 19, 14, 0.97);
+    border-bottom: 1px solid var(--line);
+    padding: 6px 0 10px;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a { padding: 14px 22px; font-size: 14px; border-top: 1px solid rgba(246,241,230,0.07); }
+  #nav { padding: 14px 14px; flex-wrap: wrap; }
   .nav-logo { font-size: 15px; gap: 7px; }
   .nav-logo .nav-mark { width: 20px; height: 22px; }
   .nav-cta { padding: 9px 12px; font-size: 10px; }
@@ -455,19 +505,14 @@ a.cc-big:hover { color: var(--gold); border-color: var(--gold); }
   .hud-section { display: none; }
 
   .hero-stack { transform: translateY(-17vh); }
-  .hero-title { font-size: clamp(24px, 7vw, 38px); }
-  .hero-sub { font-size: 10px; letter-spacing: 0.16em; }
+  .ht-new { font-size: clamp(22px, 6.4vw, 34px); }
+  .ht-old { font-size: clamp(24px, 7vw, 38px); }
+  /* on phones the doodles sit under the words, not beside them */
+  .ht-row { display: block; }
+  .ht-hint { position: static; justify-content: center; transform: none; margin-top: 2px; font-size: 9px; }
+  body.ar .ht-hint { transform: none; }
   .corner { font-size: 8px; bottom: 16px; }
-  .corner-br { max-width: 52vw; }
-
-  /* the scroll cue reads as a clear, friendly instruction on phones */
-  .scroll-cue { bottom: 30px; gap: 11px; }
-  .cue-text {
-    font-size: 11px; letter-spacing: 0.2em; color: var(--cream);
-    background: rgba(122, 166, 214, 0.14); border: 1px solid rgba(122, 166, 214, 0.4);
-    padding: 8px 16px; border-radius: 20px;
-  }
-  .cue-chev b { width: 13px; height: 13px; }
+  .corner-c { white-space: normal; }
 
   .big-title { font-size: clamp(20px, 6vw, 32px); }
   .giant-word { font-size: clamp(48px, 15vw, 70px); }

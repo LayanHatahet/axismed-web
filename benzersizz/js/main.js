@@ -139,16 +139,20 @@ const P_TELE     = 0.578;    // glitch-out flash → the tower shaft
 const P_PIN = 0.5565;                                   // right after the last record
 const P_HERO = 0.1;                                     // end of the hero → CRT dive
 const OLD_PAGES = 24;                                   // the original spacer height
-/* touch scrolls 1:1 with the finger, so touch devices get more runway
-   everywhere EXCEPT the hero dive — that transition stays quick */
+/* scroll pacing per segment. Touch tracks the finger 1:1, so touch gets far
+   more runway; the records INSIDE the laptop are the slowest of all. The
+   hero → CRT dive keeps its original pace everywhere. */
 const IS_TOUCH = window.matchMedia('(hover: none), (pointer: coarse)').matches;
-const TOUCH_STRETCH = IS_TOUCH ? 1.5 : 1.0;
-const HERO_PAGES = P_HERO * OLD_PAGES;
-const MID_PAGES = (P_PIN - P_HERO) * OLD_PAGES * TOUCH_STRETCH;
-const PHONE_PAGES = 4.0 * TOUCH_STRETCH;
-const TAIL_PAGES = (1 - P_PIN) * OLD_PAGES * 1.4 * TOUCH_STRETCH;
-const PIN_PAGES = HERO_PAGES + MID_PAGES;
-const TOTAL_PAGES = PIN_PAGES + PHONE_PAGES + TAIL_PAGES;
+const SEGS = [
+  { a: 0,        b: P_HERO,   mul: 1 },                            // the dive — untouched
+  { a: P_HERO,   b: P_PORT_A, mul: IS_TOUCH ? 2.0 : 1.1 },
+  { a: P_PORT_A, b: P_PORT_B, mul: IS_TOUCH ? 2.6 : 1.35 },        // the records
+  { a: P_PORT_B, b: P_PIN,    mul: IS_TOUCH ? 2.0 : 1.1 },
+  { a: P_PIN,    b: 1,        mul: (IS_TOUCH ? 2.0 : 1.1) * 1.4 }, // the descent
+].map((s) => ({ ...s, pages: (s.b - s.a) * OLD_PAGES * s.mul }));
+const PHONE_PAGES = 4.0 * (IS_TOUCH ? 2 : 1);
+const PIN_PAGES = SEGS[0].pages + SEGS[1].pages + SEGS[2].pages + SEGS[3].pages;
+const TOTAL_PAGES = PIN_PAGES + PHONE_PAGES + SEGS[4].pages;
 document.documentElement.style.setProperty('--pages', TOTAL_PAGES.toFixed(3));
 
 /* world layout: the pinned computer at x=0, then the descent shaft */
@@ -368,8 +372,8 @@ if (window.Lenis && !RM) {
     // touch tracks the finger 1:1 — no acceleration, gentle release
     syncTouch: true,
     touchMultiplier: 1.0,
-    syncTouchLerp: 0.5,
-    touchInertiaMultiplier: 6,
+    syncTouchLerp: 0.75,
+    touchInertiaMultiplier: 4,
   });
   lenis.stop();
 }
@@ -383,11 +387,16 @@ function scrollRaw() {
 }
 /* raw scroll → legacy timeline position (the phone scene is a plateau at P_PIN) */
 function scrollP() {
-  const x = scrollRaw() * TOTAL_PAGES;
-  if (x <= HERO_PAGES) return (x / HERO_PAGES) * P_HERO;
-  if (x <= PIN_PAGES) return P_HERO + ((x - HERO_PAGES) / MID_PAGES) * (P_PIN - P_HERO);
-  if (x <= PIN_PAGES + PHONE_PAGES) return P_PIN;
-  return P_PIN + ((x - PIN_PAGES - PHONE_PAGES) / TAIL_PAGES) * (1 - P_PIN);
+  let x = scrollRaw() * TOTAL_PAGES;
+  for (let i = 0; i < 4; i++) {
+    const s = SEGS[i];
+    if (x <= s.pages) return s.a + (x / s.pages) * (s.b - s.a);
+    x -= s.pages;
+  }
+  if (x <= PHONE_PAGES) return P_PIN;
+  x -= PHONE_PAGES;
+  const t = SEGS[4];
+  return Math.min(1, t.a + (x / t.pages) * (t.b - t.a));
 }
 /* raw scroll → phone-scene progress 0..1 */
 function phoneRaw() {
@@ -396,11 +405,15 @@ function phoneRaw() {
 }
 /* legacy timeline position → raw scroll fraction, for scrollTo targets */
 function rawOf(p) {
-  let x;
-  if (p <= P_HERO) x = (p / P_HERO) * HERO_PAGES;
-  else if (p <= P_PIN) x = HERO_PAGES + ((p - P_HERO) / (P_PIN - P_HERO)) * MID_PAGES;
-  else x = PIN_PAGES + PHONE_PAGES + ((p - P_PIN) / (1 - P_PIN)) * TAIL_PAGES;
-  return x / TOTAL_PAGES;
+  let x = 0;
+  for (let i = 0; i < 4; i++) {
+    const s = SEGS[i];
+    if (p <= s.b) return (x + ((p - s.a) / (s.b - s.a)) * s.pages) / TOTAL_PAGES;
+    x += s.pages;
+  }
+  x += PHONE_PAGES;
+  const t = SEGS[4];
+  return (x + ((p - t.a) / (t.b - t.a)) * t.pages) / TOTAL_PAGES;
 }
 const rawOfPhone = (pt) => (PIN_PAGES + pt * PHONE_PAGES) / TOTAL_PAGES;
 
@@ -2816,7 +2829,19 @@ function phoneBook(c, now, ar) {
     if (me.sent) {
       c.fillStyle = '#58ff8a';
       c.font = ar ? `800 26px ${AR_BODY}` : `700 22px ${BUBBLE}`;
-      c.fillText(i18n.t('phone.meet.sent'), PH_W / 2, cy2 + 46);
+      c.fillText(i18n.t('phone.meet.sent'), PH_W / 2, cy2 + 24);
+      // and it becomes a REAL calendar invite — we're on the guest list
+      roundedPath(c, 56, cy2 + 56, PH_W - 112, 78, 39);
+      c.fillStyle = 'rgba(122,166,214,0.16)'; c.fill();
+      c.strokeStyle = '#8fb5e3'; c.lineWidth = 2.5; c.stroke();
+      c.fillStyle = '#cfe4fb';
+      const acTxt = i18n.t('phone.meet.addcal');
+      fitFont(c, acTxt, PH_W - 160, ar ? 24 : 20, ar ? 800 : 700, ar ? AR_BODY : BUBBLE, 13);
+      c.fillText(acTxt, PH_W / 2, cy2 + 104);
+      c.fillStyle = 'rgba(234,255,240,0.5)';
+      c.font = ar ? `600 17px ${AR_BODY}` : `500 13px ${MONO}`;
+      c.fillText(i18n.t('phone.meet.calnote'), PH_W / 2, cy2 + 168);
+      hots.push({ x: 56, y: cy2 + 44, w: PH_W - 112, h: 102, act: 'cal', label: acTxt, cal: true });
     } else {
       roundedPath(c, 56, cy2, PH_W - 112, 80, 40);
       const g = c.createLinearGradient(56, cy2, PH_W - 56, cy2 + 80);
@@ -2826,10 +2851,10 @@ function phoneBook(c, now, ar) {
       c.font = ar ? `800 25px ${AR_BODY}` : `700 22px ${BUBBLE}`;
       c.fillText(i18n.t('phone.meet.confirm'), PH_W / 2, cy2 + 50);
       hots.push({ x: 56, y: cy2 - 12, w: PH_W - 112, h: 104, act: 'order', label: i18n.t('phone.meet.confirm'), link: true });
+      c.fillStyle = 'rgba(234,255,240,0.5)';
+      c.font = ar ? `600 18px ${AR_BODY}` : `500 14px ${MONO}`;
+      c.fillText(i18n.t('phone.meet.note'), PH_W / 2, cy2 + 124);
     }
-    c.fillStyle = 'rgba(234,255,240,0.5)';
-    c.font = ar ? `600 18px ${AR_BODY}` : `500 14px ${MONO}`;
-    c.fillText(i18n.t('phone.meet.note'), PH_W / 2, cy2 + 124);
   }
   c.textAlign = 'left';
   return hots;
@@ -3562,7 +3587,25 @@ function drawPhoneUI(t, now) {
 /* ---- DOM hotspots that track the canvas-drawn buttons ---- */
 const PH_POOL = [];
 const phoneOrderEl = document.getElementById('phone-order');
+const phoneCalEl = document.getElementById('phone-cal');
 let phInput = null, phSlide = null, phGrid = null;
+
+/* a REAL Google Calendar invite: we're on the guest list, so saving the
+   event emails the invitation straight to the bureau */
+function meetCalUrl() {
+  const ph = phoneState;
+  if (ph.meet.day <= 0 || ph.meet.slot < 0) return '#';
+  const d = new Date();
+  const [hh, mm] = MEET_SLOTS[ph.meet.slot].split(':').map(Number);
+  const start = new Date(d.getFullYear(), d.getMonth(), ph.meet.day, hh, mm);
+  const end = new Date(start.getTime() + 30 * 60000);
+  const fmt = (t) => t.toISOString().replace(/[-:]|\.\d{3}/g, '');
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+    + '&text=' + encodeURIComponent('BENZERSIZ® — Intro Meeting')
+    + '&dates=' + fmt(start) + '/' + fmt(end)
+    + '&add=' + encodeURIComponent('deals@benzersizz.com')
+    + '&details=' + encodeURIComponent('Booked on benzersizz.com · WhatsApp +90 534 338 84 48');
+}
 
 /* the CTA link speaks for whatever the visitor is doing right now */
 function phoneCtaLink() {
@@ -3838,6 +3881,7 @@ function placePhoneRect(el, bx, by, bw, bh) {
 function hidePhoneHots() {
   for (const b of PH_POOL) if (b.style.display !== 'none') b.style.display = 'none';
   if (phoneOrderEl && phoneOrderEl.style.display !== 'none') phoneOrderEl.style.display = 'none';
+  if (phoneCalEl && phoneCalEl.style.display !== 'none') phoneCalEl.style.display = 'none';
   if (phInput && phInput.style.display !== 'none') {
     if (document.activeElement === phInput) phInput.blur();
     phInput.style.display = 'none';
@@ -3925,9 +3969,10 @@ function updatePhoneScene(pt, t, now) {
     phoneScreen.updateWorldMatrix(true, false);
     ensurePhoneHots();
     ensurePhoneExtras();
-    let bi = 0, linkRect = null;
+    let bi = 0, linkRect = null, calRect = null;
     for (const h of hots) {
       if (h.link) { linkRect = h; continue; }
+      if (h.cal) { calRect = h; continue; }
       const b = PH_POOL[bi++];
       if (!b) continue;
       b.dataset.act = h.act;
@@ -3940,6 +3985,10 @@ function updatePhoneScene(pt, t, now) {
     }
     if (linkRect && phoneOrderEl) placePhoneRect(phoneOrderEl, linkRect.x, linkRect.y, linkRect.w, linkRect.h);
     else if (phoneOrderEl && phoneOrderEl.style.display !== 'none') phoneOrderEl.style.display = 'none';
+    if (calRect && phoneCalEl) {
+      phoneCalEl.href = meetCalUrl();
+      placePhoneRect(phoneCalEl, calRect.x, calRect.y, calRect.w, calRect.h);
+    } else if (phoneCalEl && phoneCalEl.style.display !== 'none') phoneCalEl.style.display = 'none';
     // the REAL controls: keyboard input (name or card), calendar grid, slide zone
     const wantCard = ph.app === 'shop' && ph.pay.open && ph.pay.adding;
     const wantName = ph.app === 'b-name';

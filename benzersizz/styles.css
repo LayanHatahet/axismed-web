@@ -19,9 +19,9 @@
   /* headlines Arial Black · body Times · memos Courier — the 90s trinity;
      Arabic in Baloo Bhaijaan 2 (playful, rounded) + Rubik (modern body) */
   --display: "Baloo 2", "Baloo Bhaijaan 2", "Arial Rounded MT Bold", sans-serif;
-  --serif: "Times New Roman", Times, Georgia, serif;
+  --serif: "Baloo 2", "Baloo Bhaijaan 2", "Arial Rounded MT Bold", sans-serif;
   --ar-display: "Baloo Bhaijaan 2", "Rubik", sans-serif;
-  --serif-ar: "Rubik", "Baloo Bhaijaan 2", sans-serif;
+  --serif-ar: "Baloo Bhaijaan 2", "Rubik", sans-serif;
   --mono: "Courier Prime", "Courier New", Courier, monospace;
   /* the two voices: bubbly tomorrow / CRT-terminal yesterday */
   --bubble: "Baloo 2", "Baloo Bhaijaan 2", "Arial Rounded MT Bold", sans-serif;
@@ -338,7 +338,7 @@ body.live .hero-sub { transition-delay: 0.85s; }
 
 .giant-word {
   font-family: var(--serif);
-  font-weight: 400; font-style: italic;
+  font-weight: 700; font-style: normal;
   font-size: clamp(56px, 12vw, 190px);
   letter-spacing: -0.02em; color: var(--cream);
 }
@@ -351,7 +351,7 @@ body.ar .giant-word { font-style: normal; }
   line-height: 1.18; letter-spacing: 0;
   text-transform: uppercase;
 }
-.big-title em { font-family: var(--serif); font-style: italic; text-transform: none; color: var(--gold); font-size: 1.1em; }
+.big-title em { font-family: var(--serif); font-style: normal; font-weight: 800; text-transform: none; color: var(--gold); font-size: 1.1em; }
 .gold-title { color: var(--real-gold); text-shadow: 0 0 40px rgba(217,164,65,0.3); }
 .sub { margin-top: 22px; font-size: 11px; letter-spacing: 0.2em; color: var(--cream-dim); line-height: 2; }
 
@@ -371,7 +371,7 @@ body.ar #ov-work-caption { place-items: end end; }
 .wc-exhibit { font-size: 10px; letter-spacing: 0.3em; color: var(--gold); margin-bottom: 10px; }
 .wc-title { font-family: var(--display); font-weight: 800; font-size: clamp(22px, 2.6vw, 38px); line-height: 1.15; text-transform: uppercase; }
 .wc-sub { font-size: 10px; letter-spacing: 0.24em; color: var(--cream-dim); margin-top: 10px; }
-.wc-tag { font-style: italic; font-size: clamp(15px, 1.4vw, 19px); color: var(--cream-dim); margin-top: 14px; }
+.wc-tag { font-style: normal; font-size: clamp(15px, 1.4vw, 19px); color: var(--cream-dim); margin-top: 14px; }
 .wc-live {
   display: inline-block; margin-top: 16px;
   font-size: 10px; letter-spacing: 0.2em;

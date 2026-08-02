@@ -2385,7 +2385,7 @@ function phoneShop(c, now, ar) {
     c.fillStyle = '#eafff0'; c.textAlign = 'center';
     c.font = ar ? `800 34px ${AR_DISPLAY}` : `400 28px ${BUBBLE}`;
     c.fillText(i18n.t('phone.shop.done1'), PH_W / 2, 590);
-    c.font = ar ? `600 26px ${AR_BODY}` : `italic 500 26px ${SERIF}`;
+    c.font = ar ? `600 26px ${AR_BODY}` : `700 26px ${BUBBLE}`;
     c.fillStyle = 'rgba(234,255,240,0.75)';
     c.fillText(i18n.t('phone.shop.done2'), PH_W / 2, 640);
     if (ph.pay.done) {

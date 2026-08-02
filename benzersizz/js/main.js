@@ -145,12 +145,12 @@ const OLD_PAGES = 24;                                   // the original spacer h
 const IS_TOUCH = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 const SEGS = [
   { a: 0,        b: P_HERO,   mul: 1 },                            // the dive — untouched
-  { a: P_HERO,   b: P_PORT_A, mul: IS_TOUCH ? 2.0 : 1.1 },
-  { a: P_PORT_A, b: P_PORT_B, mul: IS_TOUCH ? 2.6 : 1.35 },        // the records
-  { a: P_PORT_B, b: P_PIN,    mul: IS_TOUCH ? 2.0 : 1.1 },
-  { a: P_PIN,    b: 1,        mul: (IS_TOUCH ? 2.0 : 1.1) * 1.4 }, // the descent
+  { a: P_HERO,   b: P_PORT_A, mul: IS_TOUCH ? 3.2 : 1.6 },
+  { a: P_PORT_A, b: P_PORT_B, mul: IS_TOUCH ? 4.5 : 2.2 },         // the records — glacial
+  { a: P_PORT_B, b: P_PIN,    mul: IS_TOUCH ? 3.2 : 1.6 },
+  { a: P_PIN,    b: 1,        mul: (IS_TOUCH ? 3.2 : 1.6) * 1.5 }, // the descent
 ].map((s) => ({ ...s, pages: (s.b - s.a) * OLD_PAGES * s.mul }));
-const PHONE_PAGES = 4.0 * (IS_TOUCH ? 2 : 1);
+const PHONE_PAGES = IS_TOUCH ? 12 : 6;
 const PIN_PAGES = SEGS[0].pages + SEGS[1].pages + SEGS[2].pages + SEGS[3].pages;
 const TOTAL_PAGES = PIN_PAGES + PHONE_PAGES + SEGS[4].pages;
 document.documentElement.style.setProperty('--pages', TOTAL_PAGES.toFixed(3));
@@ -367,13 +367,13 @@ window.addEventListener('keydown', (e) => {
 let lenis = null;
 if (window.Lenis && !RM) {
   lenis = new window.Lenis({
-    lerp: 0.09,
-    wheelMultiplier: 1.0,
-    // touch tracks the finger 1:1 — no acceleration, gentle release
+    lerp: 0.08,
+    wheelMultiplier: 0.7,     // wheel ticks travel less
+    // touch tracks the finger 1:1 — no acceleration, almost no fling
     syncTouch: true,
     touchMultiplier: 1.0,
     syncTouchLerp: 0.75,
-    touchInertiaMultiplier: 4,
+    touchInertiaMultiplier: 2,
   });
   lenis.stop();
 }

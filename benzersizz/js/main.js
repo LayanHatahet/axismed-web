@@ -729,19 +729,6 @@ async function initGL() {
   const cord = new THREE.Mesh(new THREE.TubeGeometry(cordCurve, 32, 0.018, 8), beigeDark);
   gHero.add(cord);
 
-  // post-it note
-  const [noteC, nctx] = makeCanvas(128, 128);
-  nctx.fillStyle = '#ffd75e'; nctx.fillRect(0, 0, 128, 128);
-  nctx.fillStyle = 'rgba(0,0,0,0.06)'; nctx.fillRect(0, 0, 128, 18);
-  nctx.fillStyle = '#3a3126';
-  nctx.font = `italic 700 30px ${SERIF}`;
-  nctx.save(); nctx.translate(64, 74); nctx.rotate(-0.08);
-  nctx.textAlign = 'center'; nctx.fillText('SHIP IT', 0, 0); nctx.restore();
-  const note = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.3), new THREE.MeshBasicMaterial({ map: canvasTexture(noteC) }));
-  note.position.set(0.92, 1.18, 0.87);
-  note.rotation.z = -0.1;
-  gHero.add(note);
-
   /* ------------------------------------------------------------
      THE APP DEPT. — a modern glass phone lies face-down on a
      charging pad; after the last record it lifts off, flips over

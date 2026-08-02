@@ -67,7 +67,7 @@ function canvasTexture(c) {
 }
 
 const SERIF = '"Times New Roman", Times, serif';
-const DISPLAY = '"Archivo Black", "Arial Black", sans-serif';
+const DISPLAY = '"Baloo 2", "Baloo Bhaijaan 2", "Archivo Black", "Arial Black", sans-serif';
 const MONO = '"Courier Prime", "Courier New", monospace';
 const AR_DISPLAY = '"Baloo Bhaijaan 2", "Rubik", sans-serif';   // playful, rounded (مدعبل)
 const AR_BODY = '"Rubik", "Baloo Bhaijaan 2", sans-serif';      // modern, readable
@@ -116,7 +116,7 @@ const PROJECTS = [
   { slug: 'daghoum',       url: 'https://www.daghoumcompanyco.com',      title: 'Daghoum & Co.',    titleAr: 'داغوم وشركاه',
     sub: 'TIN PACKAGING, SINCE 1992',  subAr: 'عُبُوَّاتٌ مَعْدِنِيَّةٌ، مُنْذُ ١٩٩٢',    tag: 'Everything canned. Except ambition.', tagAr: 'كُلُّ شَيْءٍ مُعَلَّبٌ. إِلَّا الطُّمُوحَ.' },
   { slug: 'levantbridge',  url: 'https://www.levantbridge.net',          title: 'Levant Bridge',    titleAr: 'Levant Bridge',
-    sub: 'FRESH PRODUCE TRADING, ATHENS', subAr: 'تِجَارَةُ خُضَارٍ وَفَوَاكِهَ، أَثِينَا', tag: 'Fruit that travels first class.',   tagAr: 'فَوَاكِهُ تُسَافِرُ عَلَى الدَّرَجَةِ الأُولَى.' },
+    sub: 'FRESH PRODUCE TRADING, ATHENS', subAr: 'تِجَارَةُ خُضَارٍ وَفَوَاكِهَ، أَثِينَا', tag: 'Fruits that travel first class.',  tagAr: 'فَوَاكِهُ تُسَافِرُ عَلَى الدَّرَجَةِ الأُولَى.' },
   { slug: 'barakat',       url: 'https://site-xi-two-89.vercel.app/en',  title: 'Barakat',          titleAr: 'بركات',
     sub: 'RESTAURANT & CAFE, COPENHAGEN', subAr: 'مَطْعَمٌ وَمَقْهًى، كُوبِنْهَاغِن',     tag: 'Charcoal-fired. Board-approved.',     tagAr: 'عَلَى نَارِ الفَحْمِ. وَبِمُوَافَقَةِ مَجْلِسِ الإِدَارَةِ.' },
   { slug: 'alhareef',      url: 'https://al-hareef-three.vercel.app/en', title: 'Al-Hareef',        titleAr: 'الحريف',
@@ -145,12 +145,12 @@ const OLD_PAGES = 24;                                   // the original spacer h
 const IS_TOUCH = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 const SEGS = [
   { a: 0,        b: P_HERO,   mul: 1 },                            // the dive — untouched
-  { a: P_HERO,   b: P_PORT_A, mul: IS_TOUCH ? 3.2 : 1.6 },
-  { a: P_PORT_A, b: P_PORT_B, mul: IS_TOUCH ? 4.5 : 2.2 },         // the records — glacial
-  { a: P_PORT_B, b: P_PIN,    mul: IS_TOUCH ? 3.2 : 1.6 },
-  { a: P_PIN,    b: 1,        mul: (IS_TOUCH ? 3.2 : 1.6) * 1.5 }, // the descent
+  { a: P_HERO,   b: P_PORT_A, mul: IS_TOUCH ? 4.2 : 2.2 },
+  { a: P_PORT_A, b: P_PORT_B, mul: IS_TOUCH ? 6.5 : 3.2 },         // the records — glacial
+  { a: P_PORT_B, b: P_PIN,    mul: IS_TOUCH ? 4.2 : 2.2 },
+  { a: P_PIN,    b: 1,        mul: (IS_TOUCH ? 4.2 : 2.2) * 1.6 }, // the descent
 ].map((s) => ({ ...s, pages: (s.b - s.a) * OLD_PAGES * s.mul }));
-const PHONE_PAGES = IS_TOUCH ? 12 : 6;
+const PHONE_PAGES = IS_TOUCH ? 16 : 8;
 const PIN_PAGES = SEGS[0].pages + SEGS[1].pages + SEGS[2].pages + SEGS[3].pages;
 const TOTAL_PAGES = PIN_PAGES + PHONE_PAGES + SEGS[4].pages;
 document.documentElement.style.setProperty('--pages', TOTAL_PAGES.toFixed(3));
@@ -368,7 +368,7 @@ let lenis = null;
 if (window.Lenis && !RM) {
   lenis = new window.Lenis({
     lerp: 0.08,
-    wheelMultiplier: 0.7,     // wheel ticks travel less
+    wheelMultiplier: 0.55,    // wheel ticks travel much less
     // touch tracks the finger 1:1 — no acceleration, almost no fling
     syncTouch: true,
     touchMultiplier: 1.0,
@@ -1317,7 +1317,7 @@ function drawProjectSlide(ctx, yTop, i, t, ar, compact) {
     : `400 ${compact ? 58 : 44}px ${DISPLAY}`;
   ctx.fillText((ar ? pr.titleAr : pr.title).toUpperCase(), tx, yTop + (compact ? 560 : 620));
   ctx.fillStyle = 'rgba(234,255,240,0.72)';
-  ctx.font = ar ? `700 ${compact ? 38 : 26}px ${AR_BODY}` : `italic 500 ${compact ? 34 : 26}px ${SERIF}`;
+  ctx.font = ar ? `700 ${compact ? 38 : 26}px ${AR_BODY}` : `600 ${compact ? 34 : 26}px ${BUBBLE}`;
   ctx.fillText(ar ? pr.tagAr : pr.tag, tx, yTop + (compact ? 616 : 664));
   // VIEW LIVE button (the DOM hotspot tracks this rect)
   const { bx, by, bw, bh } = portBtnRect(yTop, ar, compact);
@@ -1394,8 +1394,7 @@ function drawProjectSlideCompact(ctx, yTop, i, t, ar) {
   y += 56;
   ctx.fillStyle = 'rgba(234,255,240,0.78)';
   const tag = ar ? pr.tagAr : pr.tag;
-  fitFont(ctx, tag, PC.cw - 52, ar ? 32 : 30, ar ? 500 : 500, ar ? AR_BODY : SERIF, 18);
-  if (!ar) ctx.font = `italic ${ctx.font}`;
+  fitFont(ctx, tag, PC.cw - 52, ar ? 32 : 30, 600, ar ? AR_BODY : BUBBLE, 18);
   ctx.fillText(tag, cx, y);
   // VIEW LIVE button
   const b = portBtnRect(yTop, ar, true);

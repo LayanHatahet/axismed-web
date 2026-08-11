@@ -4,11 +4,11 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, Search, Edit2, Trash2, Copy, X, Check,
-  Filter, Eye, ChevronDown, Upload, Image as ImageIcon, RefreshCw,
+  Filter, Eye, ChevronDown, Upload, Image as ImageIcon, RefreshCw, CalendarDays,
 } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { courses as initialCourses } from "@/lib/data/courses";
-import type { Course, CourseCategory, ProgramType, CourseStatus } from "@/lib/types";
+import type { Course, CourseCategory, ProgramType, CourseStatus, AgendaItem, FacultyMember } from "@/lib/types";
 import { StatusBadge } from "@/components/ui/Badge";
 import { formatDateShort } from "@/lib/utils/formatDate";
 import Link from "next/link";
@@ -31,9 +31,18 @@ const emptyForm = {
   seats: "", seatsAvailable: "", price: "", currency: "USD",
   status: "draft" as CourseStatus, description: "", overview: "", featured: false,
   image: "",
+  agenda: [] as AgendaItem[],
+  faculty: [] as FacultyMember[],
+  sponsors: [] as string[],
+  tags: [] as string[],
+  gallery: [] as string[],
 };
 
 type FormState = typeof emptyForm;
+
+function newId(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
 
 export default function AdminCourses() {
   const [courses, setCourses] = useState<Course[]>(initialCourses);
@@ -75,27 +84,102 @@ export default function AdminCourses() {
       currency: course.currency, status: course.status,
       description: course.description, overview: course.overview,
       featured: course.featured, image: course.image ?? "",
+      agenda: course.agenda ?? [],
+      faculty: course.faculty ?? [],
+      sponsors: course.sponsors ?? [],
+      tags: course.tags ?? [],
+      gallery: course.gallery ?? [],
     });
     setEditingCourse(course);
     setShowModal(true);
   }
 
-  function set(field: keyof FormState, value: string | boolean) {
+  function set<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  async function uploadImage(file: File): Promise<string | null> {
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("folder", "uploads/courses");
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    return data.url ?? null;
   }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setImgUploading(true);
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("folder", "uploads/courses");
-    const res = await fetch("/api/upload", { method: "POST", body: fd });
-    const data = await res.json();
-    if (data.url) set("image", data.url);
+    const url = await uploadImage(file);
+    if (url) set("image", url);
     setImgUploading(false);
     if (imgRef.current) imgRef.current.value = "";
+  }
+
+  // ── String-list fields (sponsors, tags, gallery) ─────────────────────────
+  function addListItem(field: "sponsors" | "tags" | "gallery", value: string) {
+    if (!value.trim()) return;
+    setForm((prev) => ({ ...prev, [field]: [...prev[field], value.trim()] }));
+  }
+  function removeListItem(field: "sponsors" | "tags" | "gallery", index: number) {
+    setForm((prev) => ({ ...prev, [field]: prev[field].filter((_, i) => i !== index) }));
+  }
+
+  // ── Faculty ───────────────────────────────────────────────────────────
+  function addFaculty() {
+    const member: FacultyMember = { id: newId("faculty"), name: "", title: "", institution: "", specialty: "" };
+    setForm((prev) => ({ ...prev, faculty: [...prev.faculty, member] }));
+  }
+  function updateFaculty(index: number, patch: Partial<FacultyMember>) {
+    setForm((prev) => ({
+      ...prev,
+      faculty: prev.faculty.map((m, i) => (i === index ? { ...m, ...patch } : m)),
+    }));
+  }
+  function removeFaculty(index: number) {
+    setForm((prev) => ({ ...prev, faculty: prev.faculty.filter((_, i) => i !== index) }));
+  }
+
+  // ── Agenda ────────────────────────────────────────────────────────────
+  function addAgendaDay() {
+    const day: AgendaItem = { day: `Day ${form.agenda.length + 1}`, sessions: [] };
+    setForm((prev) => ({ ...prev, agenda: [...prev.agenda, day] }));
+  }
+  function updateAgendaDay(index: number, label: string) {
+    setForm((prev) => ({
+      ...prev,
+      agenda: prev.agenda.map((d, i) => (i === index ? { ...d, day: label } : d)),
+    }));
+  }
+  function removeAgendaDay(index: number) {
+    setForm((prev) => ({ ...prev, agenda: prev.agenda.filter((_, i) => i !== index) }));
+  }
+  function addSession(dayIndex: number) {
+    setForm((prev) => ({
+      ...prev,
+      agenda: prev.agenda.map((d, i) =>
+        i === dayIndex ? { ...d, sessions: [...d.sessions, { time: "", title: "", speaker: "" }] } : d
+      ),
+    }));
+  }
+  function updateSession(dayIndex: number, sessionIndex: number, patch: Partial<AgendaItem["sessions"][number]>) {
+    setForm((prev) => ({
+      ...prev,
+      agenda: prev.agenda.map((d, i) =>
+        i === dayIndex
+          ? { ...d, sessions: d.sessions.map((s, si) => (si === sessionIndex ? { ...s, ...patch } : s)) }
+          : d
+      ),
+    }));
+  }
+  function removeSession(dayIndex: number, sessionIndex: number) {
+    setForm((prev) => ({
+      ...prev,
+      agenda: prev.agenda.map((d, i) =>
+        i === dayIndex ? { ...d, sessions: d.sessions.filter((_, si) => si !== sessionIndex) } : d
+      ),
+    }));
   }
 
   async function handleSave() {
@@ -133,7 +217,8 @@ export default function AdminCourses() {
         price: Number(form.price) || 0, currency: form.currency,
         status: form.status, featured: form.featured,
         description: form.description, overview: form.overview,
-        agenda: [], faculty: [], sponsors: [], tags: [], gallery: [],
+        agenda: form.agenda, faculty: form.faculty, sponsors: form.sponsors,
+        tags: form.tags, gallery: form.gallery,
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
       };
       const res = await fetch("/api/courses", {
@@ -336,7 +421,7 @@ export default function AdminCourses() {
                     <div className="relative">
                       <select
                         value={form.status}
-                        onChange={(e) => set("status", e.target.value)}
+                        onChange={(e) => set("status", e.target.value as CourseStatus)}
                         className={inputCls + " appearance-none pr-8 cursor-pointer"}
                       >
                         {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -364,7 +449,7 @@ export default function AdminCourses() {
                     <div className="relative">
                       <select
                         value={form.category}
-                        onChange={(e) => set("category", e.target.value)}
+                        onChange={(e) => set("category", e.target.value as CourseCategory)}
                         className={inputCls + " appearance-none pr-8 cursor-pointer"}
                       >
                         {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -377,7 +462,7 @@ export default function AdminCourses() {
                     <div className="relative">
                       <select
                         value={form.programType}
-                        onChange={(e) => set("programType", e.target.value)}
+                        onChange={(e) => set("programType", e.target.value as ProgramType)}
                         className={inputCls + " appearance-none pr-8 cursor-pointer"}
                       >
                         {PROGRAM_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
@@ -524,6 +609,64 @@ export default function AdminCourses() {
                   />
                 </div>
 
+                {/* Overview */}
+                <div>
+                  <label className={labelCls}>Program Overview</label>
+                  <textarea
+                    rows={4}
+                    value={form.overview}
+                    onChange={(e) => set("overview", e.target.value)}
+                    placeholder="Long-form program overview shown on the course page..."
+                    className={inputCls + " resize-none"}
+                  />
+                </div>
+
+                {/* Tags */}
+                <TagListEditor
+                  label="Topics / Tags"
+                  placeholder="Add a topic and press Enter"
+                  items={form.tags}
+                  onAdd={(v) => addListItem("tags", v)}
+                  onRemove={(i) => removeListItem("tags", i)}
+                />
+
+                {/* Sponsors */}
+                <TagListEditor
+                  label="Sponsors"
+                  placeholder="Add a sponsor name and press Enter"
+                  items={form.sponsors}
+                  onAdd={(v) => addListItem("sponsors", v)}
+                  onRemove={(i) => removeListItem("sponsors", i)}
+                />
+
+                {/* Faculty */}
+                <FacultyEditor
+                  members={form.faculty}
+                  onAdd={addFaculty}
+                  onUpdate={updateFaculty}
+                  onRemove={removeFaculty}
+                  onUpload={uploadImage}
+                />
+
+                {/* Gallery */}
+                <GalleryEditor
+                  images={form.gallery}
+                  onAdd={(url) => setForm((prev) => ({ ...prev, gallery: [...prev.gallery, url] }))}
+                  onRemove={(i) => setForm((prev) => ({ ...prev, gallery: prev.gallery.filter((_, gi) => gi !== i) }))}
+                  onUpload={uploadImage}
+                />
+
+                {/* Agenda */}
+                <AgendaEditor
+                  days={form.agenda}
+                  onAddDay={addAgendaDay}
+                  onUpdateDay={updateAgendaDay}
+                  onRemoveDay={removeAgendaDay}
+                  onAddSession={addSession}
+                  onUpdateSession={updateSession}
+                  onRemoveSession={removeSession}
+                />
+
                 {/* Featured toggle */}
                 <div className="flex items-center gap-3">
                   <button
@@ -564,5 +707,290 @@ export default function AdminCourses() {
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+// ── Shared form styles for sub-editors ──────────────────────────────────────
+const subLabelCls = "block text-xs font-medium text-text-secondary mb-1.5 uppercase tracking-wider";
+const subInputCls = "w-full bg-bg-elevated border border-border focus:border-purple-500/70 rounded-xl px-3 py-2 text-sm text-white placeholder:text-text-dim outline-none transition-colors";
+
+// ── Tags / Sponsors chip list editor ────────────────────────────────────────
+function TagListEditor({
+  label, placeholder, items, onAdd, onRemove,
+}: { label: string; placeholder: string; items: string[]; onAdd: (v: string) => void; onRemove: (i: number) => void }) {
+  const [value, setValue] = useState("");
+  return (
+    <div>
+      <label className={subLabelCls}>{label}</label>
+      {items.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {items.map((item, i) => (
+            <span
+              key={`${item}-${i}`}
+              className="flex items-center gap-1.5 pl-3 pr-1.5 py-1 text-xs rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20"
+            >
+              {item}
+              <button
+                type="button"
+                onClick={() => onRemove(i)}
+                className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-purple-500/20"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="flex gap-2">
+        <input
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") { e.preventDefault(); onAdd(value); setValue(""); }
+          }}
+          placeholder={placeholder}
+          className={subInputCls}
+        />
+        <button
+          type="button"
+          onClick={() => { onAdd(value); setValue(""); }}
+          className="shrink-0 px-4 rounded-xl border border-border text-text-secondary hover:text-white hover:bg-white/5 transition-all text-sm"
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Gallery image list editor ───────────────────────────────────────────────
+function GalleryEditor({
+  images, onAdd, onRemove, onUpload,
+}: { images: string[]; onAdd: (url: string) => void; onRemove: (i: number) => void; onUpload: (file: File) => Promise<string | null> }) {
+  const [url, setUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const uploaded = await onUpload(file);
+    if (uploaded) onAdd(uploaded);
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = "";
+  }
+
+  return (
+    <div>
+      <label className={subLabelCls}>Gallery Photos</label>
+      {images.length > 0 && (
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-2">
+          {images.map((img, i) => (
+            <div key={`${img}-${i}`} className="relative group rounded-lg overflow-hidden bg-bg-elevated h-20">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={img} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => onRemove(i)}
+                className="absolute top-1 right-1 w-5 h-5 flex items-center justify-center rounded-full bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="flex gap-2">
+        <input
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") { e.preventDefault(); if (url.trim()) { onAdd(url.trim()); setUrl(""); } }
+          }}
+          placeholder="Paste image URL"
+          className={subInputCls}
+        />
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          className="shrink-0 px-4 rounded-xl border border-border text-text-secondary hover:text-white hover:bg-white/5 transition-all text-sm flex items-center gap-1.5"
+        >
+          {uploading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+          Upload
+        </button>
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      </div>
+    </div>
+  );
+}
+
+// ── Faculty list editor ─────────────────────────────────────────────────────
+function FacultyPhoto({
+  member, onUpload, onChange,
+}: { member: FacultyMember; onUpload: (file: File) => Promise<string | null>; onChange: (url: string) => void }) {
+  const [uploading, setUploading] = useState(false);
+  const ref = useRef<HTMLInputElement>(null);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const url = await onUpload(file);
+    if (url) onChange(url);
+    setUploading(false);
+    if (ref.current) ref.current.value = "";
+  }
+
+  return (
+    <div
+      onClick={() => ref.current?.click()}
+      className="shrink-0 w-14 h-14 rounded-xl overflow-hidden bg-bg-elevated border border-border cursor-pointer flex items-center justify-center"
+    >
+      {uploading ? (
+        <RefreshCw className="w-4 h-4 text-purple-400 animate-spin" />
+      ) : member.image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
+      ) : (
+        <ImageIcon className="w-4 h-4 text-text-dim" />
+      )}
+      <input ref={ref} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+    </div>
+  );
+}
+
+function FacultyEditor({
+  members, onAdd, onUpdate, onRemove, onUpload,
+}: {
+  members: FacultyMember[];
+  onAdd: () => void;
+  onUpdate: (i: number, patch: Partial<FacultyMember>) => void;
+  onRemove: (i: number) => void;
+  onUpload: (file: File) => Promise<string | null>;
+}) {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <label className={subLabelCls + " mb-0"}>Faculty</label>
+        <button type="button" onClick={onAdd} className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300">
+          <Plus className="w-3.5 h-3.5" /> Add Faculty Member
+        </button>
+      </div>
+      <div className="space-y-3">
+        {members.map((member, i) => (
+          <div key={member.id} className="border border-border rounded-xl p-4 space-y-3 bg-bg-elevated/40">
+            <div className="flex items-start gap-3">
+              <FacultyPhoto member={member} onUpload={onUpload} onChange={(image) => onUpdate(i, { image })} />
+              <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input value={member.name} onChange={(e) => onUpdate(i, { name: e.target.value })} placeholder="Full name" className={subInputCls} />
+                <input value={member.title} onChange={(e) => onUpdate(i, { title: e.target.value })} placeholder="Title" className={subInputCls} />
+                <input value={member.institution} onChange={(e) => onUpdate(i, { institution: e.target.value })} placeholder="Institution" className={subInputCls} />
+                <input value={member.specialty} onChange={(e) => onUpdate(i, { specialty: e.target.value })} placeholder="Specialty" className={subInputCls} />
+              </div>
+              <button
+                type="button"
+                onClick={() => onRemove(i)}
+                className="p-1.5 rounded-lg text-text-dim hover:text-red-400 hover:bg-red-500/10 transition-all"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <textarea
+              rows={2}
+              value={member.bio ?? ""}
+              onChange={(e) => onUpdate(i, { bio: e.target.value })}
+              placeholder="Short bio (optional)"
+              className={subInputCls + " resize-none"}
+            />
+          </div>
+        ))}
+        {members.length === 0 && <p className="text-xs text-text-dim">No faculty added yet.</p>}
+      </div>
+    </div>
+  );
+}
+
+// ── Agenda editor ────────────────────────────────────────────────────────────
+function AgendaEditor({
+  days, onAddDay, onUpdateDay, onRemoveDay, onAddSession, onUpdateSession, onRemoveSession,
+}: {
+  days: AgendaItem[];
+  onAddDay: () => void;
+  onUpdateDay: (i: number, label: string) => void;
+  onRemoveDay: (i: number) => void;
+  onAddSession: (dayIndex: number) => void;
+  onUpdateSession: (dayIndex: number, sessionIndex: number, patch: Partial<AgendaItem["sessions"][number]>) => void;
+  onRemoveSession: (dayIndex: number, sessionIndex: number) => void;
+}) {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <label className={subLabelCls + " mb-0"}>Agenda</label>
+        <button type="button" onClick={onAddDay} className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300">
+          <Plus className="w-3.5 h-3.5" /> Add Day
+        </button>
+      </div>
+      <div className="space-y-3">
+        {days.map((day, di) => (
+          <div key={di} className="border border-border rounded-xl p-4 space-y-3 bg-bg-elevated/40">
+            <div className="flex items-center gap-2">
+              <CalendarDays className="w-4 h-4 text-purple-400 shrink-0" />
+              <input
+                value={day.day}
+                onChange={(e) => onUpdateDay(di, e.target.value)}
+                placeholder="Day 1 — March 15"
+                className={subInputCls + " min-w-0"}
+              />
+              <button
+                type="button"
+                onClick={() => onRemoveDay(di)}
+                className="p-1.5 rounded-lg text-text-dim hover:text-red-400 hover:bg-red-500/10 transition-all shrink-0"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <div className="space-y-2 pl-2 border-l-2 border-border">
+              {day.sessions.map((session, si) => (
+                <div key={si} className="flex items-start gap-2">
+                  <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-[5rem_1fr] gap-2">
+                    <input
+                      value={session.time}
+                      onChange={(e) => onUpdateSession(di, si, { time: e.target.value })}
+                      placeholder="09:00"
+                      className={subInputCls}
+                    />
+                    <input
+                      value={session.title}
+                      onChange={(e) => onUpdateSession(di, si, { title: e.target.value })}
+                      placeholder="Session title"
+                      className={subInputCls}
+                    />
+                    <input
+                      value={session.speaker ?? ""}
+                      onChange={(e) => onUpdateSession(di, si, { speaker: e.target.value })}
+                      placeholder="Speaker (optional)"
+                      className={subInputCls + " sm:col-start-2"}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveSession(di, si)}
+                    className="p-1.5 mt-1 rounded-lg text-text-dim hover:text-red-400 hover:bg-red-500/10 transition-all shrink-0"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+              <button type="button" onClick={() => onAddSession(di)} className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300">
+                <Plus className="w-3 h-3" /> Add Session
+              </button>
+            </div>
+          </div>
+        ))}
+        {days.length === 0 && <p className="text-xs text-text-dim">No agenda days added yet.</p>}
+      </div>
+    </div>
   );
 }

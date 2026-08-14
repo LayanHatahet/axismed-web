@@ -28,8 +28,28 @@ export interface Course {
   tags: string[];
   gallery: string[];
   brochure?: string;
+  // Per-course page content. All optional — when unset the course page falls
+  // back to the shared defaults in lib/data/courseDefaults.ts.
+  venueImage?: string;
+  venueMapEmbed?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  travelInfo?: string;
+  included?: string[];
+  pricingTiers?: PricingTier[];
+  paymentInfo?: string;
+  sponsorsIntro?: string;
+  galleryIntro?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface PricingTier {
+  label: string;
+  /** Percentage of the course base price, e.g. 85 for early-bird. */
+  percent: number;
+  note: string;
+  highlight: boolean;
 }
 
 export type CourseCategory =

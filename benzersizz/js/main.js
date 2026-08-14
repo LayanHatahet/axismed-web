@@ -145,12 +145,12 @@ const OLD_PAGES = 24;                                   // the original spacer h
 const IS_TOUCH = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 const SEGS = [
   { a: 0,        b: P_HERO,   mul: 1 },                            // the dive — untouched
-  { a: P_HERO,   b: P_PORT_A, mul: IS_TOUCH ? 4.2 : 2.2 },
-  { a: P_PORT_A, b: P_PORT_B, mul: IS_TOUCH ? 6.5 : 3.2 },         // the records — glacial
-  { a: P_PORT_B, b: P_PIN,    mul: IS_TOUCH ? 4.2 : 2.2 },
-  { a: P_PIN,    b: 1,        mul: (IS_TOUCH ? 4.2 : 2.2) * 1.6 }, // the descent
+  { a: P_HERO,   b: P_PORT_A, mul: IS_TOUCH ? 2.0 : 1.2 },
+  { a: P_PORT_A, b: P_PORT_B, mul: IS_TOUCH ? 0.6 : 0.45 },        // folders are click-driven now
+  { a: P_PORT_B, b: P_PIN,    mul: IS_TOUCH ? 2.0 : 1.2 },
+  { a: P_PIN,    b: 1,        mul: (IS_TOUCH ? 2.0 : 1.2) * 1.35 },// the descent
 ].map((s) => ({ ...s, pages: (s.b - s.a) * OLD_PAGES * s.mul }));
-const PHONE_PAGES = IS_TOUCH ? 16 : 8;
+const PHONE_PAGES = IS_TOUCH ? 8 : 5;
 const PIN_PAGES = SEGS[0].pages + SEGS[1].pages + SEGS[2].pages + SEGS[3].pages;
 const TOTAL_PAGES = PIN_PAGES + PHONE_PAGES + SEGS[4].pages;
 document.documentElement.style.setProperty('--pages', TOTAL_PAGES.toFixed(3));
@@ -335,7 +335,6 @@ if (langBtn) {
 /* ------------------------------------------------------------
    Keyboard navigation — arrows scroll, ←/→ step the records
    ------------------------------------------------------------ */
-const slideF = (p) => clamp01((p - P_PORT_A) / (P_PORT_B - P_PORT_A)) * PROJECTS.length;
 window.addEventListener('keydown', (e) => {
   if (!started) return;
   if (e.target && e.target.closest && e.target.closest('button, a, input, textarea')) return;
@@ -350,14 +349,13 @@ window.addEventListener('keydown', (e) => {
   } else if (e.key === 'ArrowUp' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey)) {
     e.preventDefault(); glide(window.scrollY - vh * 1.15);
   } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-    const p = scrollP();
-    const pt = phoneRaw();
-    if (p > P_PORT_A - 0.02 && p < P_PORT_B + 0.02 && !(pt > 0.02 && pt < 0.98)) {
+    // inside an open folder window, arrows flip between deals
+    if (crt.mode === 'win') {
       e.preventDefault();
-      const dir = e.key === 'ArrowRight' ? 1 : -1;
-      const ni = Math.min(PROJECTS.length, Math.max(0, Math.round(slideF(p)) + dir));
-      glide(rawOf(P_PORT_A + (ni / PROJECTS.length) * (P_PORT_B - P_PORT_A)) * max);
+      crtTap(e.key === 'ArrowRight' ? 'wnext' : 'wprev');
     }
+  } else if (e.key === 'Escape' && crt.mode === 'win') {
+    crtTap('wclose');
   }
 });
 
@@ -367,13 +365,13 @@ window.addEventListener('keydown', (e) => {
 let lenis = null;
 if (window.Lenis && !RM) {
   lenis = new window.Lenis({
-    lerp: 0.08,
-    wheelMultiplier: 0.55,    // wheel ticks travel much less
-    // touch tracks the finger 1:1 — no acceleration, almost no fling
+    lerp: 0.09,
+    wheelMultiplier: 1.0,
+    // touch tracks the finger EXACTLY — 1:1, instant, light natural release
     syncTouch: true,
     touchMultiplier: 1.0,
-    syncTouchLerp: 0.75,
-    touchInertiaMultiplier: 2,
+    syncTouchLerp: 0.9,
+    touchInertiaMultiplier: 8,
   });
   lenis.stop();
 }
@@ -475,12 +473,9 @@ const screenSkip = document.getElementById('screen-skip');
    painted href can freeze if rAF throttles while a popup steals focus). */
 function currentLiveUrl() {
   const p = scrollP();
-  if (p < P_PORT_A - 0.006 || p > P_PORT_B + 0.012) return null;
-  const nn = PROJECTS.length;
-  const ff = clamp01((p - P_PORT_A) / (P_PORT_B - P_PORT_A));
-  const active = Math.round(ff * nn);
-  if (active < 1) return null;                       // still on the intro slide
-  return PROJECTS[Math.min(nn, active) - 1].url;
+  if (p < P_GLITCH_IN || p > P_PORT_B + 0.012) return null;
+  if (crt.mode !== 'win' || crt.open < 0) return null;
+  return PROJECTS[crt.open].url;
 }
 
 /* navigate to the live site EXPLICITLY — the native target=_blank default is
@@ -1215,17 +1210,14 @@ function drawTerminal(t) {
 }
 
 /* ------------------------------------------------------------
-   PORTFOLIO.EXE — the records scroll vertically INSIDE the CRT.
-   The outer page scroll drives `inner`; the tube distorts, tears,
-   flickers and generally struggles to display modern websites.
+   PORTFOLIO.EXE is now a real old desktop: the visitor LOGS IN,
+   then opens FOLDERS — one per closed deal — in chunky windows.
+   Click-driven; the outer scroll just holds the camera here.
    ------------------------------------------------------------ */
-const SLIDE_H = 768;
 const SCR_W = 1024, SCR_H = 768;
-let lastSlide = -1;
 
 /* PORTFOLIO COLUMN — on portrait the camera zooms IN so the tube fills the phone
-   height (you are inside the screen); only the central strip of the wide canvas
-   is visible, so the whole record is laid out vertically inside that strip. */
+   height; only the central strip of the wide canvas is visible. */
 const PC = { ox: 0, cw: SCR_W };
 function computeCol() {
   const d = Math.max(0.5, camera.position.z - 0.862);
@@ -1247,10 +1239,6 @@ function fitFont(ctx, text, maxW, base, weight, family, min = 22) {
 }
 
 const barH = (compact) => (compact ? 56 : 40);
-function portBtnRect(yTop, ar, compact) {
-  if (compact) return { bx: PC.ox + 26, by: yTop + 556, bw: PC.cw - 52, bh: 68 };
-  return { bx: ar ? SCR_W - 48 - 330 : 48, by: yTop + 676, bw: 330, bh: 46 };
-}
 function portSkipRect(ar, compact) {
   if (compact) return { x: PC.ox + 70, y: SCR_H - 62, w: PC.cw - 140, h: 46 };
   const w = 175, h = 40;
@@ -1258,160 +1246,304 @@ function portSkipRect(ar, compact) {
   return { x, y: SCR_H - h - 16, w, h };
 }
 
-function drawProjectSlide(ctx, yTop, i, t, ar, compact) {
-  if (compact) return drawProjectSlideCompact(ctx, yTop, i, t, ar);
-  const pr = PROJECTS[i];
-  // footage window
-  const ix = compact ? 28 : 40, iy = yTop + (compact ? 20 : 56),
-    iw = SCR_W - (compact ? 56 : 80), ih = compact ? 398 : 452;
-  ctx.fillStyle = '#01100a';
-  ctx.fillRect(ix - 4, iy - 4, iw + 8, ih + 8);
-  ctx.strokeStyle = 'rgba(88,255,138,0.35)';
+/* the machine's state — persists while you wander the site */
+const crt = {
+  mode: 'login',            // 'login' | 'granted' | 'desk' | 'win'
+  loginAt: 0, typedN: 0, grantedAt: 0,
+  open: -1, openAt: 0,
+};
+
+function crtTap(act) {
+  sound.unlock();
+  if (act === 'login') {
+    if (crt.mode === 'login') { crt.mode = 'granted'; crt.grantedAt = performance.now(); sound.chime(); }
+  } else if (act === 'wclose') {
+    crt.mode = 'desk'; crt.open = -1; sound.flip();
+  } else if (act === 'wprev' || act === 'wnext') {
+    const n = PROJECTS.length;
+    crt.open = (crt.open + (act === 'wnext' ? 1 : -1) + n) % n;
+    crt.openAt = performance.now();
+    sound.flip();
+  } else if (act.startsWith('fd')) {
+    crt.open = +act.slice(2);
+    crt.openAt = performance.now();
+    crt.mode = 'win';
+    sound.flip();
+  }
+}
+
+/* a classic manila folder */
+function drawFolder(ctx, x, y, w, h) {
+  ctx.fillStyle = '#d9a441';
+  ctx.fillRect(x, y + h * 0.18, w, h * 0.82);
+  ctx.fillRect(x, y, w * 0.44, h * 0.3);
+  ctx.fillStyle = '#e8bc63';
+  ctx.fillRect(x + w * 0.045, y + h * 0.3, w * 0.91, h * 0.62);
+  ctx.strokeStyle = 'rgba(23,19,14,0.55)';
   ctx.lineWidth = 2;
-  ctx.strokeRect(ix - 4, iy - 4, iw + 8, ih + 8);
+  ctx.strokeRect(x, y + h * 0.18, w, h * 0.82);
+}
+
+/* ---- LOGIN — the bureau does not let just anyone in ---- */
+function drawCrtLogin(ctx, t, now, ar, compact) {
+  const hots = [];
+  const cx = PC.ox + PC.cw / 2;
+  const pw = Math.min(compact ? PC.cw - 36 : 620, 620), phh = compact ? 420 : 380;
+  const px = cx - pw / 2, py = (SCR_H - phh) / 2 - 20;
+  ctx.fillStyle = 'rgba(2,14,7,0.9)';
+  ctx.fillRect(px, py, pw, phh);
+  ctx.strokeStyle = 'rgba(88,255,138,0.65)';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(px, py, pw, phh);
+  ctx.strokeRect(px + 8, py + 8, pw - 16, phh - 16);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#58ff8a';
+  fitFont(ctx, i18n.t('work.login.title'), pw - 60, ar ? (compact ? 30 : 26) : (compact ? 26 : 21), ar ? 700 : 600, ar ? AR_BODY : MONO, 12);
+  ctx.fillText(i18n.t('work.login.title'), cx, py + (compact ? 62 : 56));
+  // user + password lines, typed like the machine is doing it for you
+  ctx.textAlign = ar ? 'right' : 'left';
+  const lx = ar ? px + pw - 46 : px + 46;
+  ctx.font = ar ? `700 ${compact ? 30 : 25}px ${AR_BODY}` : `600 ${compact ? 27 : 22}px ${MONO}`;
+  ctx.fillStyle = '#baffd0';
+  ctx.fillText(i18n.t('work.login.user'), lx, py + (compact ? 140 : 128));
+  const typed = Math.min(9, Math.floor((now - crt.loginAt) / 130));
+  if (typed > crt.typedN) { crt.typedN = typed; sound.key(); }
+  ctx.fillText(
+    `${i18n.t('work.login.pass')} ${'▮'.repeat(typed)}${typed < 9 && Math.floor(now / 300) % 2 ? '_' : ''}`,
+    lx, py + (compact ? 206 : 186)
+  );
+  ctx.textAlign = 'center';
+  // the LOG IN button appears once the machine finishes typing
+  if (typed >= 9) {
+    const bw = compact ? pw - 120 : 300, bh2 = compact ? 74 : 58;
+    const bx = cx - bw / 2, by = py + (compact ? 258 : 232);
+    ctx.fillStyle = 'rgba(88,255,138,0.14)';
+    ctx.fillRect(bx, by, bw, bh2);
+    ctx.strokeStyle = Math.floor(t * 1.8) % 2 ? '#58ff8a' : 'rgba(88,255,138,0.4)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(bx, by, bw, bh2);
+    ctx.fillStyle = '#eafff0';
+    ctx.font = ar ? `700 ${compact ? 30 : 24}px ${AR_BODY}` : `600 ${compact ? 28 : 21}px ${MONO}`;
+    ctx.fillText(i18n.t('work.login.btn'), cx, by + bh2 / 2 + (ar ? 11 : 8));
+    hots.push({ x: bx, y: by, w: bw, h: bh2, act: 'login', label: i18n.t('work.login.btn') });
+    if (now - crt.loginAt > 7000) crtTap('login');   // nobody gets stuck at the door
+  }
+  ctx.fillStyle = 'rgba(143,181,227,0.7)';
+  fitFont(ctx, i18n.t('work.login.hint'), pw - 60, ar ? (compact ? 22 : 19) : (compact ? 19 : 15), ar ? 600 : 500, ar ? AR_BODY : MONO, 10);
+  ctx.fillText(i18n.t('work.login.hint'), cx, py + phh - (compact ? 44 : 38));
+  ctx.textAlign = 'left';
+  return hots;
+}
+
+function drawCrtGranted(ctx, t, now, ar) {
+  const cx = PC.ox + PC.cw / 2;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#58ff8a';
+  fitFont(ctx, i18n.t('work.granted'), PC.cw - 60, ar ? 52 : 46, ar ? 800 : 600, ar ? AR_DISPLAY : MONO, 20);
+  ctx.fillText(i18n.t('work.granted'), cx, SCR_H / 2);
+  ctx.strokeStyle = 'rgba(88,255,138,0.6)';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(cx, SCR_H / 2 - 110, 44, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx - 20, SCR_H / 2 - 110);
+  ctx.lineTo(cx - 5, SCR_H / 2 - 94);
+  ctx.lineTo(cx + 24, SCR_H / 2 - 130);
+  ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.stroke();
+  ctx.textAlign = 'left';
+  if (now - crt.grantedAt > 1000) crt.mode = 'desk';
+  return [];
+}
+
+/* ---- THE DESKTOP — every deal is a folder ---- */
+function drawCrtDesk(ctx, t, now, ar, compact, bh0) {
+  const hots = [];
+  const n = PROJECTS.length;
+  if (compact) {
+    // file-list view: one row per deal
+    const rx = PC.ox + 14, rw = PC.cw - 28, rh = 74;
+    PROJECTS.forEach((pr, i) => {
+      const y = bh0 + 18 + i * rh;
+      if (y + rh > SCR_H - 118) return;   // the rest sit below the fold gag
+      ctx.fillStyle = i % 2 ? 'rgba(88,255,138,0.045)' : 'rgba(88,255,138,0.09)';
+      ctx.fillRect(rx, y, rw, rh - 6);
+      drawFolder(ctx, ar ? rx + rw - 62 : rx + 14, y + 14, 48, 38);
+      ctx.textAlign = ar ? 'right' : 'left';
+      ctx.fillStyle = '#eafff0';
+      const nm = (ar ? pr.titleAr : pr.title).toUpperCase();
+      fitFont(ctx, nm, rw - 160, ar ? 30 : 26, ar ? 800 : 600, ar ? AR_DISPLAY : MONO, 14);
+      ctx.fillText(nm, ar ? rx + rw - 84 : rx + 84, y + 44);
+      ctx.textAlign = 'left';
+      hots.push({ x: rx, y, w: rw, h: rh - 6, act: 'fd' + i, label: pr.title });
+    });
+    // how many fit on screen; the label tells the truth
+    const fit = Math.floor((SCR_H - 118 - bh0 - 18) / rh);
+    if (fit < n) {
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffd75e';
+      ctx.font = ar ? `700 24px ${AR_BODY}` : `600 20px ${MONO}`;
+      ctx.fillText(ar ? `+${arNum(n - fit)} …` : `+${n - fit} MORE INSIDE ANY WINDOW ▸`, PC.ox + PC.cw / 2, SCR_H - 128);
+      ctx.textAlign = 'left';
+    }
+  } else {
+    // icon grid, five across
+    const cols = 5, rows = 3;
+    const gx = 52, gy = bh0 + 26;
+    const cw2 = (SCR_W - 104) / cols, ch = 176;
+    PROJECTS.forEach((pr, i) => {
+      const col = i % cols, row = Math.floor(i / cols);
+      if (row >= rows) return;
+      const x = gx + col * cw2, y = gy + row * ch;
+      drawFolder(ctx, x + cw2 / 2 - 42, y + 14, 84, 62);
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#eafff0';
+      const nm = (ar ? pr.titleAr : pr.title).toUpperCase();
+      fitFont(ctx, nm, cw2 - 18, ar ? 24 : 18, ar ? 700 : 600, ar ? AR_BODY : MONO, 11);
+      ctx.fillText(nm, x + cw2 / 2, y + 104);
+      ctx.fillStyle = 'rgba(143,181,227,0.75)';
+      fitFont(ctx, ar ? pr.subAr : pr.sub, cw2 - 14, ar ? 17 : 12, ar ? 600 : 500, ar ? AR_BODY : MONO, 8);
+      ctx.fillText(ar ? pr.subAr : pr.sub, x + cw2 / 2, y + 130);
+      ctx.textAlign = 'left';
+      hots.push({ x: x + 8, y: y + 6, w: cw2 - 16, h: ch - 30, act: 'fd' + i, label: pr.title });
+    });
+    // the recycle bin of regrets
+    ctx.strokeStyle = 'rgba(143,181,227,0.7)';
+    ctx.lineWidth = 3;
+    const tx0 = ar ? 66 : SCR_W - 96;
+    ctx.strokeRect(tx0 - 20, SCR_H - 168, 40, 48);
+    ctx.beginPath();
+    ctx.moveTo(tx0 - 28, SCR_H - 168); ctx.lineTo(tx0 + 28, SCR_H - 168);
+    ctx.stroke();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(143,181,227,0.75)';
+    ctx.font = ar ? `600 17px ${AR_BODY}` : `500 13px ${MONO}`;
+    ctx.fillText(i18n.t('work.trash'), tx0, SCR_H - 104);
+    ctx.fillText(i18n.t('work.empty'), tx0, SCR_H - 84);
+    ctx.textAlign = 'left';
+  }
+  // the standing instruction
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#58ff8a';
+  const hint = i18n.t('work.keep');
+  fitFont(ctx, hint, PC.cw - 60, ar ? (compact ? 26 : 24) : (compact ? 22 : 19), ar ? 700 : 600, ar ? AR_BODY : MONO, 11);
+  ctx.fillText(hint, PC.ox + PC.cw / 2, compact ? SCR_H - 92 : SCR_H - 40);
+  if (Math.floor(t * 1.4) % 2 === 0) {
+    ctx.fillStyle = '#ffd75e';
+    fitFont(ctx, i18n.t('work.done'), PC.cw - 60, ar ? (compact ? 24 : 20) : (compact ? 20 : 15), ar ? 700 : 600, ar ? AR_BODY : MONO, 10);
+    ctx.fillText(i18n.t('work.done'), PC.ox + PC.cw / 2, compact ? SCR_H - 128 : SCR_H - 68);
+  }
+  ctx.textAlign = 'left';
+  return hots;
+}
+
+/* ---- AN OPEN FOLDER — chunky window, live footage, real button ---- */
+function drawCrtWin(ctx, t, now, ar, compact, bh0) {
+  drawCrtDesk(ctx, t, now, ar, compact, bh0);   // the desk stays behind
+  ctx.fillStyle = 'rgba(1,8,4,0.72)';
+  ctx.fillRect(0, 0, SCR_W, SCR_H);
+  const pr = PROJECTS[crt.open];
+  const hots = [];
+  const s = RM ? 1 : smooth(0, 1, clamp01((now - crt.openAt) / 220));
+  const wx = compact ? PC.ox + 10 : 96;
+  const wy = compact ? bh0 + 10 : bh0 + 22;
+  const ww = compact ? PC.cw - 20 : SCR_W - 192;
+  const wh = compact ? SCR_H - bh0 - 84 : SCR_H - bh0 - 92;
+  ctx.save();
+  ctx.translate(wx + ww / 2, wy + wh / 2);
+  ctx.scale(s, s);
+  ctx.translate(-(wx + ww / 2), -(wy + wh / 2));
+  // frame
+  ctx.fillStyle = '#03170c';
+  ctx.fillRect(wx, wy, ww, wh);
+  ctx.strokeStyle = 'rgba(88,255,138,0.75)';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(wx, wy, ww, wh);
+  // title bar
+  const tbh = compact ? 58 : 46;
+  ctx.fillStyle = 'rgba(88,255,138,0.16)';
+  ctx.fillRect(wx, wy, ww, tbh);
+  ctx.textAlign = ar ? 'right' : 'left';
+  ctx.fillStyle = '#eafff0';
+  const ttl = (ar ? pr.titleAr : pr.title).toUpperCase();
+  fitFont(ctx, ttl, ww - 140, ar ? (compact ? 32 : 26) : (compact ? 28 : 22), ar ? 800 : 600, ar ? AR_DISPLAY : MONO, 13);
+  ctx.fillText(ttl, ar ? wx + ww - 22 : wx + 22, wy + tbh / 2 + (ar ? 11 : 8));
+  // close box
+  const cbx = ar ? wx + 8 : wx + ww - tbh + 4;
+  ctx.strokeStyle = '#ff8f6b';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(cbx, wy + 7, tbh - 14, tbh - 14);
+  ctx.beginPath();
+  ctx.moveTo(cbx + 12, wy + 19); ctx.lineTo(cbx + tbh - 26, wy + tbh - 21);
+  ctx.moveTo(cbx + tbh - 26, wy + 19); ctx.lineTo(cbx + 12, wy + tbh - 21);
+  ctx.stroke();
+  hots.push({ x: cbx - 8, y: wy, w: tbh + 4, h: tbh + 4, act: 'wclose', label: 'Close' });
+  // footage
+  const fx = wx + 16, fy = wy + tbh + 12;
+  const fw = ww - 32, fh = compact ? Math.round(fw * 0.62) : wh - tbh - (compact ? 250 : 208);
+  ctx.fillStyle = '#01100a';
+  ctx.fillRect(fx, fy, fw, fh);
   const loaded = pr.frames.filter(Boolean);
-  const fr = loaded.length ? pr.frames[Math.floor(t * 2.1 + i) % 6] || loaded[0] : null;
+  const fr = loaded.length ? pr.frames[Math.floor(t * 2.1 + crt.open) % 6] || loaded[0] : null;
   if (fr) {
-    const sh = fr.width * (ih / iw);
-    const sy = Math.max(0, (fr.height - sh) / 2);
-    ctx.drawImage(fr, 0, sy, fr.width, Math.min(sh, fr.height), ix, iy, iw, ih);
-    // the tube struggles: green cast + darkened edges over the footage
+    const sh = fr.width * (fh / fw);
+    const sy2 = Math.max(0, (fr.height - sh) / 2);
+    ctx.drawImage(fr, 0, sy2, fr.width, Math.min(sh, fr.height), fx, fy, fw, fh);
     ctx.fillStyle = 'rgba(70,255,150,0.055)';
-    ctx.fillRect(ix, iy, iw, ih);
-    ctx.fillStyle = 'rgba(0,0,0,0.12)';
-    ctx.fillRect(ix, iy, iw, 26);
+    ctx.fillRect(fx, fy, fw, fh);
     ctx.fillStyle = '#58ff8a';
     ctx.font = `600 15px ${MONO}`;
     ctx.textAlign = 'left';
-    ctx.fillText('● REC', ix + 12, iy + 19);
-    ctx.textAlign = 'right';
-    ctx.fillText('SIGNAL: ACCEPTABLE', ix + iw - 12, iy + 19);
+    ctx.fillText('● REC', fx + 12, fy + 22);
   } else {
     ctx.fillStyle = '#58ff8a';
     ctx.font = `500 22px ${MONO}`;
     ctx.textAlign = 'center';
-    ctx.fillText('RETRIEVING RECORD ... ▮', ix + iw / 2, iy + ih / 2);
+    ctx.fillText('RETRIEVING ▮', fx + fw / 2, fy + fh / 2);
   }
-  // info panel
-  const tx = ar ? SCR_W - (compact ? 28 : 48) : (compact ? 28 : 48);
+  // info
+  const iy = fy + fh + (compact ? 42 : 38);
   ctx.textAlign = ar ? 'right' : 'left';
-  ctx.fillStyle = '#8fb5e3';
-  ctx.font = ar ? `700 ${compact ? 36 : 22}px ${AR_BODY}` : `600 ${compact ? 28 : 17}px ${MONO}`;
-  ctx.fillText(`${ar ? pr.exAr : pr.ex}  ·  ${ar ? pr.subAr : pr.sub}`, tx, yTop + (compact ? 478 : 556));
-  ctx.fillStyle = '#eafff0';
-  ctx.font = ar && /[؀-ۿ]/.test(pr.titleAr)
-    ? `800 ${compact ? 66 : 50}px ${AR_DISPLAY}`
-    : `400 ${compact ? 58 : 44}px ${DISPLAY}`;
-  ctx.fillText((ar ? pr.titleAr : pr.title).toUpperCase(), tx, yTop + (compact ? 560 : 620));
-  ctx.fillStyle = 'rgba(234,255,240,0.72)';
-  ctx.font = ar ? `700 ${compact ? 38 : 26}px ${AR_BODY}` : `600 ${compact ? 34 : 26}px ${BUBBLE}`;
-  ctx.fillText(ar ? pr.tagAr : pr.tag, tx, yTop + (compact ? 616 : 664));
-  // VIEW LIVE button (the DOM hotspot tracks this rect)
-  const { bx, by, bw, bh } = portBtnRect(yTop, ar, compact);
-  ctx.fillStyle = 'rgba(88,255,138,0.13)';
-  ctx.fillRect(bx, by, bw, bh);
-  ctx.strokeStyle = Math.floor(t * 1.6) % 2 === 0 ? '#58ff8a' : 'rgba(88,255,138,0.4)';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(bx, by, bw, bh);
-  ctx.fillStyle = '#baffd0';
-  ctx.font = ar ? `700 ${compact ? 34 : 22}px ${AR_BODY}` : `600 ${compact ? 28 : 17}px ${MONO}`;
-  ctx.textAlign = 'center';
-  ctx.fillText(i18n.t('work.live'), bx + bw / 2, by + bh / 2 + (ar ? (compact ? 13 : 9) : (compact ? 10 : 7)));
-  ctx.textAlign = 'left';
-}
-
-function drawIntroSlide(ctx, yTop, t, ar, compact) {
-  if (compact) return drawIntroSlideCompact(ctx, yTop, t, ar);
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#8fb5e3';
-  ctx.font = ar ? `700 ${compact ? 36 : 24}px ${AR_BODY}` : `600 ${compact ? 26 : 17}px ${MONO}`;
-  ctx.fillText(i18n.t('work.overline'), SCR_W / 2, yTop + 250);
-  ctx.fillStyle = '#eafff0';
-  ctx.font = ar ? `800 ${compact ? 84 : 78}px ${AR_DISPLAY}` : `400 ${compact ? 74 : 72}px ${DISPLAY}`;
-  ctx.fillText(i18n.t('work.title').toUpperCase(), SCR_W / 2, yTop + 380);
-  ctx.fillStyle = 'rgba(234,255,240,0.65)';
-  ctx.font = ar ? `700 ${compact ? 38 : 26}px ${AR_BODY}` : `500 ${compact ? 27 : 19}px ${MONO}`;
-  ctx.fillText(i18n.t('work.sub'), SCR_W / 2, yTop + 448);
-  if (Math.floor(t * 1.4) % 2 === 0) {
-    ctx.fillStyle = '#ffd75e';
-    ctx.font = ar ? `700 ${compact ? 36 : 24}px ${AR_BODY}` : `600 ${compact ? 27 : 19}px ${MONO}`;
-    ctx.fillText(i18n.t('work.keep'), SCR_W / 2, yTop + 570);
-  }
-  ctx.textAlign = 'left';
-}
-
-/* ---- mobile: a full-height vertical record card inside the visible column ---- */
-function drawProjectSlideCompact(ctx, yTop, i, t, ar) {
-  const pr = PROJECTS[i];
-  const cx = PC.ox + PC.cw / 2, pad = 26;
-  // footage window (landscape) at the top of the card
-  const fw = PC.cw - pad * 2, fh = Math.round(fw * 0.6), fx = PC.ox + pad, fy = yTop + 84;
-  ctx.fillStyle = '#01100a';
-  ctx.fillRect(fx - 4, fy - 4, fw + 8, fh + 8);
-  ctx.strokeStyle = 'rgba(88,255,138,0.42)'; ctx.lineWidth = 2;
-  ctx.strokeRect(fx - 4, fy - 4, fw + 8, fh + 8);
-  const loaded = pr.frames.filter(Boolean);
-  const fr = loaded.length ? pr.frames[Math.floor(t * 2.1 + i) % 6] || loaded[0] : null;
-  if (fr) {
-    const sh = fr.width * (fh / fw), sy = Math.max(0, (fr.height - sh) / 2);
-    ctx.drawImage(fr, 0, sy, fr.width, Math.min(sh, fr.height), fx, fy, fw, fh);
-    ctx.fillStyle = 'rgba(70,255,150,0.06)'; ctx.fillRect(fx, fy, fw, fh);
-    ctx.fillStyle = 'rgba(0,0,0,0.18)'; ctx.fillRect(fx, fy, fw, 32);
-    ctx.fillStyle = '#58ff8a'; ctx.font = `600 21px ${MONO}`;
-    ctx.textAlign = 'left'; ctx.fillText('● REC', fx + 14, fy + 24);
-    ctx.textAlign = 'right';
-    ctx.fillText(ar ? `المِلَفُّ ${arNum(String(i + 1).padStart(2, '0'))}` : `REC ${String(i + 1).padStart(2, '0')}/${PROJECTS.length}`, fx + fw - 14, fy + 24);
-  } else {
-    ctx.fillStyle = '#58ff8a'; ctx.font = `500 26px ${MONO}`; ctx.textAlign = 'center';
-    ctx.fillText('RETRIEVING ▮', cx, fy + fh / 2);
-  }
-  // info block, centered under the footage
-  ctx.textAlign = 'center';
-  let y = fy + fh + 58;
+  const txx = ar ? wx + ww - 24 : wx + 24;
   ctx.fillStyle = '#8fb5e3';
   const exLine = `${ar ? pr.exAr : pr.ex} · ${ar ? pr.subAr : pr.sub}`;
-  fitFont(ctx, exLine, PC.cw - 44, ar ? 30 : 22, 600, ar ? AR_BODY : MONO, 12);
-  ctx.fillText(exLine, cx, y);
-  y += 72;
-  const title = (ar ? pr.titleAr : pr.title).toUpperCase();
-  const isAr = ar && /[؀-ۿ]/.test(pr.titleAr);
-  fitFont(ctx, title, PC.cw - 52, isAr ? 66 : 56, isAr ? 800 : 400, isAr ? AR_DISPLAY : DISPLAY, 30);
-  ctx.fillStyle = '#eafff0';
-  ctx.fillText(title, cx, y);
-  y += 56;
-  ctx.fillStyle = 'rgba(234,255,240,0.78)';
+  fitFont(ctx, exLine, ww - 60, ar ? (compact ? 26 : 21) : (compact ? 22 : 16), ar ? 700 : 600, ar ? AR_BODY : MONO, 11);
+  ctx.fillText(exLine, txx, iy);
+  ctx.fillStyle = 'rgba(234,255,240,0.85)';
   const tag = ar ? pr.tagAr : pr.tag;
-  fitFont(ctx, tag, PC.cw - 52, ar ? 32 : 30, 600, ar ? AR_BODY : BUBBLE, 18);
-  ctx.fillText(tag, cx, y);
-  // VIEW LIVE button
-  const b = portBtnRect(yTop, ar, true);
-  ctx.fillStyle = 'rgba(88,255,138,0.15)'; ctx.fillRect(b.bx, b.by, b.bw, b.bh);
+  fitFont(ctx, tag, ww - 60, ar ? (compact ? 30 : 25) : (compact ? 26 : 21), 700, ar ? AR_BODY : BUBBLE, 13);
+  ctx.fillText(tag, txx, iy + (compact ? 44 : 38));
+  // VIEW LIVE (the real link sits on this)
+  const lbw = compact ? ww - 48 : 330, lbh = compact ? 64 : 48;
+  const lbx = ar ? wx + ww - 24 - lbw : wx + 24, lby = wy + wh - lbh - (compact ? 88 : 18);
+  ctx.fillStyle = 'rgba(88,255,138,0.13)';
+  ctx.fillRect(lbx, lby, lbw, lbh);
   ctx.strokeStyle = Math.floor(t * 1.6) % 2 === 0 ? '#58ff8a' : 'rgba(88,255,138,0.4)';
-  ctx.lineWidth = 2; ctx.strokeRect(b.bx, b.by, b.bw, b.bh);
-  ctx.fillStyle = '#baffd0'; ctx.font = ar ? `700 30px ${AR_BODY}` : `600 25px ${MONO}`;
-  ctx.textAlign = 'center'; ctx.fillText(i18n.t('work.live'), b.bx + b.bw / 2, b.by + b.bh / 2 + (ar ? 11 : 9));
-  ctx.textAlign = 'left';
-}
-
-function drawIntroSlideCompact(ctx, yTop, t, ar) {
-  const cx = PC.ox + PC.cw / 2;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(lbx, lby, lbw, lbh);
+  ctx.fillStyle = '#baffd0';
+  ctx.font = ar ? `700 ${compact ? 28 : 22}px ${AR_BODY}` : `600 ${compact ? 24 : 17}px ${MONO}`;
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#8fb5e3';
-  fitFont(ctx, i18n.t('work.overline'), PC.cw - 40, ar ? 30 : 22, 600, ar ? AR_BODY : MONO, 11);
-  ctx.fillText(i18n.t('work.overline'), cx, yTop + 236);
-  ctx.fillStyle = '#eafff0';
-  const title = i18n.t('work.title').toUpperCase();
-  fitFont(ctx, title, PC.cw - 44, ar ? 92 : 78, ar ? 800 : 400, ar ? AR_DISPLAY : DISPLAY, 26);
-  ctx.fillText(title, cx, yTop + 344);
-  ctx.fillStyle = 'rgba(234,255,240,0.68)';
-  fitFont(ctx, i18n.t('work.sub'), PC.cw - 44, ar ? 32 : 22, ar ? 600 : 500, ar ? AR_BODY : MONO, 11);
-  ctx.fillText(i18n.t('work.sub'), cx, yTop + 410);
-  if (Math.floor(t * 1.4) % 2 === 0) {
-    ctx.fillStyle = '#ffd75e';
-    fitFont(ctx, i18n.t('work.keep'), PC.cw - 40, ar ? 30 : 22, ar ? 700 : 600, ar ? AR_BODY : MONO, 11);
-    ctx.fillText(i18n.t('work.keep'), cx, yTop + 540);
+  ctx.fillText(i18n.t('work.live'), lbx + lbw / 2, lby + lbh / 2 + (ar ? 10 : 7));
+  const liveRect = { x: lbx, y: lby, w: lbw, h: lbh };
+  // prev / next
+  const nbw = compact ? (ww - 60) / 2 : 150, nbh = compact ? 56 : 40;
+  const nby = wy + wh - nbh - (compact ? 16 : 18);
+  const pbx = compact ? wx + 20 : (ar ? wx + ww - 24 - lbw - 170 - 170 : wx + 24 + lbw + 20);
+  const nbx = compact ? wx + 40 + nbw : (ar ? wx + ww - 24 - lbw - 170 : pbx + nbw + 20);
+  for (const [bx2, lbl, act] of [[pbx, i18n.t('work.prev'), 'wprev'], [nbx, i18n.t('work.next'), 'wnext']]) {
+    ctx.strokeStyle = 'rgba(143,181,227,0.65)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(bx2, nby, nbw, nbh);
+    ctx.fillStyle = '#cfe4fb';
+    ctx.font = ar ? `700 ${compact ? 24 : 19}px ${AR_BODY}` : `600 ${compact ? 20 : 15}px ${MONO}`;
+    ctx.fillText(lbl, bx2 + nbw / 2, nby + nbh / 2 + (ar ? 9 : 6));
+    hots.push({ x: bx2, y: nby, w: nbw, h: nbh, act, label: lbl });
   }
   ctx.textAlign = 'left';
+  ctx.restore();
+  return { hots, liveRect: s > 0.9 ? liveRect : null };
 }
 
 /* ------------------------------------------------------------
@@ -1519,23 +1651,26 @@ function drawGlitch(ctx, W, H, g, t) {
 
 function drawPortfolio(t, sp, compact, glitch = 0) {
   const ctx = termCtx, W = SCR_W, H = SCR_H;
+  const now = performance.now();
   const ar = i18n.lang === 'ar';
   const n = PROJECTS.length;
   if (compact) computeCol(); else { PC.ox = 0; PC.cw = SCR_W; }
   const colL = PC.ox + 22, colR = PC.ox + PC.cw - 22;
   const bh0 = barH(compact);
-  const f = clamp01((sp - P_PORT_A) / (P_PORT_B - P_PORT_A));
-  const inner = f * n * SLIDE_H;
   ctx.fillStyle = '#050d08';
   ctx.fillRect(0, 0, W, H);
+  if (crt.loginAt === 0) crt.loginAt = now;   // the machine starts typing the password
   ctx.save();
   const jit = RM ? 0 : Math.sin(t * 31) * 0.7 + (Math.random() < 0.04 ? (Math.random() - 0.5) * 6 : 0);
   ctx.translate(0, jit);
-  const first = Math.floor(inner / SLIDE_H);
-  for (let s = first; s <= first + 1; s++) {
-    const yTop = s * SLIDE_H - inner + bh0;   // room for the status bar
-    if (s === 0) drawIntroSlide(ctx, yTop, t, ar, compact);
-    else if (s <= n) drawProjectSlide(ctx, yTop, s - 1, t, ar, compact);
+  let hots = [], liveRect = null;
+  if (crt.mode === 'login') hots = drawCrtLogin(ctx, t, now, ar, compact);
+  else if (crt.mode === 'granted') hots = drawCrtGranted(ctx, t, now, ar);
+  else if (crt.mode === 'desk') hots = drawCrtDesk(ctx, t, now, ar, compact, bh0);
+  else {
+    const r = drawCrtWin(ctx, t, now, ar, compact, bh0);
+    hots = r.hots;
+    liveRect = r.liveRect;
   }
   ctx.restore();
   // status bar
@@ -1551,21 +1686,14 @@ function drawPortfolio(t, sp, compact, glitch = 0) {
     ar ? (compact ? 'أَرْشِيفُ الأَعْمَالِ' : 'بنزرسيز — أَرْشِيفُ الأَعْمَالِ') : (compact ? 'PORTFOLIO.EXE' : 'BENZERSIZ OS — PORTFOLIO.EXE'),
     ar ? colR : colL, barBase
   );
-  const active = Math.min(n, Math.max(0, Math.round(inner / SLIDE_H)));
   ctx.textAlign = ar ? 'left' : 'right';
   ctx.fillText(
-    active === 0
-      ? (ar ? `${arNum(n)} مِلَفًّا` : `${n} RECORDS`)
-      : (ar ? `المِلَفُّ ${arNum(active)}/${arNum(n)}` : `REC ${String(active).padStart(2, '0')}/${n}`),
+    crt.mode === 'win' && crt.open >= 0
+      ? (ar ? `المِلَفُّ ${arNum(crt.open + 1)}/${arNum(n)}` : `REC ${String(crt.open + 1).padStart(2, '0')}/${n}`)
+      : (ar ? `${arNum(n)} مُجَلَّدًا` : `${n} FOLDERS`),
     ar ? colL : colR, barBase
   );
   ctx.textAlign = 'left';
-  // right-edge progress rail (inside the visible column)
-  const railX = PC.ox + PC.cw - 10;
-  ctx.fillStyle = 'rgba(88,255,138,0.15)';
-  ctx.fillRect(railX, bh0 + 8, compact ? 6 : 4, H - bh0 - 104);
-  ctx.fillStyle = '#58ff8a';
-  ctx.fillRect(railX, bh0 + 8 + f * (H - bh0 - 104 - 56), compact ? 6 : 4, 56);
   // the desktop-style SKIP button, pinned to the tube's corner
   const sk = portSkipRect(ar, compact);
   ctx.fillStyle = 'rgba(2,10,6,0.88)';
@@ -1608,9 +1736,7 @@ function drawPortfolio(t, sp, compact, glitch = 0) {
   // transition corruption — the full analog-tearing engine, ON THE GLASS ONLY
   drawGlitch(ctx, W, H, glitch, t);
   termTex.needsUpdate = true;
-  // slide-change clunk + hotspot sync
-  if (active !== lastSlide) { lastSlide = active; if (sp > P_PORT_A) sound.flip(); }
-  updateScreenLive(active, inner, ar, sp, compact);
+  updateCrtAnchors(hots, liveRect, ar, sp, compact, glitch);
 }
 
 /* project in-canvas button rects onto the page so real <a> elements sit on them */
@@ -1632,28 +1758,56 @@ function placeAnchor(el, bx, by, bw, bh) {
   el.style.height = `${(Math.abs(y2 - y1) + 16).toFixed(0)}px`;
 }
 
-function updateScreenLive(active, inner, ar, sp, compact) {
+/* the CRT's clickable spots: a pool of buttons over folders/windows,
+   plus the two real anchors (VIEW LIVE link + SKIP) */
+const CRT_POOL = [];
+function ensureCrtHots() {
+  if (CRT_POOL.length) return;
+  for (let i = 0; i < 16; i++) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ph-hot';
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      crtTap(b.dataset.act || '');
+    });
+    document.body.appendChild(b);
+    CRT_POOL.push(b);
+  }
+}
+function hideCrtHots() {
+  for (const b of CRT_POOL) if (b.style.display !== 'none') b.style.display = 'none';
+}
+
+function updateCrtAnchors(hots, liveRect, ar, sp, compact, glitch) {
   if (!screenMesh) return;
-  // SKIP is available through the whole portfolio
+  const active = sp > P_GLITCH_IN + 0.004 && sp < P_PORT_B + 0.004 && glitch < 0.5 && started;
+  // SKIP stays available through the whole section
   if (screenSkip) {
-    if (sp > P_PORT_A - 0.015 && sp < P_PORT_B - 0.004) {
+    if (active) {
       const sk = portSkipRect(ar, compact);
       placeAnchor(screenSkip, sk.x, sk.y, sk.w, sk.h);
     } else screenSkip.style.display = 'none';
   }
-  if (!screenLive) return;
-  // track the drawn button whenever it is actually visible on the glass
-  const slideTop = barH(compact) + (active * SLIDE_H - inner);
-  const { bx, by, bw, bh } = portBtnRect(slideTop, ar, compact);
-  const visible = active >= 1
-    && by > barH(compact) - 12 && by + bh < SCR_H - 4
-    && sp >= P_PORT_A - 0.005 && sp <= P_PORT_B + 0.01;
-  if (!visible) {
-    screenLive.style.display = 'none';
-    return;
+  if (screenLive) {
+    if (active && liveRect && crt.open >= 0) {
+      screenLive.href = PROJECTS[crt.open].url;
+      placeAnchor(screenLive, liveRect.x, liveRect.y, liveRect.w, liveRect.h);
+    } else screenLive.style.display = 'none';
   }
-  screenLive.href = PROJECTS[active - 1].url;
-  placeAnchor(screenLive, bx, by, bw, bh);
+  if (!active) { hideCrtHots(); return; }
+  ensureCrtHots();
+  let bi = 0;
+  for (const h of hots) {
+    const b = CRT_POOL[bi++];
+    if (!b) break;
+    b.dataset.act = h.act;
+    b.setAttribute('aria-label', h.label || h.act);
+    placeAnchor(b, h.x, h.y, h.w, h.h);
+  }
+  for (; bi < CRT_POOL.length; bi++) {
+    if (CRT_POOL[bi].style.display !== 'none') CRT_POOL[bi].style.display = 'none';
+  }
 }
 
 /* ------------------------------------------------------------
@@ -4098,7 +4252,6 @@ const VIS = [
    Main loop
    ------------------------------------------------------------ */
 let smoothP = 0, smoothPT = 0;
-let snapLastY = 0, snapIdleAt = 0, snapDone = false;
 
 function frame(now) {
   requestAnimationFrame(frame);
@@ -4112,26 +4265,6 @@ function frame(now) {
   const ptRaw = phoneRaw();
   smoothPT = RM ? ptRaw : lerp(smoothPT, ptRaw, 0.12);
   const pt = Math.abs(smoothPT - ptRaw) < 0.0004 ? ptRaw : smoothPT;
-
-  // record snapping — an idle scroll settles onto the nearest record,
-  // so the VIEW LIVE button is always exactly where you left it
-  if (lenis && !RM && started) {
-    if (p > P_PORT_A + 0.004 && p < P_PORT_B - 0.004) {
-      const y = window.scrollY;
-      if (Math.abs(y - snapLastY) > 0.6) { snapLastY = y; snapIdleAt = now; snapDone = false; }
-      else if (!snapDone && now - snapIdleAt > 330) {
-        snapDone = true;
-        const n = PROJECTS.length;
-        const slide = Math.round(((p - P_PORT_A) / (P_PORT_B - P_PORT_A)) * n);
-        const targetY = rawOf(P_PORT_A + (slide / n) * (P_PORT_B - P_PORT_A)) * maxScroll();
-        if (Math.abs(targetY - y) > 6) lenis.scrollTo(targetY, { duration: 0.75, easing: (q) => 1 - Math.pow(1 - q, 3) });
-      }
-    } else {
-      snapLastY = window.scrollY;
-      snapIdleAt = now;
-      snapDone = false;
-    }
-  }
 
   updateOverlays(sp);
   updateHUD(scrollRaw(), sp, pt > 0.06 && pt < 0.94);
@@ -4164,12 +4297,14 @@ function frame(now) {
     } else {
       if (screenLive) screenLive.style.display = 'none';
       if (screenSkip) screenSkip.style.display = 'none';
+      hideCrtHots();
       if (heroScreenGlow) heroScreenGlow.intensity = 4;
       if (!phoneStage && now - lastTermDraw > 90) { lastTermDraw = now; drawTerminal(t); }
     }
   } else {
     if (screenLive && screenLive.style.display !== 'none') screenLive.style.display = 'none';
     if (screenSkip && screenSkip.style.display !== 'none') screenSkip.style.display = 'none';
+    hideCrtHots();
   }
 
   // bureau backdrop: the fax prints its memo as you read
@@ -4314,6 +4449,8 @@ window.__bz = {
     smoothPT = pt;
   },
   tap: (act) => phoneTap(act),
+  ctap: (act) => crtTap(act),
   ph: phoneState,
+  crt,
   start,
 };

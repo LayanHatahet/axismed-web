@@ -133,7 +133,6 @@ const SERVICES = [
     num: "01",
     title: "Branding",
     tag: "Identity with a heartbeat",
-    copy: "Naming, visual identity and brand systems that make a clinic feel like a destination and a med-tech company feel inevitable. Built on patient psychology, not design trends.",
     items: ["Brand strategy & naming", "Visual identity systems", "Medical iconography", "Bilingual EN/AR guidelines"],
     Visual: BrandingVisual,
   },
@@ -141,7 +140,6 @@ const SERVICES = [
     num: "02",
     title: "Websites",
     tag: "Digital front doors, not waiting rooms",
-    copy: "Fast, beautiful, conversion-engineered websites where patients book before they blink. Accessible, multilingual, and built to satisfy the strictest healthcare compliance.",
     items: ["Patient-first UX", "Booking & telehealth flows", "Arabic / English builds", "SEO-ready architecture"],
     Visual: WebVisual,
   },
@@ -149,7 +147,6 @@ const SERVICES = [
     num: "03",
     title: "Applications",
     tag: "Care that lives in the pocket",
-    copy: "Patient portals, booking apps, clinician tools and connected-device companions — designed for people who are stressed, busy or unwell, and engineered to clinical standards.",
     items: ["Patient & clinician apps", "Portals & dashboards", "Wearable integrations", "HIPAA-grade practices"],
     Visual: AppVisual,
   },
@@ -157,7 +154,6 @@ const SERVICES = [
     num: "04",
     title: "Marketing",
     tag: "Growth, prescribed",
-    copy: "Full-funnel campaigns tuned to healthcare advertising regulations in the UAE and beyond. We fill appointment books, launch devices, and make specialists famous.",
     items: ["Performance campaigns", "Medical content & social", "Physician branding", "Launch & GTM strategy"],
     Visual: MarketingVisual,
   },
@@ -172,9 +168,8 @@ function ServiceCard({ s }: { s: (typeof SERVICES)[number] }) {
             <span>Rx {s.num} / 04</span>
             <span className="text-[var(--axm-accent)]">✚</span>
           </p>
-          <h3 className="axm-display mt-6 text-[clamp(1.8rem,2.6vw,2.6rem)] uppercase">{s.title}</h3>
+          <h3 className="axm-display mt-5 text-[clamp(1.5rem,2.1vw,2.1rem)] uppercase">{s.title}</h3>
           <p className="mt-2 font-medium text-[var(--axm-accent)]">{s.tag}</p>
-          <p className="mt-5 max-w-md leading-relaxed text-[var(--axm-muted)]">{s.copy}</p>
         </div>
         <ul className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
           {s.items.map((it) => (
@@ -220,7 +215,7 @@ export function ServicesSection() {
 
   const header = (
     <div className="mx-auto w-full max-w-[1500px] px-5 sm:px-8">
-      <p className="axm-mono mb-4">/ 02 — the treatment plan</p>
+      <p className="axm-mono mb-4">/ 03 — the treatment plan</p>
       <h2 className="axm-display max-w-4xl text-[clamp(1.9rem,3.4vw,3.2rem)] uppercase">
         Four prescriptions.{" "}
         <span className="text-[var(--axm-accent)]">One healthy brand.</span>
@@ -253,7 +248,7 @@ export function ServicesSection() {
 
         <motion.div ref={trackRef} style={{ x }} className="flex w-max gap-8 pl-[max(1.25rem,calc((100vw-1500px)/2+2rem))] pr-[8vw]">
           {SERVICES.map((s) => (
-            <div key={s.num} className="h-[62vh] min-h-[500px] w-[min(72vw,1060px)] shrink-0">
+            <div key={s.num} className="h-[48vh] min-h-[400px] w-[min(62vw,880px)] shrink-0">
               <ServiceCard s={s} />
             </div>
           ))}

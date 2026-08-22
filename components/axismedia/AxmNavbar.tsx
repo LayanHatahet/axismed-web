@@ -5,9 +5,8 @@ import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { Magnetic } from "./Magnetic";
 
 const LINKS = [
+  { href: "#studio", label: "Studio" },
   { href: "#treatment", label: "Treatment" },
-  { href: "#engine", label: "Live demo" },
-  { href: "#process", label: "Process" },
   { href: "#sectors", label: "Sectors" },
   { href: "#checkup", label: "Check-up" },
 ];

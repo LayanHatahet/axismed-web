@@ -26,11 +26,62 @@ export interface BrandKit {
   inkSoft: string;
   darkPreview: boolean;
   monogramVariant: number;
+  /* typography of the generated brand (CSS font-family value) */
+  displayFamily: string;
+  fontKey: FontKey;
   doctors: { name: string; spec: string; rating: string }[];
   slots: string[];
   hooks: string[];
   channels: { label: string; pct: number }[];
   phases: { label: string; weeks: number }[];
+}
+
+/** The studio's creation controls — everything the visitor can change live. */
+export interface KitOverrides {
+  accent?: string; // hex from ACCENTS, or undefined = vibe default
+  mark?: number; // 0-3 monogram frame, or undefined = seeded
+  font?: FontKey; // undefined = "modern"
+}
+
+export type FontKey = "modern" | "editorial" | "technical";
+
+export const ACCENTS: { key: string; hex: string }[] = [
+  { key: "violet", hex: "#8b6bff" },
+  { key: "teal", hex: "#12b5a0" },
+  { key: "blue", hex: "#2f7fd4" },
+  { key: "coral", hex: "#e86a56" },
+  { key: "gold", hex: "#b98e3f" },
+  { key: "rose", hex: "#d84f8f" },
+];
+
+export const FONT_PAIRS: { key: FontKey; label: string; display: string }[] = [
+  { key: "modern", label: "Modern", display: "var(--font-axm-display), 'Syne', sans-serif" },
+  { key: "editorial", label: "Soft", display: "var(--font-axm-body), 'Space Grotesk', sans-serif" },
+  { key: "technical", label: "Technical", display: "var(--font-axm-mono), 'IBM Plex Mono', monospace" },
+];
+
+/** Mix a hex color toward white (amt 0..1). */
+export function tint(hex: string, amt: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  const mix = (c: number) =>
+    Math.round(c + (255 - c) * amt)
+      .toString(16)
+      .padStart(2, "0");
+  return `#${mix((n >> 16) & 255)}${mix((n >> 8) & 255)}${mix(n & 255)}`;
+}
+
+/** Apply the studio's live controls on top of a generated kit. */
+export function customizeKit(base: BrandKit, o: KitOverrides): BrandKit {
+  const accent = o.accent ?? base.accent;
+  const pair = FONT_PAIRS.find((f) => f.key === (o.font ?? "modern")) ?? FONT_PAIRS[0];
+  return {
+    ...base,
+    accent,
+    accentSoft: o.accent ? tint(accent, base.darkPreview ? 0.35 : 0.78) : base.accentSoft,
+    monogramVariant: o.mark ?? base.monogramVariant,
+    displayFamily: pair.display,
+    fontKey: pair.key,
+  };
 }
 
 export const SECTORS: { key: SectorKey; label: string }[] = [
@@ -279,6 +330,8 @@ export function generateKit(rawName: string, sector: SectorKey, vibe: VibeKey): 
     inkSoft: pal.inkSoft,
     darkPreview: pal.dark,
     monogramVariant: (seed >> 4) % 4,
+    displayFamily: FONT_PAIRS[0].display,
+    fontKey: "modern",
     doctors,
     slots: SLOT_TIMES,
     hooks: HOOKS[sector].map((h) => h.replaceAll("{name}", name)),

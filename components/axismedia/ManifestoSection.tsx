@@ -11,31 +11,13 @@ import { motion, MotionValue, useScroll, useTransform } from "framer-motion";
 type Tone = "normal" | "coral" | "green";
 
 const TEXT: Array<{ w: string; tone?: Tone }> = [
-  { w: "Diagnosis:" },
-  { w: "most" },
+  { w: "Most" },
   { w: "medical" },
   { w: "brands" },
   { w: "are" },
   { w: "flatlining.", tone: "coral" },
-  { w: "Template" },
-  { w: "logos." },
-  { w: "Websites" },
-  { w: "that" },
-  { w: "feel" },
-  { w: "like" },
-  { w: "waiting" },
-  { w: "rooms." },
-  { w: "Apps" },
-  { w: "nobody" },
-  { w: "opens" },
-  { w: "twice." },
-  { w: "Your" },
-  { w: "patients" },
-  { w: "deserve" },
-  { w: "better —" },
-  { w: "so" },
-  { w: "we" },
-  { w: "became" },
+  { w: "We" },
+  { w: "are" },
   { w: "the" },
   { w: "adrenaline.", tone: "green" },
 ];
@@ -79,7 +61,7 @@ export function ManifestoSection() {
   const flash = useTransform(scrollYProgress, [0.84, 0.9, 1], [0, 0.4, 0]);
 
   return (
-    <section ref={ref} className="axm-frame relative h-[280vh]">
+    <section ref={ref} className="axm-frame relative h-[170vh]">
       <span className="axm-tick axm-tick-tl" aria-hidden="true" />
       <span className="axm-tick axm-tick-tr" aria-hidden="true" />
 
@@ -92,8 +74,8 @@ export function ManifestoSection() {
         />
 
         <div className="mx-auto w-full max-w-[1200px] px-5 sm:px-8">
-          <p className="axm-mono mb-8">/ 01 — patient file</p>
-          <p className="axm-display text-[clamp(1.9rem,5vw,4.3rem)] leading-[1.12]">
+          <p className="axm-mono mb-8">/ 02 — patient file</p>
+          <p className="axm-display text-[clamp(2.4rem,6.5vw,5.6rem)] leading-[1.12]">
             {TEXT.map((t, i) => (
               <Word
                 key={i}

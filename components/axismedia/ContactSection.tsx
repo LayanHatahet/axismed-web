@@ -11,7 +11,7 @@ export function ContactSection() {
       <span className="axm-tick axm-tick-tr" aria-hidden="true" />
 
       <div className="mx-auto max-w-[1500px] px-5 py-24 sm:px-8 lg:py-32">
-        <p className="axm-mono mb-5 text-center">/ 09 — begin treatment</p>
+        <p className="axm-mono mb-5 text-center">/ 07 — begin treatment</p>
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}

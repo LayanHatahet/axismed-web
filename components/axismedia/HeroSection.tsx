@@ -101,9 +101,7 @@ export function HeroSection() {
             transition={{ delay: D + 0.55, duration: 0.7, ease: EASE }}
             className="max-w-md text-[1.02rem] leading-relaxed text-[var(--axm-muted)]"
           >
-            Branding, websites, applications and marketing — engineered exclusively for the
-            medical industry. We turn clinics, hospitals and health-tech into brands patients
-            trust and remember.
+            Branding · websites · apps · growth — engineered for medicine.
           </motion.p>
 
           <motion.div
@@ -113,13 +111,13 @@ export function HeroSection() {
             className="flex flex-wrap items-center gap-4"
           >
             <Magnetic>
-              <a href="#contact" className="axm-btn axm-btn-solid">
-                Start a project <span aria-hidden="true">→</span>
+              <a href="#studio" className="axm-btn axm-btn-solid">
+                ⚡ Create yours live
               </a>
             </Magnetic>
             <Magnetic>
-              <a href="#engine" className="axm-btn axm-btn-ghost">
-                ⚡ Build your brand live
+              <a href="#contact" className="axm-btn axm-btn-ghost">
+                Start a project
               </a>
             </Magnetic>
           </motion.div>

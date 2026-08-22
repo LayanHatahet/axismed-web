@@ -88,12 +88,12 @@ export function DiagnosisSection() {
       <span className="axm-tick axm-tick-tr" aria-hidden="true" />
 
       <div className="mx-auto max-w-[1100px] px-5 sm:px-8">
-        <p className="axm-mono mb-4 text-center">/ 08 — free triage</p>
+        <p className="axm-mono mb-4 text-center">/ 06 — check-up</p>
         <h2 className="axm-display text-center text-[clamp(2.2rem,5vw,4.2rem)] uppercase">
           Is your brand <span className="text-[var(--axm-accent)]">healthy?</span>
         </h2>
         <p className="mx-auto mt-4 max-w-md text-center text-sm leading-relaxed text-[var(--axm-muted)]">
-          Four questions. Sixty seconds. An honest prognosis — no email required.
+          Four taps. One honest prognosis.
         </p>
 
         <div className="relative mx-auto mt-12 min-h-[380px] overflow-hidden rounded-2xl border border-[var(--axm-line-2)] bg-[var(--axm-surface)]">

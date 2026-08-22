@@ -76,7 +76,7 @@ export function UAESection() {
       </motion.span>
 
       <div className="relative mx-auto max-w-[1500px] px-5 pt-20 sm:px-8 lg:pt-28">
-        <p className="axm-mono mb-4">/ 07 — home turf</p>
+        <p className="axm-mono mb-4">/ 05 — home turf</p>
         <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr]">
           <h2 className="axm-display text-[clamp(2.2rem,5.5vw,4.6rem)] uppercase">
             Built for the giants of{" "}
@@ -84,13 +84,7 @@ export function UAESection() {
           </h2>
           <div className="space-y-5 text-[var(--axm-muted)]">
             <p className="leading-relaxed">
-              From Dubai Healthcare City to Reem Island, we design for the region&apos;s most
-              ambitious hospital groups, clinic chains and health-tech ventures. We speak DHA,
-              DoH and MOHAP — and we design Arabic-first when your patients do.
-            </p>
-            <p className="leading-relaxed">
-              Bilingual by default. Culturally fluent. Regulation-ready. And tuned to a market
-              where a brand is judged in the first heartbeat.
+              Bilingual by default. Culturally fluent. Regulation-ready.
             </p>
             <ul className="flex flex-wrap gap-2 pt-1">
               {["Arabic / English design", "DHA · DoH · MOHAP aware", "Medical tourism ready", "Gulf-wide delivery"].map(

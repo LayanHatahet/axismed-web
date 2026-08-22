@@ -1,13 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  ACCENTS,
   BrandKit,
+  FONT_PAIRS,
+  FontKey,
+  KitOverrides,
   SECTORS,
   SectorKey,
   VIBES,
   VibeKey,
+  customizeKit,
   generateKit,
 } from "@/lib/axismedia/generator";
 import { Magnetic } from "../Magnetic";
@@ -18,66 +23,73 @@ import { PhoneDemo } from "./PhoneDemo";
 import { SitePreview } from "./SitePreview";
 import { StrategyCard } from "./StrategyCard";
 
-type Phase = "intake" | "building" | "reveal";
+type Phase = "intake" | "building" | "studio";
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 function buildLines(kit: BrandKit): string[] {
   return [
-    "axis engine v2.1 — boot ok",
+    "axis studio — boot ok",
     `patient intake: ${kit.name} [${kit.sectorLabel.toLowerCase()}]`,
     "scanning the GCC market… 412 competitors mapped",
-    "diagnosis: strong medicine, invisible brand",
-    `generating identity — ${kit.vibeLabel.toLowerCase()} direction ✓`,
-    "composing website — bilingual, booking-first ✓",
-    "compiling patient app — iOS / Android ✓",
-    "prescribing 12-week growth plan ✓",
-    "vitals stable. preparing reveal…",
+    `generating identity — ${kit.vibeLabel.toLowerCase()} ✓`,
+    "composing website ✓ compiling app ✓",
+    "designing campaign ✓ prescribing growth ✓",
+    "handing you the controls…",
   ];
 }
 
+function ControlLabel({ children }: { children: React.ReactNode }) {
+  return <p className="axm-mono !text-[0.52rem]">{children}</p>;
+}
+
 /**
- * The Axis Engine — the visitor types their name, picks a sector and a vibe,
- * and watches a brand, website, live app and marketing plan get "generated"
- * before their eyes. The pitch: this is the 30-second sketch; the studio
- * builds the real thing.
+ * The Studio — the heart of the site. Visitors name their brand, then hold
+ * the controls: vibe, color, logo mark, typography — and watch the identity,
+ * website, live app and campaign redraw instantly with every choice.
  */
 export function EngineSection() {
   const [phase, setPhase] = useState<Phase>("intake");
   const [name, setName] = useState("");
   const [sector, setSector] = useState<SectorKey>("clinic");
   const [vibe, setVibe] = useState<VibeKey>("premium");
-  const [kit, setKit] = useState<BrandKit | null>(null);
+  const [overrides, setOverrides] = useState<KitOverrides>({});
 
-  function generate(v: VibeKey = vibe) {
-    setKit(generateKit(name, sector, v));
-    setPhase("building");
+  const kit = useMemo(
+    () => customizeKit(generateKit(name, sector, vibe), overrides),
+    [name, sector, vibe, overrides]
+  );
+
+  function set<K extends keyof KitOverrides>(key: K, value: KitOverrides[K]) {
+    setOverrides((o) => ({ ...o, [key]: o[key] === value ? undefined : value }));
   }
 
+  const chip = (active: boolean) =>
+    ({
+      borderColor: active ? "var(--axm-accent)" : "var(--axm-line-2)",
+      background: active ? "rgba(179,166,236,0.12)" : "transparent",
+      color: active ? "var(--axm-text)" : "var(--axm-muted)",
+    }) as const;
+
   return (
-    <section id="engine" className="axm-frame relative overflow-hidden py-20 lg:py-28">
+    <section id="studio" className="axm-frame relative overflow-hidden py-20 lg:py-24">
       <span className="axm-tick axm-tick-tl" aria-hidden="true" />
       <span className="axm-tick axm-tick-tr" aria-hidden="true" />
 
-      {/* thinking texture */}
       <NeuralCanvas
         className={`pointer-events-none absolute inset-0 h-full w-full transition-opacity duration-1000 ${
-          phase === "building" ? "opacity-60" : "opacity-[0.14]"
+          phase === "building" ? "opacity-60" : "opacity-[0.12]"
         }`}
       />
 
       <div className="relative mx-auto max-w-[1500px] px-5 sm:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="axm-mono mb-4">/ 03 — the axis engine · live demo</p>
+          <p className="axm-mono mb-4">/ 01 — the studio · create yours</p>
           <h2 className="axm-display text-[clamp(2.2rem,5vw,4.2rem)] uppercase">
-            Watch us build <span className="text-[var(--axm-accent)]">your brand</span>
+            Your brand, <span className="text-[var(--axm-accent)]">built live</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-[var(--axm-muted)]">
-            Type your name, pick your world, and the Engine sketches your identity, website,
-            patient app and growth plan — live, in seconds. No email. No sales call. Just proof.
-          </p>
         </div>
 
-        <div className="relative mx-auto mt-12 min-h-[440px] max-w-5xl">
+        <div className="relative mx-auto mt-10 min-h-[440px]">
           <AnimatePresence mode="wait">
             {phase === "intake" && (
               <motion.form
@@ -88,12 +100,12 @@ export function EngineSection() {
                 transition={{ duration: 0.5, ease: EASE }}
                 onSubmit={(e) => {
                   e.preventDefault();
-                  generate();
+                  setPhase("building");
                 }}
                 className="mx-auto max-w-2xl rounded-2xl border border-[var(--axm-line-2)] bg-[rgba(10,6,24,0.7)] p-6 backdrop-blur-md sm:p-9"
               >
                 <label className="axm-mono !text-[0.58rem]" htmlFor="axm-name">
-                  01 · your clinic / company name
+                  01 · name it
                 </label>
                 <input
                   id="axm-name"
@@ -114,33 +126,9 @@ export function EngineSection() {
                       type="button"
                       onClick={() => setSector(s.key)}
                       className="rounded-full border px-4 py-2 text-xs font-medium transition-all"
-                      style={{
-                        borderColor: sector === s.key ? "var(--axm-accent)" : "var(--axm-line-2)",
-                        background: sector === s.key ? "rgba(179,166,236,0.12)" : "transparent",
-                        color: sector === s.key ? "var(--axm-accent)" : "var(--axm-muted)",
-                      }}
+                      style={chip(sector === s.key)}
                     >
                       {s.label}
-                    </button>
-                  ))}
-                </div>
-
-                <p className="axm-mono mt-7 !text-[0.58rem]">03 · your vibe</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {VIBES.map((v) => (
-                    <button
-                      key={v.key}
-                      type="button"
-                      onClick={() => setVibe(v.key)}
-                      className="flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium transition-all"
-                      style={{
-                        borderColor: vibe === v.key ? "var(--axm-accent)" : "var(--axm-line-2)",
-                        background: vibe === v.key ? "rgba(179,166,236,0.12)" : "transparent",
-                        color: vibe === v.key ? "var(--axm-text)" : "var(--axm-muted)",
-                      }}
-                    >
-                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: v.swatch }} />
-                      {v.label}
                     </button>
                   ))}
                 </div>
@@ -148,17 +136,14 @@ export function EngineSection() {
                 <div className="mt-9 text-center">
                   <Magnetic strength={22}>
                     <button type="submit" className="axm-btn axm-btn-solid !px-9 !py-4">
-                      ⚡ Generate my brand
+                      ⚡ Build it
                     </button>
                   </Magnetic>
-                  <p className="axm-mono mt-4 !text-[0.5rem] !normal-case !tracking-[0.08em]">
-                    a 30-second sketch, generated on your device — the real thing takes us 30 days
-                  </p>
                 </div>
               </motion.form>
             )}
 
-            {phase === "building" && kit && (
+            {phase === "building" && (
               <motion.div
                 key="building"
                 initial={{ opacity: 0 }}
@@ -167,112 +152,173 @@ export function EngineSection() {
                 transition={{ duration: 0.4 }}
                 className="flex min-h-[440px] items-center justify-center"
               >
-                <BuildConsole lines={buildLines(kit)} onDone={() => setPhase("reveal")} />
+                <BuildConsole lines={buildLines(kit)} onDone={() => setPhase("studio")} />
               </motion.div>
             )}
 
-            {phase === "reveal" && kit && (
+            {phase === "studio" && (
               <motion.div
-                key="reveal"
+                key="studio"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, ease: EASE }}
               >
-                {/* reveal header */}
-                <div className="mb-10 text-center">
-                  <p className="axm-mono !text-[0.58rem] text-[var(--axm-accent)]">
-                    ✓ generated in 28.4s — patient: {kit.name}
-                  </p>
-                  <h3 className="axm-display mt-3 text-[clamp(1.8rem,3.6vw,3rem)] uppercase">
-                    {kit.name}, <span className="text-[var(--axm-accent)]">alive.</span>
+                {/* header */}
+                <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+                  <h3 className="axm-display text-[clamp(1.5rem,3vw,2.4rem)] uppercase">
+                    {kit.name} <span className="text-[var(--axm-accent)]">— live</span>
                   </h3>
-                  <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-                    {VIBES.map((v) => (
-                      <button
-                        key={v.key}
-                        onClick={() => generate(v.key)}
-                        className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.62rem] transition-all"
-                        style={{
-                          borderColor: kit.vibe === v.key ? "var(--axm-accent)" : "var(--axm-line-2)",
-                          color: kit.vibe === v.key ? "var(--axm-accent)" : "var(--axm-muted)",
-                        }}
-                      >
-                        <span className="h-2 w-2 rounded-full" style={{ background: v.swatch }} />
-                        {v.label}
-                      </button>
-                    ))}
-                    <button
-                      onClick={() => setPhase("intake")}
-                      className="axm-mono !text-[0.55rem] underline decoration-[var(--axm-line-2)] underline-offset-4 transition-colors hover:!text-[var(--axm-accent)]"
-                    >
-                      start over
-                    </button>
+                  <button
+                    onClick={() => {
+                      setOverrides({});
+                      setPhase("intake");
+                    }}
+                    className="axm-mono !text-[0.55rem] underline decoration-[var(--axm-line-2)] underline-offset-4 transition-colors hover:!text-[var(--axm-accent)]"
+                  >
+                    start over
+                  </button>
+                </div>
+
+                {/* THE CONTROLS — everything redraws instantly */}
+                <div className="mb-8 grid gap-x-8 gap-y-5 rounded-2xl border border-[var(--axm-line-2)] bg-[rgba(10,6,24,0.7)] p-5 backdrop-blur-md sm:grid-cols-2 lg:grid-cols-4">
+                  <div>
+                    <ControlLabel>vibe</ControlLabel>
+                    <div className="mt-2.5 flex flex-wrap gap-1.5">
+                      {VIBES.map((v) => (
+                        <button
+                          key={v.key}
+                          onClick={() => setVibe(v.key)}
+                          className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.62rem] font-medium transition-all"
+                          style={chip(vibe === v.key)}
+                        >
+                          <span className="h-2 w-2 rounded-full" style={{ background: v.swatch }} />
+                          {v.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <ControlLabel>color</ControlLabel>
+                    <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                      {ACCENTS.map((a) => {
+                        const active = overrides.accent === a.hex;
+                        return (
+                          <button
+                            key={a.key}
+                            onClick={() => set("accent", a.hex)}
+                            aria-label={`Accent color ${a.key}`}
+                            className="h-7 w-7 rounded-full border-2 transition-transform hover:scale-110"
+                            style={{
+                              background: a.hex,
+                              borderColor: active ? "var(--axm-text)" : "transparent",
+                              boxShadow: active ? `0 0 14px ${a.hex}` : "none",
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <ControlLabel>logo mark</ControlLabel>
+                    <div className="mt-2.5 flex gap-1.5">
+                      {[0, 1, 2, 3].map((m) => {
+                        const active = kit.monogramVariant === m;
+                        return (
+                          <button
+                            key={m}
+                            onClick={() => set("mark", m)}
+                            aria-label={`Logo mark style ${m + 1}`}
+                            className="flex h-9 w-9 items-center justify-center rounded-lg border transition-all"
+                            style={chip(active)}
+                          >
+                            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6">
+                              {m === 0 && <circle cx="12" cy="12" r="8" strokeDasharray="2 2.4" />}
+                              {m === 1 && (
+                                <>
+                                  <circle cx="12" cy="12" r="8" strokeDasharray="10 6" />
+                                  <circle cx="12" cy="12" r="4.5" strokeDasharray="6 4" />
+                                </>
+                              )}
+                              {m === 2 && <rect x="4" y="4" width="16" height="16" rx="5" />}
+                              {m === 3 && <polygon points="12,3 20,7.5 20,16.5 12,21 4,16.5 4,7.5" />}
+                            </svg>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <ControlLabel>type</ControlLabel>
+                    <div className="mt-2.5 flex flex-wrap gap-1.5">
+                      {FONT_PAIRS.map((f) => (
+                        <button
+                          key={f.key}
+                          onClick={() => set("font", f.key as FontKey)}
+                          className="rounded-full border px-3 py-1.5 text-[0.62rem] transition-all"
+                          style={{ ...chip(kit.fontKey === f.key), fontFamily: f.display }}
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
+                {/* THE OUTPUTS */}
                 <div className="grid gap-6 lg:grid-cols-12">
-                  {/* identity */}
                   <div className="lg:col-span-4">
                     <div className="h-full overflow-hidden rounded-xl border border-[var(--axm-line-2)] bg-[var(--axm-surface)]">
                       <div className="flex items-center justify-between border-b border-[var(--axm-line)] px-5 py-3">
-                        <span className="axm-mono !text-[0.55rem]">identity system</span>
+                        <span className="axm-mono !text-[0.55rem]">identity</span>
                         <span className="text-[var(--axm-accent)]">✚</span>
                       </div>
                       <div className="flex flex-col items-center p-6">
                         <MonogramLogo kit={kit} size={132} />
-                        <p className="mt-4 font-[family-name:var(--axm-display)] text-xl font-bold text-[var(--axm-text)]">
+                        <p className="mt-4 text-xl font-bold text-[var(--axm-text)]" style={{ fontFamily: kit.displayFamily }}>
                           {kit.name}
                         </p>
                         <p className="mt-1 text-center text-xs italic text-[var(--axm-muted)]">
                           “{kit.tagline}”
                         </p>
                         <div className="mt-5 flex gap-1.5">
-                          {[kit.accent, kit.accentSoft, kit.paper, kit.ink].map((c) => (
-                            <span
-                              key={c}
+                          {[kit.accent, kit.accentSoft, kit.paper, kit.ink].map((c, i) => (
+                            <motion.span
+                              key={`${c}-${i}`}
+                              layout
                               className="h-7 w-10 rounded-md border border-[var(--axm-line)]"
                               style={{ background: c }}
                               title={c}
                             />
                           ))}
                         </div>
-                        <div className="mt-5 w-full border-t border-[var(--axm-line)] pt-4 text-center">
-                          <p className="axm-mono !text-[0.5rem]">type pairing</p>
-                          <p className="mt-1 font-[family-name:var(--axm-display)] text-sm font-bold text-[var(--axm-text)]">
-                            Syne <span className="font-[family-name:var(--axm-body)] font-normal text-[var(--axm-muted)]">/ Space Grotesk</span>
-                          </p>
-                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* website */}
                   <div className="lg:col-span-8">
                     <SitePreview kit={kit} />
                   </div>
 
-                  {/* app */}
                   <div className="lg:col-span-5">
-                    <div className="flex h-full flex-col justify-center rounded-xl border border-[var(--axm-line-2)] bg-[var(--axm-surface)] p-6">
+                    <div className="flex h-full flex-col justify-center rounded-xl border border-[var(--axm-line-2)] bg-[var(--axm-surface)] p-5">
                       <PhoneDemo kit={kit} />
                     </div>
                   </div>
 
-                  {/* strategy */}
                   <div className="lg:col-span-7">
                     <StrategyCard kit={kit} />
                   </div>
                 </div>
 
-                {/* closing pitch */}
-                <div className="mt-12 text-center">
-                  <p className="mx-auto max-w-xl text-sm leading-relaxed text-[var(--axm-muted)]">
-                    This sketch took <span className="text-[var(--axm-accent)]">30 seconds</span>
-                    {" and it's already tappable."} Now imagine what our specialists do with{" "}
-                    <span className="text-[var(--axm-accent)]">30 days</span> — research, strategy,
-                    craft and compliance included.
+                {/* closing pitch — short */}
+                <div className="mt-10 text-center">
+                  <p className="axm-mono !text-[0.6rem]">
+                    30 seconds, your hands. <span className="text-[var(--axm-accent)]">30 days, ours.</span>
                   </p>
-                  <div className="mt-6">
+                  <div className="mt-5">
                     <Magnetic strength={22}>
                       <a href="#contact" className="axm-btn axm-btn-solid">
                         Build {kit.name} for real →

@@ -108,7 +108,10 @@ export function SitePreview({ kit }: { kit: BrandKit }) {
                 <p className="text-[0.5rem] font-bold uppercase tracking-[0.2em]" style={{ color: accent }}>
                   {kit.sectorLabel} · Dubai
                 </p>
-                <p className="mt-1.5 font-[family-name:var(--axm-display)] text-[1.05rem] font-extrabold leading-tight">
+                <p
+                  className="mt-1.5 text-[1.05rem] font-extrabold leading-tight"
+                  style={{ fontFamily: kit.displayFamily }}
+                >
                   {kit.tagline}
                 </p>
                 <p className="mt-1.5 text-[0.6rem] leading-relaxed" style={{ color: inkSoft }}>

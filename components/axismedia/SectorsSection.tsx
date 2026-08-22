@@ -67,15 +67,12 @@ export function SectorsSection() {
       <div className="mx-auto max-w-[1500px] px-5 sm:px-8">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="axm-mono mb-4">/ 06 — admissions</p>
+            <p className="axm-mono mb-4">/ 04 — admissions</p>
             <h2 className="axm-display max-w-2xl text-[clamp(2.2rem,5vw,4.2rem)] uppercase">
               Every ward of the <span className="text-[var(--axm-accent)]">med industry</span>
             </h2>
           </div>
-          <p className="max-w-sm text-sm leading-relaxed text-[var(--axm-muted)]">
-            We only work in healthcare. That focus is why our work passes compliance on the
-            first round — and why it still stops the scroll.
-          </p>
+          <p className="axm-mono !text-[0.6rem]">healthcare only. always.</p>
         </div>
 
         <ul className="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-[var(--axm-line-2)] bg-[var(--axm-line)] sm:grid-cols-2 lg:grid-cols-4">

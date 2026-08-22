@@ -132,7 +132,7 @@ export function MonogramLogo({ kit, size = 120 }: { kit: BrandKit; size?: number
         y={v === 3 ? 62 : 60}
         textAnchor="middle"
         dominantBaseline="central"
-        fontFamily="var(--axm-display)"
+        fontFamily={kit.displayFamily}
         fontWeight={800}
         fontSize={initials.length > 1 ? 30 : 38}
         fill={fg}

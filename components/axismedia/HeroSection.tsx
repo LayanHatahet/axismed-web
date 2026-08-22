@@ -51,7 +51,7 @@ export function HeroSection() {
       <div
         aria-hidden="true"
         className="absolute left-1/2 top-1/2 h-[80vh] w-[80vw] -translate-x-1/2 -translate-y-1/2 rounded-full"
-        style={{ background: "radial-gradient(closest-side, rgba(44,255,192,0.07), transparent)" }}
+        style={{ background: "radial-gradient(closest-side, rgba(179,166,236,0.07), transparent)" }}
       />
 
       {/* live ECG running behind the headline — beats faster as you scroll */}
@@ -84,8 +84,8 @@ export function HeroSection() {
           <Line delay={D + 0.34}>
             a{" "}
             <motion.span
-              className="inline-block text-[var(--axm-green)]"
-              style={{ textShadow: "0 0 60px rgba(44,255,192,0.45)" }}
+              className="inline-block text-[var(--axm-accent)]"
+              style={{ textShadow: "0 0 60px rgba(179,166,236,0.45)" }}
               animate={{ scale: [1, 1.04, 1, 1.025, 1] }}
               transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.4, ease: "easeInOut" }}
             >
@@ -118,8 +118,8 @@ export function HeroSection() {
               </a>
             </Magnetic>
             <Magnetic>
-              <a href="#treatment" className="axm-btn axm-btn-ghost">
-                See the treatment
+              <a href="#engine" className="axm-btn axm-btn-ghost">
+                ⚡ Build your brand live
               </a>
             </Magnetic>
           </motion.div>
@@ -138,7 +138,7 @@ export function HeroSection() {
         <motion.span
           animate={{ y: [0, 8, 0], opacity: [1, 0.3, 1] }}
           transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-          className="block h-8 w-px bg-[var(--axm-green)]"
+          className="block h-8 w-px bg-[var(--axm-accent)]"
         />
       </motion.div>
 

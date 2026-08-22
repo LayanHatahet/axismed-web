@@ -49,7 +49,7 @@ export function Cursor() {
       {/* dot */}
       <motion.div
         style={{ x, y, opacity: visible ? 1 : 0 }}
-        className="absolute -ml-[3px] -mt-[3px] h-1.5 w-1.5 rounded-full bg-[var(--axm-green)]"
+        className="absolute -ml-[3px] -mt-[3px] h-1.5 w-1.5 rounded-full bg-[var(--axm-accent)]"
       />
       {/* ring / reticle */}
       <motion.div
@@ -62,7 +62,7 @@ export function Cursor() {
             height: hovering ? 52 : 30,
             borderRadius: hovering ? 10 : 999,
             rotate: hovering ? 45 : 0,
-            borderColor: hovering ? "rgba(44,255,192,0.9)" : "rgba(44,255,192,0.4)",
+            borderColor: hovering ? "rgba(179,166,236,0.9)" : "rgba(179,166,236,0.4)",
           }}
           transition={{ type: "spring", stiffness: 300, damping: 22 }}
           className="-translate-x-1/2 -translate-y-1/2 border"

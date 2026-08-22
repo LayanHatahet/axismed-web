@@ -11,7 +11,7 @@ export function ContactSection() {
       <span className="axm-tick axm-tick-tr" aria-hidden="true" />
 
       <div className="mx-auto max-w-[1500px] px-5 py-24 sm:px-8 lg:py-32">
-        <p className="axm-mono mb-5 text-center">/ 08 — begin treatment</p>
+        <p className="axm-mono mb-5 text-center">/ 09 — begin treatment</p>
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -21,7 +21,7 @@ export function ContactSection() {
         >
           Your brand has a pulse.
           <br />
-          <span className="text-[var(--axm-green)]" style={{ textShadow: "0 0 60px rgba(44,255,192,0.4)" }}>
+          <span className="text-[var(--axm-accent)]" style={{ textShadow: "0 0 60px rgba(179,166,236,0.4)" }}>
             Let&apos;s make it race.
           </span>
         </motion.h2>
@@ -56,14 +56,14 @@ export function ContactSection() {
             © 2026 AxisMedia — healthcare creative studio
           </p>
           <p className="axm-mono flex items-center gap-2 !text-[0.55rem]">
-            <span className="axm-heartbeat inline-block text-[var(--axm-green)]" aria-hidden="true">
+            <span className="axm-heartbeat inline-block text-[var(--axm-accent)]" aria-hidden="true">
               ♥
             </span>
             flatlines are for competitors
           </p>
           <a
             href="#top"
-            className="axm-mono !text-[0.55rem] underline decoration-[var(--axm-line-2)] underline-offset-4 transition-colors hover:!text-[var(--axm-green)]"
+            className="axm-mono !text-[0.55rem] underline decoration-[var(--axm-line-2)] underline-offset-4 transition-colors hover:!text-[var(--axm-accent)]"
           >
             back to top ↑
           </a>

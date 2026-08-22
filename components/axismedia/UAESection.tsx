@@ -36,12 +36,12 @@ function Skyline() {
         { x: 430, y: 68 },
       ].map((p, i) => (
         <g key={i}>
-          <circle cx={p.x} cy={p.y} r="3.5" fill="var(--axm-green)" />
+          <circle cx={p.x} cy={p.y} r="3.5" fill="var(--axm-accent)" />
           <motion.circle
             cx={p.x}
             cy={p.y}
             r="3.5"
-            stroke="var(--axm-green)"
+            stroke="var(--axm-accent)"
             strokeWidth="1"
             fill="none"
             animate={{ r: [4, 16], opacity: [0.9, 0] }}
@@ -70,17 +70,17 @@ export function UAESection() {
           y: ghostY,
           fontFamily: "'Noto Sans Arabic', 'Geeza Pro', 'Segoe UI', system-ui, sans-serif",
         }}
-        className="pointer-events-none absolute -right-4 top-8 select-none text-[clamp(10rem,26vw,22rem)] font-bold leading-none text-[rgba(44,255,192,0.05)]"
+        className="pointer-events-none absolute -right-4 top-8 select-none text-[clamp(10rem,26vw,22rem)] font-bold leading-none text-[rgba(179,166,236,0.05)]"
       >
         نبض
       </motion.span>
 
       <div className="relative mx-auto max-w-[1500px] px-5 pt-20 sm:px-8 lg:pt-28">
-        <p className="axm-mono mb-4">/ 06 — home turf</p>
+        <p className="axm-mono mb-4">/ 07 — home turf</p>
         <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr]">
           <h2 className="axm-display text-[clamp(2.2rem,5.5vw,4.6rem)] uppercase">
             Built for the giants of{" "}
-            <span className="text-[var(--axm-green)]">UAE healthcare</span>
+            <span className="text-[var(--axm-accent)]">UAE healthcare</span>
           </h2>
           <div className="space-y-5 text-[var(--axm-muted)]">
             <p className="leading-relaxed">
@@ -118,7 +118,7 @@ export function UAESection() {
               className="axm-display text-xl uppercase text-[var(--axm-faint)] [&:nth-child(1)]:text-[var(--axm-text)] [&:nth-child(2)]:text-[var(--axm-text)]"
             >
               {c}
-              <span className="ml-8 text-[var(--axm-green)]" aria-hidden="true">
+              <span className="ml-8 text-[var(--axm-accent)]" aria-hidden="true">
                 {i < 5 ? "·" : ""}
               </span>
             </motion.span>

@@ -60,13 +60,13 @@ function Word({
     tone === "coral"
       ? "var(--axm-coral)"
       : tone === "green"
-        ? "var(--axm-green)"
+        ? "var(--axm-accent)"
         : "var(--axm-text)";
 
   return (
     <motion.span
       style={{ opacity, color }}
-      className={tone !== "normal" ? "axm-glow-green" : undefined}
+      className={tone !== "normal" ? "axm-glow-accent" : undefined}
     >
       {word}{" "}
     </motion.span>
@@ -88,7 +88,7 @@ export function ManifestoSection() {
         <motion.div
           aria-hidden="true"
           style={{ opacity: flash }}
-          className="pointer-events-none absolute inset-0 bg-[var(--axm-green)] mix-blend-screen"
+          className="pointer-events-none absolute inset-0 bg-[var(--axm-accent)] mix-blend-screen"
         />
 
         <div className="mx-auto w-full max-w-[1200px] px-5 sm:px-8">

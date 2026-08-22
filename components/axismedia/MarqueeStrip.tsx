@@ -12,7 +12,7 @@ export function MarqueeStrip() {
                 <span className="axm-display whitespace-nowrap text-5xl uppercase lg:text-7xl">
                   <span className={i % 2 === 0 ? "" : "axm-outline-text"}>{w}</span>
                 </span>
-                <span className="axm-heartbeat text-2xl text-[var(--axm-green)]">✚</span>
+                <span className="axm-heartbeat text-2xl text-[var(--axm-accent)]">✚</span>
               </span>
             ))}
           </div>

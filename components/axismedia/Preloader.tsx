@@ -56,10 +56,10 @@ export function Preloader() {
           <svg viewBox="0 0 600 120" className="w-[min(80vw,600px)]" fill="none">
             <motion.path
               d="M0 60 H210 L232 60 L244 22 L254 96 L264 48 L276 60 H388 L400 60 L410 34 L420 78 L430 55 L442 60 H600"
-              stroke="var(--axm-green)"
+              stroke="var(--axm-accent)"
               strokeWidth="2.5"
               strokeLinejoin="round"
-              className="axm-glow-green"
+              className="axm-glow-accent"
               initial={{ pathLength: 0 }}
               animate={{ pathLength: 1 }}
               transition={{ duration: 1.5, ease: "easeInOut" }}

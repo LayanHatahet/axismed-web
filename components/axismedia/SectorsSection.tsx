@@ -67,9 +67,9 @@ export function SectorsSection() {
       <div className="mx-auto max-w-[1500px] px-5 sm:px-8">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="axm-mono mb-4">/ 05 — admissions</p>
+            <p className="axm-mono mb-4">/ 06 — admissions</p>
             <h2 className="axm-display max-w-2xl text-[clamp(2.2rem,5vw,4.2rem)] uppercase">
-              Every ward of the <span className="text-[var(--axm-green)]">med industry</span>
+              Every ward of the <span className="text-[var(--axm-accent)]">med industry</span>
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-[var(--axm-muted)]">
@@ -101,14 +101,14 @@ export function SectorsSection() {
                   className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                   style={{
                     background:
-                      "radial-gradient(340px circle at 50% 0%, rgba(44,255,192,0.09), transparent)",
+                      "radial-gradient(340px circle at 50% 0%, rgba(179,166,236,0.09), transparent)",
                   }}
                 />
                 <div className="relative">
                   <div className="flex items-center justify-between">
                     <Icon
                       className={`h-6 w-6 transition-colors duration-300 ${
-                        isActive ? "text-[var(--axm-green)]" : "text-[var(--axm-muted)]"
+                        isActive ? "text-[var(--axm-accent)]" : "text-[var(--axm-muted)]"
                       }`}
                       strokeWidth={1.5}
                       aria-hidden="true"

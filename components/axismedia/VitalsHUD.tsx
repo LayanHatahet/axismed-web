@@ -21,13 +21,13 @@ export function VitalsHUD() {
 
   const status = rate < 80 ? "RESTING" : rate < 120 ? "ELEVATED" : "RACING";
   const statusColor =
-    rate < 80 ? "var(--axm-green)" : rate < 120 ? "var(--axm-cyan)" : "var(--axm-coral)";
+    rate < 80 ? "var(--axm-accent)" : rate < 120 ? "var(--axm-cyan)" : "var(--axm-coral)";
 
   return (
     <motion.aside
       style={{ opacity }}
       aria-label="Live site vitals"
-      className="fixed bottom-5 left-5 z-[85] hidden select-none items-center gap-4 rounded-xl border border-[var(--axm-line-2)] bg-[rgba(4,10,9,0.72)] px-4 py-3 backdrop-blur-md lg:flex"
+      className="fixed bottom-5 left-5 z-[85] hidden select-none items-center gap-4 rounded-xl border border-[var(--axm-line-2)] bg-[rgba(10,6,24,0.72)] px-4 py-3 backdrop-blur-md lg:flex"
     >
       <div className="h-8 w-24">
         <EcgCanvas className="h-full w-full" beatsPerSweep={2.5} lineWidth={1.5} amplitude={0.34} />

@@ -7,20 +7,20 @@
 
 .axm {
   /* palette */
-  --axm-bg:        #040709;
-  --axm-bg-2:      #060d12;
-  --axm-surface:   #0a141a;
-  --axm-elevated:  #0e1b22;
-  --axm-line:      rgba(44, 255, 192, 0.10);
-  --axm-line-2:    rgba(44, 255, 192, 0.22);
-  --axm-green:     #2cffc0;
-  --axm-green-soft:#79ffd9;
-  --axm-green-dim: #126f5a;
-  --axm-cyan:      #5fd7ff;
+  --axm-bg:        #0a0618;
+  --axm-bg-2:      #0e0a20;
+  --axm-surface:   #151029;
+  --axm-elevated:  #1d1735;
+  --axm-line:      rgba(179, 166, 236, 0.10);
+  --axm-line-2:    rgba(179, 166, 236, 0.22);
+  --axm-accent:     #b3a6ec;
+  --axm-accent-soft:#d6ccf8;
+  --axm-accent-dim: #5e5a88;
+  --axm-cyan:      #9d8bff; /* electric violet — secondary state color */
   --axm-coral:     #ff4d6d;
-  --axm-text:      #eafff7;
-  --axm-muted:     #86a39a;
-  --axm-faint:     #4a6058;
+  --axm-text:      #f2effc;
+  --axm-muted:     #a49ecf;
+  --axm-faint:     #6a659c;
 
   /* type */
   --axm-display: var(--font-axm-display), "Syne", system-ui, sans-serif;
@@ -43,8 +43,8 @@
 }
 
 .axm ::selection {
-  background: var(--axm-green);
-  color: #04211a;
+  background: var(--axm-accent);
+  color: #12082C;
 }
 
 /* ─── HUD / mono microcopy ─── */
@@ -67,7 +67,7 @@
 /* outlined giant type (footer wordmark, ghosted numerals) */
 .axm-outline-text {
   color: transparent;
-  -webkit-text-stroke: 1px rgba(44, 255, 192, 0.28);
+  -webkit-text-stroke: 1px rgba(179, 166, 236, 0.28);
 }
 
 /* ─── section frame: thin ruled lines + corner ticks ─── */
@@ -125,8 +125,8 @@
 /* faint monitor grid used inside panels */
 .axm-grid-bg {
   background-image:
-    linear-gradient(to right, rgba(44, 255, 192, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(44, 255, 192, 0.045) 1px, transparent 1px);
+    linear-gradient(to right, rgba(179, 166, 236, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(179, 166, 236, 0.045) 1px, transparent 1px);
   background-size: 44px 44px;
 }
 
@@ -151,8 +151,8 @@
   width: 7px;
   height: 7px;
   border-radius: 9999px;
-  background: var(--axm-green);
-  box-shadow: 0 0 12px var(--axm-green);
+  background: var(--axm-accent);
+  box-shadow: 0 0 12px var(--axm-accent);
   animation: axm-heartbeat 1s ease-in-out infinite;
 }
 
@@ -185,32 +185,32 @@
   white-space: nowrap;
 }
 .axm-btn-solid {
-  background: var(--axm-green);
-  color: #03231a;
-  box-shadow: 0 0 0 rgba(44, 255, 192, 0);
+  background: var(--axm-accent);
+  color: #12082C;
+  box-shadow: 0 0 0 rgba(179, 166, 236, 0);
 }
 .axm-btn-solid:hover {
-  box-shadow: 0 0 44px rgba(44, 255, 192, 0.45);
+  box-shadow: 0 0 44px rgba(179, 166, 236, 0.45);
 }
 .axm-btn-ghost {
   border: 1px solid var(--axm-line-2);
   color: var(--axm-text);
-  background: rgba(44, 255, 192, 0.03);
+  background: rgba(179, 166, 236, 0.03);
 }
 .axm-btn-ghost:hover {
-  border-color: var(--axm-green);
-  background: rgba(44, 255, 192, 0.08);
+  border-color: var(--axm-accent);
+  background: rgba(179, 166, 236, 0.08);
 }
 
 /* focus visibility (keyboard users) */
 .axm :focus-visible {
-  outline: 2px solid var(--axm-green);
+  outline: 2px solid var(--axm-accent);
   outline-offset: 3px;
   border-radius: 4px;
 }
 
 /* ─── ECG glow helper ─── */
-.axm-glow-green { filter: drop-shadow(0 0 6px rgba(44, 255, 192, 0.65)); }
+.axm-glow-accent { filter: drop-shadow(0 0 6px rgba(179, 166, 236, 0.65)); }
 
 /* defib flash used at manifesto climax */
 @keyframes axm-defib {

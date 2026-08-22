@@ -6,6 +6,7 @@ import { Magnetic } from "./Magnetic";
 
 const LINKS = [
   { href: "#treatment", label: "Treatment" },
+  { href: "#engine", label: "Live demo" },
   { href: "#process", label: "Process" },
   { href: "#sectors", label: "Sectors" },
   { href: "#checkup", label: "Check-up" },
@@ -23,7 +24,7 @@ export function AxmNavbar() {
       transition={{ delay: 0.4, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       className={`fixed inset-x-0 top-0 z-[90] transition-colors duration-500 ${
         scrolled
-          ? "border-b border-[var(--axm-line)] bg-[rgba(4,7,9,0.75)] backdrop-blur-md"
+          ? "border-b border-[var(--axm-line)] bg-[rgba(10,6,24,0.78)] backdrop-blur-md"
           : "bg-transparent"
       }`}
     >
@@ -31,7 +32,7 @@ export function AxmNavbar() {
         <a href="#top" className="flex items-center gap-2.5" aria-label="AxisMedia — back to top">
           <span className="axm-live-dot" aria-hidden="true" />
           <span className="axm-display text-lg tracking-[0.06em] text-[var(--axm-text)]">
-            AXIS<span className="text-[var(--axm-green)]">MEDIA</span>
+            AXIS<span className="text-[var(--axm-accent)]">MEDIA</span>
           </span>
         </a>
 
@@ -40,7 +41,7 @@ export function AxmNavbar() {
             <a
               key={l.href}
               href={l.href}
-              className="axm-mono !text-[0.62rem] transition-colors hover:!text-[var(--axm-green)]"
+              className="axm-mono !text-[0.62rem] transition-colors hover:!text-[var(--axm-accent)]"
             >
               {l.label}
             </a>

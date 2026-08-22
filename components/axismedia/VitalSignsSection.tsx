@@ -48,7 +48,7 @@ export function VitalSignsSection() {
       <div className="mx-auto max-w-[1500px] px-5 sm:px-8">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="axm-mono mb-4">/ 03 — vital signs</p>
+            <p className="axm-mono mb-4">/ 04 — vital signs</p>
             <h2 className="axm-display text-[clamp(2rem,4.5vw,3.8rem)] uppercase">
               Healthy numbers
             </h2>
@@ -63,7 +63,7 @@ export function VitalSignsSection() {
           {VITALS.map((v) => (
             <div key={v.label} className="group relative bg-[var(--axm-surface)] p-7 transition-colors duration-500 hover:bg-[var(--axm-elevated)]">
               <p className="axm-mono !text-[0.58rem]">{v.label}</p>
-              <p className="mt-5 font-[family-name:var(--axm-mono)] text-5xl text-[var(--axm-green)] lg:text-6xl">
+              <p className="mt-5 font-[family-name:var(--axm-mono)] text-5xl text-[var(--axm-accent)] lg:text-6xl">
                 {v.value}
               </p>
               <p className="mt-3 text-xs text-[var(--axm-faint)]">{v.note}</p>

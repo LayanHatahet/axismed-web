@@ -28,7 +28,7 @@ export function EcgCanvas({
   lineWidth = 2,
   beatsPerSweep = 5,
   interactive = false,
-  color = "#2cffc0",
+  color = "#b3a6ec",
   glow = true,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);

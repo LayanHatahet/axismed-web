@@ -1,4 +1,5 @@
 import { HeroSection } from "@/components/axismedia/HeroSection";
+import { EngineSection } from "@/components/axismedia/engine/EngineSection";
 import { ManifestoSection } from "@/components/axismedia/ManifestoSection";
 import { ServicesSection } from "@/components/axismedia/ServicesSection";
 import { VitalSignsSection } from "@/components/axismedia/VitalSignsSection";
@@ -20,6 +21,10 @@ export default function AxisMediaPage() {
 
       {/* 3. Treatment plan — horizontal-scroll tour of the four services */}
       <ServicesSection />
+
+      {/* 4. The Axis Engine — visitors generate their own brand, website,
+             live tappable app and growth plan, right on the page */}
+      <EngineSection />
 
       <MarqueeStrip />
 

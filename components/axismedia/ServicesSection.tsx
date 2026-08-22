@@ -14,7 +14,7 @@ function BrandingVisual() {
         {[0, 1, 2, 3].map((i) => (
           <motion.span
             key={i}
-            className="absolute h-14 w-14 bg-[var(--axm-green)]"
+            className="absolute h-14 w-14 bg-[var(--axm-accent)]"
             style={{
               left: i % 2 === 0 ? 0 : "auto",
               right: i % 2 === 1 ? 0 : "auto",
@@ -35,7 +35,7 @@ function BrandingVisual() {
         <span className="absolute left-0 top-1/2 h-2 w-full -translate-y-1/2 bg-[var(--axm-bg-2)]" />
       </div>
       <div className="absolute bottom-4 flex gap-2">
-        {["#2cffc0", "#5fd7ff", "#eafff7", "#126f5a"].map((c) => (
+        {["#b3a6ec", "#cfc6f7", "#f2effc", "#5e5a88"].map((c) => (
           <span key={c} className="h-3 w-8 rounded-sm" style={{ background: c, opacity: 0.85 }} />
         ))}
       </div>
@@ -48,7 +48,7 @@ function WebVisual() {
     <div aria-hidden="true" className="flex h-full items-center justify-center p-6">
       <div className="w-full max-w-[280px] overflow-hidden rounded-lg border border-[var(--axm-line-2)] bg-[var(--axm-bg)]">
         <div className="flex items-center gap-1.5 border-b border-[var(--axm-line)] px-3 py-2">
-          {["var(--axm-coral)", "#f5c04e", "var(--axm-green)"].map((c) => (
+          {["var(--axm-coral)", "#f5c04e", "var(--axm-accent)"].map((c) => (
             <span key={c} className="h-2 w-2 rounded-full" style={{ background: c, opacity: 0.8 }} />
           ))}
           <span className="axm-mono ml-2 !text-[0.5rem] !tracking-[0.12em]">yourclinic.ae</span>
@@ -60,7 +60,7 @@ function WebVisual() {
             <EcgCanvas className="h-full w-full" beatsPerSweep={3} lineWidth={1.5} amplitude={0.3} />
           </div>
           <motion.div
-            className="inline-block rounded-full bg-[var(--axm-green)] px-4 py-1.5 text-[0.55rem] font-bold uppercase tracking-widest text-[#03231a]"
+            className="inline-block rounded-full bg-[var(--axm-accent)] px-4 py-1.5 text-[0.55rem] font-bold uppercase tracking-widest text-[#12082C]"
             animate={{ scale: [1, 1, 0.92, 1] }}
             transition={{ duration: 2.4, repeat: Infinity, times: [0, 0.8, 0.86, 1] }}
           >
@@ -82,7 +82,7 @@ function AppVisual() {
           animate={{ y: [-6, 0, 0, -6], opacity: [0, 1, 1, 0] }}
           transition={{ duration: 4, repeat: Infinity, times: [0, 0.12, 0.85, 1] }}
         >
-          <p className="axm-mono !text-[0.45rem] !tracking-[0.1em] !text-[var(--axm-green)]">
+          <p className="axm-mono !text-[0.45rem] !tracking-[0.1em] !text-[var(--axm-accent)]">
             ♥ reminder
           </p>
           <p className="mt-1 text-[0.55rem] leading-snug text-[var(--axm-muted)]">
@@ -98,7 +98,7 @@ function AppVisual() {
             <span
               key={i}
               className="h-1.5 w-1.5 rounded-full"
-              style={{ background: i === 0 ? "var(--axm-green)" : "var(--axm-elevated)" }}
+              style={{ background: i === 0 ? "var(--axm-accent)" : "var(--axm-elevated)" }}
             />
           ))}
         </div>
@@ -114,7 +114,7 @@ function MarketingVisual() {
       {bars.map((h, i) => (
         <motion.span
           key={i}
-          className="w-6 rounded-t-sm bg-[var(--axm-green)]"
+          className="w-6 rounded-t-sm bg-[var(--axm-accent)]"
           style={{ opacity: 0.35 + (i / bars.length) * 0.65 }}
           initial={{ height: 0 }}
           whileInView={{ height: `${h}%` }}
@@ -170,16 +170,16 @@ function ServiceCard({ s }: { s: (typeof SERVICES)[number] }) {
         <div>
           <p className="axm-mono flex items-center justify-between">
             <span>Rx {s.num} / 04</span>
-            <span className="text-[var(--axm-green)]">✚</span>
+            <span className="text-[var(--axm-accent)]">✚</span>
           </p>
           <h3 className="axm-display mt-6 text-[clamp(1.8rem,2.6vw,2.6rem)] uppercase">{s.title}</h3>
-          <p className="mt-2 font-medium text-[var(--axm-green)]">{s.tag}</p>
+          <p className="mt-2 font-medium text-[var(--axm-accent)]">{s.tag}</p>
           <p className="mt-5 max-w-md leading-relaxed text-[var(--axm-muted)]">{s.copy}</p>
         </div>
         <ul className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
           {s.items.map((it) => (
             <li key={it} className="flex items-center gap-2 text-sm text-[var(--axm-text)]">
-              <span className="h-1 w-1 shrink-0 rounded-full bg-[var(--axm-green)]" aria-hidden="true" />
+              <span className="h-1 w-1 shrink-0 rounded-full bg-[var(--axm-accent)]" aria-hidden="true" />
               {it}
             </li>
           ))}
@@ -223,7 +223,7 @@ export function ServicesSection() {
       <p className="axm-mono mb-4">/ 02 — the treatment plan</p>
       <h2 className="axm-display max-w-4xl text-[clamp(1.9rem,3.4vw,3.2rem)] uppercase">
         Four prescriptions.{" "}
-        <span className="text-[var(--axm-green)]">One healthy brand.</span>
+        <span className="text-[var(--axm-accent)]">One healthy brand.</span>
       </h2>
     </div>
   );
@@ -265,7 +265,7 @@ export function ServicesSection() {
           <div className="h-px flex-1 bg-[var(--axm-line)]">
             <motion.div
               style={{ scaleX: lineScale }}
-              className="h-full w-full origin-left bg-[var(--axm-green)]"
+              className="h-full w-full origin-left bg-[var(--axm-accent)]"
             />
           </div>
           <span className="axm-mono !text-[0.55rem]">04</span>

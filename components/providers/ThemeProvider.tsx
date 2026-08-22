@@ -20,17 +20,20 @@ export function useTheme() {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem("axismed-theme") as Theme | null;
-    const system = window.matchMedia("(prefers-color-scheme: light)").matches
-      ? "light"
-      : "dark";
-    const initial = stored ?? system;
-    setTheme(initial);
-    document.documentElement.setAttribute("data-theme", initial);
-    setMounted(true);
+    // deferred a frame: the pre-hydration head script has already stamped
+    // data-theme, so this only syncs React state without cascading renders
+    const id = requestAnimationFrame(() => {
+      const stored = localStorage.getItem("axismed-theme") as Theme | null;
+      const system = window.matchMedia("(prefers-color-scheme: light)").matches
+        ? "light"
+        : "dark";
+      const initial = stored ?? system;
+      setTheme(initial);
+      document.documentElement.setAttribute("data-theme", initial);
+    });
+    return () => cancelAnimationFrame(id);
   }, []);
 
   function toggle() {
@@ -40,8 +43,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.setAttribute("data-theme", next);
   }
 
-  if (!mounted) return <>{children}</>;
-
+  // Always render the Provider: swapping the wrapper type after mount (the old
+  // `mounted` gate) remounted the entire app subtree once per page load.
   return (
     <ThemeContext.Provider value={{ theme, toggle }}>
       {children}

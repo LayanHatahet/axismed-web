@@ -1,0 +1,235 @@
+/* ────────────────────────────────────────────────────────────
+   AXISMEDIA — design system
+   A living, clinical-dark aesthetic: monitor green on near-black,
+   mono HUD labels, film grain, scanlines. Scoped under .axm so it
+   never leaks into the AxisMed site that shares this app.
+──────────────────────────────────────────────────────────── */
+
+.axm {
+  /* palette */
+  --axm-bg:        #040709;
+  --axm-bg-2:      #060d12;
+  --axm-surface:   #0a141a;
+  --axm-elevated:  #0e1b22;
+  --axm-line:      rgba(44, 255, 192, 0.10);
+  --axm-line-2:    rgba(44, 255, 192, 0.22);
+  --axm-green:     #2cffc0;
+  --axm-green-soft:#79ffd9;
+  --axm-green-dim: #126f5a;
+  --axm-cyan:      #5fd7ff;
+  --axm-coral:     #ff4d6d;
+  --axm-text:      #eafff7;
+  --axm-muted:     #86a39a;
+  --axm-faint:     #4a6058;
+
+  /* type */
+  --axm-display: var(--font-axm-display), "Syne", system-ui, sans-serif;
+  --axm-body:    var(--font-axm-body), "Space Grotesk", system-ui, sans-serif;
+  --axm-mono:    var(--font-axm-mono), "IBM Plex Mono", ui-monospace, monospace;
+
+  background: var(--axm-bg);
+  color: var(--axm-text);
+  font-family: var(--axm-body);
+  cursor: none;
+  overflow-x: clip;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .axm { cursor: auto; }
+}
+.axm a, .axm button { cursor: none; }
+@media (hover: none), (pointer: coarse) {
+  .axm a, .axm button { cursor: pointer; }
+}
+
+.axm ::selection {
+  background: var(--axm-green);
+  color: #04211a;
+}
+
+/* ─── HUD / mono microcopy ─── */
+.axm-mono {
+  font-family: var(--axm-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--axm-muted);
+}
+
+.axm-display {
+  font-family: var(--axm-display);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 0.94;
+  text-wrap: balance;
+}
+
+/* outlined giant type (footer wordmark, ghosted numerals) */
+.axm-outline-text {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(44, 255, 192, 0.28);
+}
+
+/* ─── section frame: thin ruled lines + corner ticks ─── */
+.axm-frame {
+  position: relative;
+  border-top: 1px solid var(--axm-line);
+}
+
+.axm-tick {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--axm-line-2);
+  pointer-events: none;
+}
+.axm-tick-tl { top: -1px; left: 16px;  border-top: 1px solid; border-left: 1px solid; }
+.axm-tick-tr { top: -1px; right: 16px; border-top: 1px solid; border-right: 1px solid; }
+
+/* ─── film grain + scanlines overlays (fixed, decorative) ─── */
+.axm-grain {
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  z-index: 80;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+  animation: axm-grain-shift 0.9s steps(4) infinite;
+}
+
+@keyframes axm-grain-shift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-2%, 1%); }
+  50%  { transform: translate(1%, -2%); }
+  75%  { transform: translate(-1%, -1%); }
+  100% { transform: translate(2%, 2%); }
+}
+
+.axm-scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 79;
+  opacity: 0.5;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.12) 3px,
+    rgba(0, 0, 0, 0.12) 4px
+  );
+}
+
+/* faint monitor grid used inside panels */
+.axm-grid-bg {
+  background-image:
+    linear-gradient(to right, rgba(44, 255, 192, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(44, 255, 192, 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* ─── heartbeat pulse (used on ♥ glyphs and live dots) ─── */
+@keyframes axm-heartbeat {
+  0%, 100% { transform: scale(1); }
+  14%      { transform: scale(1.28); }
+  28%      { transform: scale(1); }
+  42%      { transform: scale(1.18); }
+  56%      { transform: scale(1); }
+}
+.axm-heartbeat { animation: axm-heartbeat 1s ease-in-out infinite; transform-origin: center; }
+
+@keyframes axm-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.15; }
+}
+.axm-blink { animation: axm-blink 1.2s steps(2) infinite; }
+
+/* live status dot */
+.axm-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: var(--axm-green);
+  box-shadow: 0 0 12px var(--axm-green);
+  animation: axm-heartbeat 1s ease-in-out infinite;
+}
+
+/* ─── marquee ─── */
+@keyframes axm-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.axm-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: axm-marquee 26s linear infinite;
+}
+.axm-marquee-track:hover { animation-play-state: paused; }
+
+/* ─── buttons ─── */
+.axm-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--axm-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 1.05rem 1.9rem;
+  border-radius: 9999px;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+  white-space: nowrap;
+}
+.axm-btn-solid {
+  background: var(--axm-green);
+  color: #03231a;
+  box-shadow: 0 0 0 rgba(44, 255, 192, 0);
+}
+.axm-btn-solid:hover {
+  box-shadow: 0 0 44px rgba(44, 255, 192, 0.45);
+}
+.axm-btn-ghost {
+  border: 1px solid var(--axm-line-2);
+  color: var(--axm-text);
+  background: rgba(44, 255, 192, 0.03);
+}
+.axm-btn-ghost:hover {
+  border-color: var(--axm-green);
+  background: rgba(44, 255, 192, 0.08);
+}
+
+/* focus visibility (keyboard users) */
+.axm :focus-visible {
+  outline: 2px solid var(--axm-green);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ─── ECG glow helper ─── */
+.axm-glow-green { filter: drop-shadow(0 0 6px rgba(44, 255, 192, 0.65)); }
+
+/* defib flash used at manifesto climax */
+@keyframes axm-defib {
+  0%   { opacity: 0; }
+  8%   { opacity: 0.55; }
+  100% { opacity: 0; }
+}
+
+/* smooth anchor scrolling, only while the AxisMedia experience is mounted */
+html:has(.axm) { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html:has(.axm) { scroll-behavior: auto; }
+}
+
+/* ─── reduced motion: kill loops, keep content ─── */
+@media (prefers-reduced-motion: reduce) {
+  .axm-grain,
+  .axm-heartbeat,
+  .axm-blink,
+  .axm-live-dot { animation: none !important; }
+  .axm-marquee-track { animation-duration: 120s; }
+}

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Sora } from "next/font/google";
 import "./globals.css";
-import { Concierge } from "@/components/chat/Concierge";
-import { PulseNetwork } from "@/components/ui/PulseNetwork";
+import { SiteChrome } from "@/components/layout/SiteChrome";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 const inter = Inter({
@@ -85,9 +84,8 @@ export default function RootLayout({
       </head>
       <body className="bg-bg-dark text-text-primary antialiased overflow-x-hidden">
         <ThemeProvider>
-          <PulseNetwork />
+          <SiteChrome />
           {children}
-          <Concierge />
         </ThemeProvider>
       </body>
     </html>

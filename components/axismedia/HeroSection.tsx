@@ -76,7 +76,7 @@ export function HeroSection() {
           Healthcare creative studio — Dubai · United Arab Emirates
         </motion.p>
 
-        <h1 className="axm-display text-[clamp(2.8rem,8vw,7.6rem)] uppercase">
+        <h1 className="axm-display text-[clamp(3.2rem,9.4vw,9rem)] uppercase">
           <Line delay={D + 0.1}>We give</Line>
           <Line delay={D + 0.22}>
             <span className="axm-outline-text">medical brands</span>

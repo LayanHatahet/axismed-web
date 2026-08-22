@@ -36,10 +36,10 @@ export interface BrandKit {
   phases: { label: string; weeks: number }[];
 }
 
-/** The studio's creation controls — everything the visitor can change live. */
+/** The studio's creation controls — everything the visitor can change live.
+ *  The logo is deliberately NOT a control: it is generated, like the tagline. */
 export interface KitOverrides {
   accent?: string; // hex from ACCENTS, or undefined = vibe default
-  mark?: number; // 0-3 monogram frame, or undefined = seeded
   font?: FontKey; // undefined = "modern"
 }
 
@@ -55,9 +55,9 @@ export const ACCENTS: { key: string; hex: string }[] = [
 ];
 
 export const FONT_PAIRS: { key: FontKey; label: string; display: string }[] = [
-  { key: "modern", label: "Modern", display: "var(--font-axm-display), 'Syne', sans-serif" },
+  { key: "modern", label: "Bold", display: "var(--font-axm-display), 'Anton', 'Arial Narrow', sans-serif" },
   { key: "editorial", label: "Soft", display: "var(--font-axm-body), 'Space Grotesk', sans-serif" },
-  { key: "technical", label: "Technical", display: "var(--font-axm-mono), 'IBM Plex Mono', monospace" },
+  { key: "technical", label: "Mono", display: "var(--font-axm-mono), 'IBM Plex Mono', monospace" },
 ];
 
 /** Mix a hex color toward white (amt 0..1). */
@@ -78,11 +78,72 @@ export function customizeKit(base: BrandKit, o: KitOverrides): BrandKit {
     ...base,
     accent,
     accentSoft: o.accent ? tint(accent, base.darkPreview ? 0.35 : 0.78) : base.accentSoft,
-    monogramVariant: o.mark ?? base.monogramVariant,
     displayFamily: pair.display,
     fontKey: pair.key,
   };
 }
+
+/* ── social media strategy data ────────────────────────────────────────── */
+
+export interface Platform {
+  name: string;
+  role: string;
+  cadence: string;
+}
+
+export const PLATFORMS: Record<SectorKey, Platform[]> = {
+  clinic: [
+    { name: "Instagram", role: "Reels: doctors, tips, tours", cadence: "5×/wk" },
+    { name: "TikTok", role: "Myth-busting & trends", cadence: "3×/wk" },
+    { name: "Google", role: "Maps + symptom search", cadence: "always-on" },
+    { name: "WhatsApp", role: "Booking & reminders", cadence: "24/7" },
+  ],
+  hospital: [
+    { name: "LinkedIn", role: "Physician thought leadership", cadence: "3×/wk" },
+    { name: "Instagram", role: "Patient stories & tours", cadence: "4×/wk" },
+    { name: "YouTube", role: "Procedure explainers", cadence: "2×/mo" },
+    { name: "Google", role: "Specialty search dominance", cadence: "always-on" },
+  ],
+  dental: [
+    { name: "Instagram", role: "Before/afters & smiles", cadence: "5×/wk" },
+    { name: "TikTok", role: "Transformation reveals", cadence: "4×/wk" },
+    { name: "Google", role: "\"dentist near me\" ownership", cadence: "always-on" },
+    { name: "Snapchat", role: "Gen-Z smile culture", cadence: "3×/wk" },
+  ],
+  aesthetics: [
+    { name: "Instagram", role: "Natural-results storytelling", cadence: "daily" },
+    { name: "TikTok", role: "Practitioner authority", cadence: "4×/wk" },
+    { name: "Snapchat", role: "GCC beauty audience", cadence: "4×/wk" },
+    { name: "Google", role: "Treatment-intent search", cadence: "always-on" },
+  ],
+  pharma: [
+    { name: "LinkedIn", role: "HCP engagement & science", cadence: "4×/wk" },
+    { name: "YouTube", role: "MOA films & symposia", cadence: "2×/mo" },
+    { name: "Congress", role: "Booth-to-digital funnels", cadence: "per event" },
+    { name: "Email", role: "Rep-triggered journeys", cadence: "weekly" },
+  ],
+  digital: [
+    { name: "Instagram", role: "Product-in-life reels", cadence: "5×/wk" },
+    { name: "TikTok", role: "Speed-to-doctor demos", cadence: "4×/wk" },
+    { name: "App stores", role: "ASO + review engine", cadence: "always-on" },
+    { name: "LinkedIn", role: "B2B2C employer deals", cadence: "3×/wk" },
+  ],
+};
+
+export const WEEK_CONTENT: Record<SectorKey, string[]> = {
+  clinic: ["Myth-buster reel", "Patient story", "Doctor Q&A", "Health tip carousel", "Team behind-the-scenes", "Community spotlight", "Book-now push"],
+  hospital: ["Outcome story", "Specialist profile", "Tech tour reel", "Research highlight", "Patient journey", "Staff heroes", "Referral push"],
+  dental: ["Before/after", "Smile story", "Dentist Q&A", "Procedure demo", "Pricing transparency", "Kids corner", "Book-now push"],
+  aesthetics: ["Natural result", "Treatment explainer", "Practitioner Q&A", "Ingredient science", "Client story", "Trend take", "Consult push"],
+  pharma: ["Science simplified", "HCP spotlight", "Data drop", "Patient journey", "Congress recap", "Team culture", "CME invite"],
+  digital: ["Feature demo", "User story", "Doctor on-app Q&A", "Health stat", "Speed challenge", "Team build-log", "Download push"],
+};
+
+export const KPIS: { label: string; value: string }[] = [
+  { label: "bookings", value: "+40% in 90 days" },
+  { label: "followers", value: "3× in 6 months" },
+  { label: "cost per lead", value: "− 35%" },
+];
 
 export const SECTORS: { key: SectorKey; label: string }[] = [
   { key: "clinic", label: "Clinic" },

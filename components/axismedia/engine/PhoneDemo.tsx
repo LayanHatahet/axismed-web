@@ -138,7 +138,8 @@ function HomeTab(props: {
   displayFamily: string;
 }) {
   const { kit, screen, setScreen, setDoctor, slot, setSlot, touch, card, cardBorder, onAccent, doc, displayFamily } = props;
-  const { accent, accentSoft, ink, inkSoft, darkPreview } = kit;
+  const { accent, accentSoft, ink, inkSoft } = kit;
+  const grad = `linear-gradient(130deg, ${accent}, ${accentSoft})`;
 
   function go(next: Screen) {
     touch();
@@ -165,21 +166,50 @@ function HomeTab(props: {
             transition={{ duration: 0.3, ease: EASE }}
             className="flex min-h-0 flex-1 flex-col"
           >
+            {/* gradient hero header */}
             <div
-              className="px-5 pb-4 pt-2"
-              style={{ background: darkPreview ? "transparent" : accentSoft, borderRadius: "0 0 22px 22px" }}
+              className="relative mx-3 overflow-hidden rounded-3xl px-4 pb-4 pt-3"
+              style={{ background: grad, color: onAccent }}
             >
-              <p className="text-[0.6rem]" style={{ color: inkSoft }}>
-                Good morning 👋
-              </p>
-              <p className="text-[1.1rem] font-bold leading-tight" style={{ fontFamily: displayFamily }}>
+              <motion.span
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full"
+                style={{ background: "rgba(255,255,255,0.18)", filter: "blur(2px)" }}
+                animate={{ scale: [1, 1.15, 1] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <p className="text-[0.58rem] opacity-80">Good morning 👋</p>
+              <p className="text-[1.2rem] uppercase leading-none tracking-wide" style={{ fontFamily: displayFamily }}>
                 {kit.name}
               </p>
               <div
-                className="mt-3 flex items-center gap-2 rounded-full px-3.5 py-2 text-[0.62rem]"
-                style={{ background: card, border: `1px solid ${cardBorder}`, color: inkSoft }}
+                className="mt-2.5 flex items-center gap-2 rounded-full px-3.5 py-2 text-[0.6rem] backdrop-blur"
+                style={{ background: "rgba(255,255,255,0.22)", color: onAccent }}
               >
                 🔍 Search doctors, services…
+              </div>
+            </div>
+
+            {/* floating next-appointment card */}
+            <div className="relative z-10 mx-5 -mt-2.5">
+              <div
+                className="flex items-center gap-2 rounded-2xl px-3 py-2 backdrop-blur-md"
+                style={{
+                  background: card,
+                  border: `1px solid ${cardBorder}`,
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+                }}
+              >
+                <span className="text-[0.8rem]">📅</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[0.5rem] font-bold uppercase tracking-widest" style={{ color: inkSoft }}>
+                    next appointment
+                  </span>
+                  <span className="block truncate text-[0.62rem] font-bold">Tue · 16:00 · {kit.doctors[0].name}</span>
+                </span>
+                <span className="text-[0.65rem] font-bold" style={{ color: accent }}>
+                  →
+                </span>
               </div>
             </div>
 
@@ -201,7 +231,7 @@ function HomeTab(props: {
                   >
                     <span
                       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[0.62rem] font-bold"
-                      style={{ background: accent, color: onAccent }}
+                      style={{ background: grad, color: onAccent, boxShadow: `0 4px 12px ${accent}55` }}
                     >
                       {initialsOf(d.name)}
                     </span>
@@ -236,7 +266,7 @@ function HomeTab(props: {
             <div className="mt-2.5 flex items-center gap-3">
               <span
                 className="flex h-10 w-10 items-center justify-center rounded-full text-[0.65rem] font-bold"
-                style={{ background: accent, color: onAccent }}
+                style={{ background: grad, color: onAccent, boxShadow: `0 4px 12px ${accent}55` }}
               >
                 {initialsOf(doc.name)}
               </span>
@@ -263,7 +293,7 @@ function HomeTab(props: {
                     }}
                     className="rounded-xl py-2.5 text-[0.64rem] font-bold transition-transform active:scale-95"
                     style={{
-                      background: active ? accent : card,
+                      background: active ? grad : card,
                       color: active ? onAccent : ink,
                       border: `1px solid ${active ? accent : cardBorder}`,
                     }}
@@ -279,8 +309,9 @@ function HomeTab(props: {
                 onClick={() => slot !== null && go("confirm")}
                 className="w-full rounded-2xl py-3 text-[0.7rem] font-bold transition-all active:scale-[0.98]"
                 style={{
-                  background: slot !== null ? accent : cardBorder,
+                  background: slot !== null ? grad : cardBorder,
                   color: slot !== null ? onAccent : inkSoft,
+                  boxShadow: slot !== null ? `0 8px 24px ${accent}55` : "none",
                 }}
               >
                 {slot !== null ? "Continue" : "Pick a time"}
@@ -321,7 +352,7 @@ function HomeTab(props: {
               <button
                 onClick={() => go("success")}
                 className="w-full rounded-2xl py-3 text-[0.7rem] font-bold transition-transform active:scale-[0.98]"
-                style={{ background: accent, color: onAccent }}
+                style={{ background: grad, color: onAccent, boxShadow: `0 8px 24px ${accent}55` }}
               >
                 Confirm booking
               </button>

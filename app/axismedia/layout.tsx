@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Space_Grotesk, Syne } from "next/font/google";
+import { Anton, IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
 import "./axismedia.css";
 import { PulseEngine } from "@/components/axismedia/PulseEngine";
 import { Cursor } from "@/components/axismedia/Cursor";
@@ -7,10 +7,10 @@ import { VitalsHUD } from "@/components/axismedia/VitalsHUD";
 import { Preloader } from "@/components/axismedia/Preloader";
 import { AxmNavbar } from "@/components/axismedia/AxmNavbar";
 
-const syne = Syne({
+const anton = Anton({
   variable: "--font-axm-display",
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: "400",
   display: "swap",
 });
 
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
 
 export default function AxisMediaLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`axm ${syne.variable} ${grotesk.variable} ${plexMono.variable}`}>
+    <div className={`axm ${anton.variable} ${grotesk.variable} ${plexMono.variable}`}>
       <PulseEngine />
       <Preloader />
       <Cursor />

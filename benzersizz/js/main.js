@@ -145,12 +145,12 @@ const OLD_PAGES = 24;                                   // the original spacer h
 const IS_TOUCH = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 const SEGS = [
   { a: 0,        b: P_HERO,   mul: 1 },                            // the dive — untouched
-  { a: P_HERO,   b: P_PORT_A, mul: IS_TOUCH ? 2.0 : 1.2 },
-  { a: P_PORT_A, b: P_PORT_B, mul: IS_TOUCH ? 0.6 : 0.45 },        // folders are click-driven now
-  { a: P_PORT_B, b: P_PIN,    mul: IS_TOUCH ? 2.0 : 1.2 },
-  { a: P_PIN,    b: 1,        mul: (IS_TOUCH ? 2.0 : 1.2) * 1.35 },// the descent
+  { a: P_HERO,   b: P_PORT_A, mul: IS_TOUCH ? 1.3 : 0.8 },
+  { a: P_PORT_A, b: P_PORT_B, mul: IS_TOUCH ? 0.4 : 0.3 },         // folders are click-driven now
+  { a: P_PORT_B, b: P_PIN,    mul: IS_TOUCH ? 1.3 : 0.8 },
+  { a: P_PIN,    b: 1,        mul: (IS_TOUCH ? 1.3 : 0.8) * 1.35 },// the descent
 ].map((s) => ({ ...s, pages: (s.b - s.a) * OLD_PAGES * s.mul }));
-const PHONE_PAGES = IS_TOUCH ? 8 : 5;
+const PHONE_PAGES = IS_TOUCH ? 6 : 4;
 const PIN_PAGES = SEGS[0].pages + SEGS[1].pages + SEGS[2].pages + SEGS[3].pages;
 const TOTAL_PAGES = PIN_PAGES + PHONE_PAGES + SEGS[4].pages;
 document.documentElement.style.setProperty('--pages', TOTAL_PAGES.toFixed(3));
@@ -365,8 +365,8 @@ window.addEventListener('keydown', (e) => {
 let lenis = null;
 if (window.Lenis && !RM) {
   lenis = new window.Lenis({
-    lerp: 0.09,
-    wheelMultiplier: 1.0,
+    lerp: 0.13,
+    wheelMultiplier: 1.15,
     // touch tracks the finger EXACTLY — 1:1, instant, light natural release
     syncTouch: true,
     touchMultiplier: 1.0,

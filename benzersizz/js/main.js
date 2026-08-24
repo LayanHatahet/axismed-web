@@ -502,7 +502,7 @@ if (screenSkip) {
   const doSkip = (e) => {
     e.preventDefault();
     sound.flip();
-    const y = rawOf(0.596) * maxScroll();   // past the glitch-out, onto the bureau landing
+    const y = rawOfPhone(0.45) * maxScroll();   // skip the rest of the desktop, land on the phone — not past it
     if (lenis) lenis.scrollTo(y, { duration: 1.8, easing: (t) => 1 - Math.pow(1 - t, 3) });
     else window.scrollTo({ top: y, behavior: 'smooth' });
   };

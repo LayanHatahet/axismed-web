@@ -26,8 +26,8 @@ export default function DiscountCodesAdmin() {
     setLoading(true);
     try {
       const [c, co] = await Promise.all([
-        fetch("/api/admin/discount-codes"),
-        fetch("/api/courses"),
+        fetch("/api/admin/discount-codes", { cache: "no-store" }),
+        fetch("/api/courses", { cache: "no-store" }),
       ]);
       setCodes(c.ok ? await c.json() : []);
       setCourses(co.ok ? await co.json() : []);

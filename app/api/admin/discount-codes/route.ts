@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const data = await readJSON<DiscountCode[]>("discount-codes.json", []);
-  return NextResponse.json(data);
+  return NextResponse.json(data, { headers: { "Cache-Control": "no-store" } });
 }
 
 export async function POST(req: NextRequest) {

@@ -189,6 +189,38 @@ export function RegistrationSidebar({ course }: Props) {
               </div>
             )}
 
+            {payable && (
+              <div className="mb-4">
+                <label className="block text-text-dim text-xs font-semibold tracking-widest uppercase mb-2">Discount code</label>
+                {discount ? (
+                  <div className="flex items-center justify-between rounded-lg border border-green-300 bg-green-50 px-3 py-2.5">
+                    <span className="text-green-700 text-sm font-semibold">{discount.code} applied — {amountLabel}</span>
+                    <button type="button" onClick={clearCode} className="text-green-700 text-xs underline shrink-0">Remove</button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      value={codeInput}
+                      onChange={(e) => { setCodeInput(e.target.value); if (codeStatus !== "idle") setCodeStatus("idle"); }}
+                      placeholder="Have a code? Enter it"
+                      className="flex-1 bg-bg-elevated border border-border focus:border-purple-500 rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-text-dim outline-none transition-colors uppercase"
+                    />
+                    <button
+                      type="button"
+                      onClick={applyCode}
+                      disabled={codeStatus === "checking" || !codeInput.trim()}
+                      className="px-4 rounded-lg text-sm font-semibold border border-purple-500 text-purple-700 hover:bg-purple-500/10 disabled:opacity-50 transition-all"
+                    >
+                      {codeStatus === "checking" ? "…" : "Apply"}
+                    </button>
+                  </div>
+                )}
+                {codeStatus === "invalid" && (
+                  <p className="text-red-500 text-xs mt-1">That code isn&apos;t valid for this course.</p>
+                )}
+              </div>
+            )}
+
             {payable ? (
               <>
                 <button
@@ -241,37 +273,6 @@ export function RegistrationSidebar({ course }: Props) {
                 )}
               </div>
             ))}
-
-            {/* Discount code (optional) */}
-            <div>
-              <label className="block text-sm text-text-secondary mb-1.5">Discount code (optional)</label>
-              {discount ? (
-                <div className="flex items-center justify-between rounded-lg border border-green-300 bg-green-50 px-4 py-2.5">
-                  <span className="text-green-700 text-sm font-semibold">{discount.code} — you pay {amountLabel}</span>
-                  <button type="button" onClick={clearCode} className="text-green-700 text-xs underline shrink-0">Remove</button>
-                </div>
-              ) : (
-                <div className="flex gap-2">
-                  <input
-                    value={codeInput}
-                    onChange={(e) => { setCodeInput(e.target.value); if (codeStatus !== "idle") setCodeStatus("idle"); }}
-                    placeholder="Enter code"
-                    className="flex-1 bg-bg-elevated border border-border focus:border-purple-500 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-text-dim outline-none transition-colors uppercase"
-                  />
-                  <button
-                    type="button"
-                    onClick={applyCode}
-                    disabled={codeStatus === "checking" || !codeInput.trim()}
-                    className="px-4 rounded-lg text-sm font-semibold border border-purple-500 text-purple-700 hover:bg-purple-500/10 disabled:opacity-50 transition-all"
-                  >
-                    {codeStatus === "checking" ? "…" : "Apply"}
-                  </button>
-                </div>
-              )}
-              {codeStatus === "invalid" && (
-                <p className="text-red-500 text-xs mt-1">That code isn&apos;t valid for this course.</p>
-              )}
-            </div>
 
             {payError && (
               <div className="flex items-start gap-2 rounded-xl border border-red-300 bg-red-50 px-4 py-3">

@@ -1,0 +1,407 @@
+/**
+ * The Axis Engine's "AI" — a deterministic brand generator.
+ *
+ * Everything is seeded from the visitor's input (name + sector + vibe), so the
+ * output feels generated yet needs no backend, no keys and no latency. The
+ * page presents it as a 30-second sketch of what the studio builds for real.
+ */
+
+export type SectorKey = "clinic" | "hospital" | "dental" | "aesthetics" | "pharma" | "digital";
+export type VibeKey = "premium" | "warm" | "clinical" | "bold";
+
+export interface BrandKit {
+  name: string;
+  initials: string;
+  sector: SectorKey;
+  sectorLabel: string;
+  vibe: VibeKey;
+  vibeLabel: string;
+  tagline: string;
+  subline: string;
+  /* preview palette (used to skin the generated site + app) */
+  accent: string;
+  accentSoft: string;
+  paper: string;
+  ink: string;
+  inkSoft: string;
+  darkPreview: boolean;
+  monogramVariant: number;
+  /* typography of the generated brand (CSS font-family value) */
+  displayFamily: string;
+  fontKey: FontKey;
+  doctors: { name: string; spec: string; rating: string }[];
+  slots: string[];
+  hooks: string[];
+  channels: { label: string; pct: number }[];
+  phases: { label: string; weeks: number }[];
+}
+
+/** The studio's creation controls — everything the visitor can change live.
+ *  The logo is deliberately NOT a control: it is generated, like the tagline. */
+export interface KitOverrides {
+  accent?: string; // hex from ACCENTS, or undefined = vibe default
+  font?: FontKey; // undefined = "modern"
+}
+
+export type FontKey = "modern" | "editorial" | "technical";
+
+export const ACCENTS: { key: string; hex: string }[] = [
+  { key: "violet", hex: "#8b6bff" },
+  { key: "teal", hex: "#12b5a0" },
+  { key: "blue", hex: "#2f7fd4" },
+  { key: "coral", hex: "#e86a56" },
+  { key: "gold", hex: "#b98e3f" },
+  { key: "rose", hex: "#d84f8f" },
+];
+
+export const FONT_PAIRS: { key: FontKey; label: string; display: string }[] = [
+  { key: "modern", label: "Bold", display: "var(--font-axm-display), 'Anton', 'Arial Narrow', sans-serif" },
+  { key: "editorial", label: "Soft", display: "var(--font-axm-body), 'Space Grotesk', sans-serif" },
+  { key: "technical", label: "Mono", display: "var(--font-axm-mono), 'IBM Plex Mono', monospace" },
+];
+
+/** Mix a hex color toward white (amt 0..1). */
+export function tint(hex: string, amt: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  const mix = (c: number) =>
+    Math.round(c + (255 - c) * amt)
+      .toString(16)
+      .padStart(2, "0");
+  return `#${mix((n >> 16) & 255)}${mix((n >> 8) & 255)}${mix(n & 255)}`;
+}
+
+/** Apply the studio's live controls on top of a generated kit. */
+export function customizeKit(base: BrandKit, o: KitOverrides): BrandKit {
+  const accent = o.accent ?? base.accent;
+  const pair = FONT_PAIRS.find((f) => f.key === (o.font ?? "modern")) ?? FONT_PAIRS[0];
+  return {
+    ...base,
+    accent,
+    accentSoft: o.accent ? tint(accent, base.darkPreview ? 0.35 : 0.78) : base.accentSoft,
+    displayFamily: pair.display,
+    fontKey: pair.key,
+  };
+}
+
+/* ── social media strategy data ────────────────────────────────────────── */
+
+export interface Platform {
+  name: string;
+  role: string;
+  cadence: string;
+}
+
+export const PLATFORMS: Record<SectorKey, Platform[]> = {
+  clinic: [
+    { name: "Instagram", role: "Reels: doctors, tips, tours", cadence: "5×/wk" },
+    { name: "TikTok", role: "Myth-busting & trends", cadence: "3×/wk" },
+    { name: "Google", role: "Maps + symptom search", cadence: "always-on" },
+    { name: "WhatsApp", role: "Booking & reminders", cadence: "24/7" },
+  ],
+  hospital: [
+    { name: "LinkedIn", role: "Physician thought leadership", cadence: "3×/wk" },
+    { name: "Instagram", role: "Patient stories & tours", cadence: "4×/wk" },
+    { name: "YouTube", role: "Procedure explainers", cadence: "2×/mo" },
+    { name: "Google", role: "Specialty search dominance", cadence: "always-on" },
+  ],
+  dental: [
+    { name: "Instagram", role: "Before/afters & smiles", cadence: "5×/wk" },
+    { name: "TikTok", role: "Transformation reveals", cadence: "4×/wk" },
+    { name: "Google", role: "\"dentist near me\" ownership", cadence: "always-on" },
+    { name: "Snapchat", role: "Gen-Z smile culture", cadence: "3×/wk" },
+  ],
+  aesthetics: [
+    { name: "Instagram", role: "Natural-results storytelling", cadence: "daily" },
+    { name: "TikTok", role: "Practitioner authority", cadence: "4×/wk" },
+    { name: "Snapchat", role: "GCC beauty audience", cadence: "4×/wk" },
+    { name: "Google", role: "Treatment-intent search", cadence: "always-on" },
+  ],
+  pharma: [
+    { name: "LinkedIn", role: "HCP engagement & science", cadence: "4×/wk" },
+    { name: "YouTube", role: "MOA films & symposia", cadence: "2×/mo" },
+    { name: "Congress", role: "Booth-to-digital funnels", cadence: "per event" },
+    { name: "Email", role: "Rep-triggered journeys", cadence: "weekly" },
+  ],
+  digital: [
+    { name: "Instagram", role: "Product-in-life reels", cadence: "5×/wk" },
+    { name: "TikTok", role: "Speed-to-doctor demos", cadence: "4×/wk" },
+    { name: "App stores", role: "ASO + review engine", cadence: "always-on" },
+    { name: "LinkedIn", role: "B2B2C employer deals", cadence: "3×/wk" },
+  ],
+};
+
+export const WEEK_CONTENT: Record<SectorKey, string[]> = {
+  clinic: ["Myth-buster reel", "Patient story", "Doctor Q&A", "Health tip carousel", "Team behind-the-scenes", "Community spotlight", "Book-now push"],
+  hospital: ["Outcome story", "Specialist profile", "Tech tour reel", "Research highlight", "Patient journey", "Staff heroes", "Referral push"],
+  dental: ["Before/after", "Smile story", "Dentist Q&A", "Procedure demo", "Pricing transparency", "Kids corner", "Book-now push"],
+  aesthetics: ["Natural result", "Treatment explainer", "Practitioner Q&A", "Ingredient science", "Client story", "Trend take", "Consult push"],
+  pharma: ["Science simplified", "HCP spotlight", "Data drop", "Patient journey", "Congress recap", "Team culture", "CME invite"],
+  digital: ["Feature demo", "User story", "Doctor on-app Q&A", "Health stat", "Speed challenge", "Team build-log", "Download push"],
+};
+
+export const KPIS: { label: string; value: string }[] = [
+  { label: "bookings", value: "+40% in 90 days" },
+  { label: "followers", value: "3× in 6 months" },
+  { label: "cost per lead", value: "− 35%" },
+];
+
+export const SECTORS: { key: SectorKey; label: string }[] = [
+  { key: "clinic", label: "Clinic" },
+  { key: "hospital", label: "Hospital" },
+  { key: "dental", label: "Dental" },
+  { key: "aesthetics", label: "Aesthetics" },
+  { key: "pharma", label: "Pharma" },
+  { key: "digital", label: "Digital health" },
+];
+
+export const VIBES: { key: VibeKey; label: string; swatch: string }[] = [
+  { key: "premium", label: "Premium", swatch: "#d8b56a" },
+  { key: "warm", label: "Warm", swatch: "#ff8a7a" },
+  { key: "clinical", label: "Clinical", swatch: "#6fbdff" },
+  { key: "bold", label: "Bold", swatch: "#7c5cff" },
+];
+
+const TAGLINES: Record<SectorKey, string[]> = {
+  clinic: [
+    "Care that knows your name.",
+    "Walk in worried. Walk out well.",
+    "Your neighbourhood, healthier.",
+  ],
+  hospital: [
+    "Where the region comes to heal.",
+    "Serious medicine. Human touch.",
+    "Built for the hardest cases.",
+  ],
+  dental: [
+    "Smiles, engineered.",
+    "The last dentist you'll ever switch from.",
+    "Confidence, one visit away.",
+  ],
+  aesthetics: [
+    "Science you can see.",
+    "Subtle. Safe. Stunning.",
+    "The art of looking like yourself.",
+  ],
+  pharma: [
+    "Molecules that move medicine.",
+    "From lab bench to bedside.",
+    "Tomorrow's treatments, today.",
+  ],
+  digital: [
+    "Healthcare, in your pocket.",
+    "See a doctor before your coffee cools.",
+    "The clinic that never closes.",
+  ],
+};
+
+const SUBLINES: Record<SectorKey, string> = {
+  clinic: "Book in seconds, be seen the same day, and leave with a plan you understand.",
+  hospital: "World-class specialists, JCI-grade processes and outcomes we publish.",
+  dental: "From routine cleanings to full-arch transformation — gently, transparently.",
+  aesthetics: "Board-certified specialists, honest consultations, natural results.",
+  pharma: "Partnering with clinicians and regulators to bring therapies to the Gulf.",
+  digital: "Video consults, e-prescriptions and lab results — one tap each.",
+};
+
+const DOCTOR_POOLS: Record<SectorKey, { name: string; spec: string }[]> = {
+  clinic: [
+    { name: "Dr. Sara Haddad", spec: "Family medicine" },
+    { name: "Dr. Omar Khalil", spec: "Internal medicine" },
+    { name: "Dr. Lina Aziz", spec: "Pediatrics" },
+  ],
+  hospital: [
+    { name: "Dr. Yusuf Rahman", spec: "Cardiology" },
+    { name: "Dr. Mariam Saleh", spec: "Neurology" },
+    { name: "Dr. Adam Nasser", spec: "Orthopedics" },
+  ],
+  dental: [
+    { name: "Dr. Hala Mansour", spec: "Orthodontics" },
+    { name: "Dr. Karim Fares", spec: "Implantology" },
+    { name: "Dr. Noor Zaki", spec: "Cosmetic dentistry" },
+  ],
+  aesthetics: [
+    { name: "Dr. Layla Amin", spec: "Dermatology" },
+    { name: "Dr. Ziad Hamdan", spec: "Plastic surgery" },
+    { name: "Dr. Rania Kassem", spec: "Laser medicine" },
+  ],
+  pharma: [
+    { name: "Dr. Samir Attar", spec: "Medical affairs" },
+    { name: "Dr. Dana Yousef", spec: "Clinical research" },
+    { name: "Dr. Fadi Najm", spec: "Pharmacovigilance" },
+  ],
+  digital: [
+    { name: "Dr. Aisha Malik", spec: "Telemedicine" },
+    { name: "Dr. Hassan Qadi", spec: "General practice" },
+    { name: "Dr. Maya Salem", spec: "Mental health" },
+  ],
+};
+
+const HOOKS: Record<SectorKey, string[]> = {
+  clinic: [
+    "\"The 8-minute wait\" — a campaign built on your real average waiting time",
+    "{name} Family Passport — one membership, the whole household covered",
+    "Symptom-search takeover: own every \"doctor near me\" query in your district",
+  ],
+  hospital: [
+    "Outcomes, published — a transparency campaign competitors can't copy",
+    "\"The second opinion\" — positioning {name} as the region's referee",
+    "Physician-led reels: your surgeons become the Gulf's medical voices",
+  ],
+  dental: [
+    "The {name} Smile Gallery — verified before/afters as a booking engine",
+    "\"Scared of dentists?\" — a comfort-first campaign for the 40% who avoid us",
+    "Invisible-aligner launch bundle with influencer smile diaries",
+  ],
+  aesthetics: [
+    "\"Still you\" — an anti-overfilled campaign that owns the natural look",
+    "Treatment transparency index — publish real prices, win real trust",
+    "Practitioner-first content: the faces behind the results",
+  ],
+  pharma: [
+    "HCP micro-academy — CME-style content that earns prescriber attention",
+    "Patient-journey storytelling cleared for MOHAP compliance",
+    "Congress domination kit: booth, satellite symposium, digital follow-up",
+  ],
+  digital: [
+    "\"Before your coffee cools\" — speed-to-doctor as the hero metric",
+    "App-store conquest: reviews engine + ASO for the {name} app",
+    "Corporate wellness pilots — land B2B2C contracts with UAE employers",
+  ],
+};
+
+const CHANNELS: Record<SectorKey, { label: string; pct: number }[]> = {
+  clinic: [
+    { label: "Local search & maps", pct: 34 },
+    { label: "Social & reels", pct: 26 },
+    { label: "Content & SEO", pct: 22 },
+    { label: "Community & offline", pct: 18 },
+  ],
+  hospital: [
+    { label: "Physician branding", pct: 30 },
+    { label: "Search & referrals", pct: 28 },
+    { label: "PR & thought leadership", pct: 24 },
+    { label: "Medical tourism", pct: 18 },
+  ],
+  dental: [
+    { label: "Social & before/afters", pct: 34 },
+    { label: "Local search", pct: 28 },
+    { label: "Influencer smiles", pct: 20 },
+    { label: "Retention & recall", pct: 18 },
+  ],
+  aesthetics: [
+    { label: "Instagram & TikTok", pct: 38 },
+    { label: "KOL practitioners", pct: 24 },
+    { label: "Search & landing pages", pct: 22 },
+    { label: "VIP referral program", pct: 16 },
+  ],
+  pharma: [
+    { label: "HCP engagement", pct: 36 },
+    { label: "Congress & events", pct: 26 },
+    { label: "Medical content", pct: 22 },
+    { label: "Digital detailing", pct: 16 },
+  ],
+  digital: [
+    { label: "Performance & ASO", pct: 36 },
+    { label: "B2B partnerships", pct: 26 },
+    { label: "Content & community", pct: 22 },
+    { label: "Lifecycle & CRM", pct: 16 },
+  ],
+};
+
+const VIBE_PALETTES: Record<
+  VibeKey,
+  { accent: string; accentSoft: string; paper: string; ink: string; inkSoft: string; dark: boolean; label: string }
+> = {
+  premium: {
+    label: "Premium",
+    accent: "#b98e3f",
+    accentSoft: "#ecdcb8",
+    paper: "#f8f5ee",
+    ink: "#231d33",
+    inkSoft: "#6f6884",
+    dark: false,
+  },
+  warm: {
+    label: "Warm",
+    accent: "#e86a56",
+    accentSoft: "#ffd9d1",
+    paper: "#fdf7f3",
+    ink: "#332223",
+    inkSoft: "#8a7376",
+    dark: false,
+  },
+  clinical: {
+    label: "Clinical",
+    accent: "#2f7fd4",
+    accentSoft: "#cde4fa",
+    paper: "#f5f9fd",
+    ink: "#16283a",
+    inkSoft: "#5f7690",
+    dark: false,
+  },
+  bold: {
+    label: "Bold",
+    accent: "#8b6bff",
+    accentSoft: "#c9bbff",
+    paper: "#131022",
+    ink: "#f4f1ff",
+    inkSoft: "#9d95c0",
+    dark: true,
+  },
+};
+
+export const SLOT_TIMES = ["09:00", "10:30", "12:00", "14:30", "16:00", "17:30"];
+
+function hash(str: string): number {
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+export function initialsOf(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "AX";
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
+}
+
+export function generateKit(rawName: string, sector: SectorKey, vibe: VibeKey): BrandKit {
+  const name = rawName.trim() || "Nova Health";
+  const seed = hash(`${name.toLowerCase()}|${sector}|${vibe}`);
+  const pal = VIBE_PALETTES[vibe];
+  const taglines = TAGLINES[sector];
+  const doctors = DOCTOR_POOLS[sector].map((d, i) => ({
+    ...d,
+    rating: (4.7 + (((seed >> (i * 3)) % 3) / 10)).toFixed(1),
+  }));
+
+  return {
+    name,
+    initials: initialsOf(name),
+    sector,
+    sectorLabel: SECTORS.find((s) => s.key === sector)?.label ?? sector,
+    vibe,
+    vibeLabel: pal.label,
+    tagline: taglines[seed % taglines.length],
+    subline: SUBLINES[sector],
+    accent: pal.accent,
+    accentSoft: pal.accentSoft,
+    paper: pal.paper,
+    ink: pal.ink,
+    inkSoft: pal.inkSoft,
+    darkPreview: pal.dark,
+    monogramVariant: (seed >> 4) % 4,
+    displayFamily: FONT_PAIRS[0].display,
+    fontKey: "modern",
+    doctors,
+    slots: SLOT_TIMES,
+    hooks: HOOKS[sector].map((h) => h.replaceAll("{name}", name)),
+    channels: CHANNELS[sector],
+    phases: [
+      { label: "Diagnose", weeks: 2 },
+      { label: "Brand", weeks: 4 },
+      { label: "Build", weeks: 4 },
+      { label: "Launch", weeks: 2 },
+    ],
+  };
+}

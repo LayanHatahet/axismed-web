@@ -1,0 +1,12 @@
+[
+  {
+    "id": "dc_dram2026",
+    "code": "DrAM2026",
+    "label": "Dr. AM referral",
+    "type": "fixed_price",
+    "value": 5499,
+    "courseId": "",
+    "active": true,
+    "createdAt": "2026-07-12"
+  }
+]

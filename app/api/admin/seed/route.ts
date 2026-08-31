@@ -18,6 +18,7 @@ const FILES = [
   "registrations.json",
   "concierge-settings.json",
   "concierge-leads.json",
+  "discount-codes.json",
 ];
 
 export async function POST() {

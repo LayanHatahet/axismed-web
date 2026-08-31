@@ -137,6 +137,17 @@ export interface Registration {
   notes?: string;
 }
 
+export interface DiscountCode {
+  id: string;
+  code: string;                        // e.g. "DrAM2026" (matched case-insensitively)
+  label?: string;                      // internal note, e.g. "Dr. AM referral"
+  type: "fixed_price" | "percent";     // fixed_price = set price to `value`; percent = value% off
+  value: number;                       // fixed_price: discounted price in the course base currency; percent: 0–100
+  courseId?: string;                   // restrict to a course id; empty or "all" = every payable course
+  active: boolean;
+  createdAt: string;
+}
+
 export interface Testimonial {
   id: string;
   name: string;

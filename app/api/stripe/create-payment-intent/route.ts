@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe.server";
 import { readJSON } from "@/lib/db.server";
 import { courses as seed } from "@/lib/data/courses";
-import type { Course } from "@/lib/types";
+import type { Course, DiscountCode } from "@/lib/types";
 import { chargeAmountMinor, isSupportedCurrency, type Currency } from "@/lib/currency";
+import { findValidCode, applyDiscount } from "@/lib/discount";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,6 +21,7 @@ interface Body {
   specialty?: string;
   institution?: string;
   currency?: string;
+  code?: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -68,9 +70,18 @@ export async function POST(req: NextRequest) {
 
   try {
     const stripe = getStripe();
-    // Amount is always derived server-side from the course's real base price,
+
+    // Apply a discount code if one was supplied — validated server-side, and it
+    // can only ever LOWER the price (never raise it above the course base).
+    const codes = await readJSON<DiscountCode[]>("discount-codes.json", []);
+    const discountCode = findValidCode(codes, body.code || "", course.id);
+    const effectivePrice = discountCode
+      ? Math.min(course.price, applyDiscount(course.price, discountCode))
+      : course.price;
+
+    // Amount is always derived server-side from the (possibly discounted) price,
     // converted into the customer's chosen currency (USD or AED).
-    const amount = chargeAmountMinor(course.price, course.currency, chosenCurrency);
+    const amount = chargeAmountMinor(effectivePrice, course.currency, chosenCurrency);
     const currency = chosenCurrency.toLowerCase();
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -88,6 +99,8 @@ export async function POST(req: NextRequest) {
         basePrice: String(course.price),
         baseCurrency: course.currency || "USD",
         chargedCurrency: chosenCurrency,
+        discountCode: discountCode?.code || "",
+        discountedPrice: discountCode ? String(effectivePrice) : "",
         firstName,
         lastName,
         email,

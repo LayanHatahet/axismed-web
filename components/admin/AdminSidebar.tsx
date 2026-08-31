@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, BookOpen, Calendar, Image as ImageIcon,
   Handshake, Settings, ChevronLeft, ChevronRight,
-  ClipboardList, ExternalLink, Inbox, Bot, FileText, GalleryHorizontalEnd,
+  ClipboardList, ExternalLink, Inbox, Bot, FileText, GalleryHorizontalEnd, Tag,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -28,6 +28,7 @@ const navGroups = [
       { icon: GalleryHorizontalEnd,  label: "Site Gallery",   href: "/admin/gallery" },
       { icon: ImageIcon,             label: "Media Library",  href: "/admin/media" },
       { icon: Handshake,             label: "Partners",       href: "/admin/partners" },
+      { icon: Tag,                   label: "Discount Codes", href: "/admin/discount-codes" },
     ],
   },
   {

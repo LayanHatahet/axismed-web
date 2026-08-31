@@ -42,9 +42,45 @@ export function RegistrationSidebar({ course }: Props) {
   const baseCurrency: Currency = (course.currency || "").toUpperCase() === "AED" ? "AED" : "USD";
   const [currency, setCurrency]         = useState<Currency>(baseCurrency);
 
-  const payable     = PAYABLE.has(course.status) && course.price > 0;
-  const amountLabel = formatAmount(toMinorUnits(convertPrice(course.price, course.currency, currency)), currency);
-  const availPct    = course.seats > 0 ? (course.seatsAvailable / course.seats) * 100 : 100;
+  // Discount code
+  const [codeInput, setCodeInput]   = useState("");
+  const [discount, setDiscount]     = useState<{ code: string; price: number } | null>(null);
+  const [codeStatus, setCodeStatus] = useState<"idle" | "checking" | "applied" | "invalid">("idle");
+
+  const payable       = PAYABLE.has(course.status) && course.price > 0;
+  const effectiveBase = discount ? discount.price : course.price;
+  const amountLabel   = formatAmount(toMinorUnits(convertPrice(effectiveBase, course.currency, currency)), currency);
+  const originalLabel = formatAmount(toMinorUnits(convertPrice(course.price, course.currency, currency)), currency);
+  const availPct      = course.seats > 0 ? (course.seatsAvailable / course.seats) * 100 : 100;
+
+  async function applyCode() {
+    const c = codeInput.trim();
+    if (!c) return;
+    setCodeStatus("checking");
+    try {
+      const res = await fetch("/api/validate-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: c, courseId: course.id }),
+      });
+      const json = await res.json();
+      if (json.valid) {
+        setDiscount({ code: json.code, price: json.discountedPrice });
+        setCodeStatus("applied");
+      } else {
+        setDiscount(null);
+        setCodeStatus("invalid");
+      }
+    } catch {
+      setCodeStatus("invalid");
+    }
+  }
+
+  function clearCode() {
+    setDiscount(null);
+    setCodeInput("");
+    setCodeStatus("idle");
+  }
 
   const onSubmit = async (data: FormData) => {
     setStarting(true);
@@ -53,7 +89,7 @@ export function RegistrationSidebar({ course }: Props) {
       const res = await fetch("/api/stripe/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, courseId: course.id, currency }),
+        body: JSON.stringify({ ...data, courseId: course.id, currency, code: discount?.code }),
       });
       const json = await res.json();
       if (!res.ok || !json.clientSecret) {
@@ -80,12 +116,18 @@ export function RegistrationSidebar({ course }: Props) {
         {/* Price header */}
         <div className="p-6 border-b border-border bg-bg-elevated">
           <div className="text-text-dim text-xs font-semibold tracking-widest uppercase mb-1.5">Registration Fee</div>
-          <div className="flex items-baseline gap-2 mb-1">
+          <div className="flex items-baseline gap-2 mb-1 flex-wrap">
             <span className="font-display text-4xl font-bold text-white">
               {course.price > 0 ? amountLabel : "Contact for Pricing"}
             </span>
+            {course.price > 0 && discount && (
+              <span className="text-text-dim text-lg line-through">{originalLabel}</span>
+            )}
             {course.price > 0 && <span className="text-text-muted">{currency} per Participant</span>}
           </div>
+          {discount && (
+            <div className="text-green-600 text-xs font-semibold mb-1">Code {discount.code} applied</div>
+          )}
           <div className="flex items-center gap-2">
             <StatusBadge status={course.status} />
             <span className="text-text-muted text-sm">{course.duration}</span>
@@ -200,6 +242,37 @@ export function RegistrationSidebar({ course }: Props) {
               </div>
             ))}
 
+            {/* Discount code (optional) */}
+            <div>
+              <label className="block text-sm text-text-secondary mb-1.5">Discount code (optional)</label>
+              {discount ? (
+                <div className="flex items-center justify-between rounded-lg border border-green-300 bg-green-50 px-4 py-2.5">
+                  <span className="text-green-700 text-sm font-semibold">{discount.code} — you pay {amountLabel}</span>
+                  <button type="button" onClick={clearCode} className="text-green-700 text-xs underline shrink-0">Remove</button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    value={codeInput}
+                    onChange={(e) => { setCodeInput(e.target.value); if (codeStatus !== "idle") setCodeStatus("idle"); }}
+                    placeholder="Enter code"
+                    className="flex-1 bg-bg-elevated border border-border focus:border-purple-500 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-text-dim outline-none transition-colors uppercase"
+                  />
+                  <button
+                    type="button"
+                    onClick={applyCode}
+                    disabled={codeStatus === "checking" || !codeInput.trim()}
+                    className="px-4 rounded-lg text-sm font-semibold border border-purple-500 text-purple-700 hover:bg-purple-500/10 disabled:opacity-50 transition-all"
+                  >
+                    {codeStatus === "checking" ? "…" : "Apply"}
+                  </button>
+                </div>
+              )}
+              {codeStatus === "invalid" && (
+                <p className="text-red-500 text-xs mt-1">That code isn&apos;t valid for this course.</p>
+              )}
+            </div>
+
             {payError && (
               <div className="flex items-start gap-2 rounded-xl border border-red-300 bg-red-50 px-4 py-3">
                 <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
@@ -249,7 +322,9 @@ export function RegistrationSidebar({ course }: Props) {
                 <span className="text-text-secondary line-clamp-1 pr-2">{course.title}</span>
                 <span className="font-semibold text-white whitespace-nowrap">{amountLabel}</span>
               </div>
-              <div className="text-text-dim text-xs">{currency} · {course.duration}</div>
+              <div className="text-text-dim text-xs">
+                {currency} · {course.duration}{discount ? ` · code ${discount.code}` : ""}
+              </div>
             </div>
 
             <StripePaymentForm clientSecret={clientSecret} amountLabel={amountLabel} />

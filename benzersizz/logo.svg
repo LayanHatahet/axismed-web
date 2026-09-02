@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 571 600" role="img" aria-label="Benzersiz monogram">
+  <!-- white 'b': tall stem + large ring -->
+  <rect x="88" y="34" width="46" height="266" rx="4" fill="#f4f1ea"/>
+  <circle cx="278" cy="300" r="148" fill="none" stroke="#f4f1ea" stroke-width="44"/>
+  <!-- blue 'A': pointed apex rising above the ring -->
+  <path fill="#5E8FC7" d="M287 148 L457 582 L390 582 L287 314 L184 582 L117 582 Z"/>
+  <!-- ring arc re-drawn over the A's right leg (the interlock) -->
+  <circle cx="278" cy="300" r="148" fill="none" stroke="#f4f1ea" stroke-width="44"
+          pathLength="100" stroke-dasharray="21 79" stroke-dashoffset="-1" transform="rotate(16 278 300)"/>
+</svg>

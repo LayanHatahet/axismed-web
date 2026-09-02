@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>BENZERSIZ® — A Serious Business Technology Company</title>
+  <meta name="description" content="BENZERSIZ is a creative technology bureau engineering interactive 3D experiences and mobile applications for organizations that mean business. Istanbul · Dubai · Damascus. Scroll to inspect our closed deals." />
+  <meta name="theme-color" content="#211c17" />
+  <meta property="og:title" content="BENZERSIZ® — A Serious Business Technology Company" />
+  <meta property="og:description" content="Tomorrow's websites. Yesterday's values. Istanbul · Dubai · Damascus. Scroll to inspect our closed deals." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://benzersizz.com/" />
+  <link rel="canonical" href="https://benzersizz.com/" />
+  <link rel="icon" type="image/svg+xml" href="logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Baloo+2:wght@500;600;700;800&family=VT323&family=Rubik:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./lib/three.module.js",
+      "three/addons/": "./lib/jsm/"
+    }
+  }
+  </script>
+  <script src="./lib/lenis.min.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#ov-contact">Skip to contact</a>
+
+  <!-- force the Arabic fonts to load up-front so the in-canvas Arabic is ready on toggle -->
+  <div aria-hidden="true" style="position:absolute; left:-9999px; top:-9999px; opacity:0; pointer-events:none;">
+    <span style="font-family:'Baloo Bhaijaan 2'">صَفَقَاتٌ نُفِّذَتْ</span>
+    <span style="font-family:'Rubik'">مَوَاقِعُ الغَدِ بِقِيَمِ الأَمْسِ</span>
+  </div>
+
+  <!-- ============ BOOT SCREEN ============ -->
+  <div id="boot" aria-live="polite">
+    <div class="boot-inner">
+      <img class="boot-mark" src="logo.svg" alt="" width="86" height="92" />
+      <div class="boot-logo" aria-hidden="true">BENZERSIZ</div>
+      <div class="boot-sub">BENZERSIZ BUSINESS MACHINES &nbsp;·&nbsp; BIOS v2.6 &nbsp;·&nbsp; (C) 1984&ndash;2026</div>
+      <div class="boot-lines" id="boot-lines"></div>
+      <div class="boot-progress">
+        <span id="boot-pct">0%</span>
+        <span class="boot-bar"><span id="boot-bar-fill"></span></span>
+      </div>
+      <div class="boot-prompt" id="boot-prompt">PRESS ANY KEY TO BEGIN BUSINESS <span class="blink">▮</span></div>
+    </div>
+    <div class="boot-scanlines" aria-hidden="true"></div>
+  </div>
+
+  <!-- ============ WEBGL CANVAS ============ -->
+  <canvas id="gl" aria-hidden="true"></canvas>
+
+  <!-- ============ NAV ============ -->
+  <header id="nav">
+    <a class="nav-logo" href="#" data-goto="0" aria-label="BENZERSIZ — home">
+      <img class="nav-mark" src="logo.svg" alt="" width="26" height="28" />
+      <span>BENZERSIZ<sup>®</sup></span>
+    </a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="#" data-goto="0.165"><span class="mono">01</span> <span data-i18n="nav.deals">Closed Deals</span></a>
+      <a href="#" data-goto="phone"><span class="mono">02</span> <span data-i18n="nav.apps">The App Dept.</span></a>
+      <a href="#" data-goto="0.60"><span class="mono">03</span> <span data-i18n="nav.bureau">The Bureau</span></a>
+      <a href="#" data-goto="0.97"><span class="mono">04</span> <span data-i18n="nav.contact">Interface</span></a>
+    </nav>
+    <div class="nav-right">
+      <button id="lang-toggle" class="mono" aria-label="التبديل إلى العربية">ع</button>
+      <button id="sound-toggle" aria-pressed="true" aria-label="Toggle sound">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"></polygon>
+          <path class="spk-wave" d="M15.5 8.5a5 5 0 0 1 0 7"></path>
+          <path class="spk-wave" d="M18.5 5.5a9.4 9.4 0 0 1 0 13"></path>
+          <line class="spk-mute" x1="15" y1="9" x2="21" y2="15"></line>
+          <line class="spk-mute" x1="21" y1="9" x2="15" y2="15"></line>
+        </svg>
+      </button>
+      <a class="nav-cta" href="https://wa.me/905343388448?text=Hello%20BENZERSIZ%20—%20I%20want%20to%20book%20a%20call." target="_blank" rel="noopener" data-i18n="nav.cta">Book a Call</a>
+      <button id="nav-burger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+
+  <!-- invisible anchors that track the buttons drawn on the CRT -->
+  <a id="screen-live" href="#" target="_blank" rel="noopener" aria-label="View live site"></a>
+  <a id="screen-skip" href="#" role="button" aria-label="Skip portfolio"></a>
+  <a id="dial-hot" href="https://wa.me/905343388448?text=Hello%20BENZERSIZ%20—%20I%20want%20to%20start%20a%20project." target="_blank" rel="noopener" aria-label="Start your project on WhatsApp"></a>
+  <a id="phone-order" href="https://wa.me/905343388448?text=Hello%20BENZERSIZ%20—%20I%20want%20an%20app%20like%20this." target="_blank" rel="noopener" aria-label="Order an app on WhatsApp"></a>
+  <a id="phone-cal" href="#" target="_blank" rel="noopener" aria-label="Add the meeting to your calendar"></a>
+
+  <!-- ============ HUD ============ -->
+  <div id="hud" aria-hidden="true">
+    <div class="hud-bar"><span id="hud-bar-fill"></span></div>
+    <div class="hud-section mono" id="hud-section">SEC. 01 — RECEPTION</div>
+  </div>
+
+  <!-- ============ OVERLAYS ============ -->
+  <main id="overlays">
+
+    <!-- HERO -->
+    <section class="ov" id="ov-hero">
+      <div class="ov-center hero-stack">
+        <p class="overline mono reveal" data-i18n="hero.overline">A BUSINESS TECHNOLOGY COMPANY™</p>
+        <h1 class="hero-title">
+          <span class="ht-row reveal">
+            <a href="#" class="ht-new" data-goto="phone" data-i18n="hero.l1">Tomorrow&rsquo;s Websites,</a>
+            <span class="ht-hint mono" aria-hidden="true">
+              <svg class="ht-arrow ht-arrow-phone" viewBox="0 0 90 54" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M4 6 C 34 10, 62 18, 80 44" stroke-dasharray="5 5"></path>
+                <path d="M70 40 L 80 44 L 78 33"></path>
+              </svg>
+              <span data-i18n="hero.hint1">TAP — THE PHONE OPENS</span>
+            </span>
+          </span>
+          <br />
+          <span class="ht-row reveal">
+            <a href="#" class="ht-old" data-goto="0.165" data-i18n="hero.l2">Yesterday&rsquo;s Values.</a>
+            <span class="ht-hint mono" aria-hidden="true">
+              <svg class="ht-arrow ht-arrow-crt" viewBox="0 0 34 58" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M17 4 C 12 22, 22 32, 17 50" stroke-dasharray="5 5"></path>
+                <path d="M8 42 L 17 50 L 25 42"></path>
+              </svg>
+              <span data-i18n="hero.hint2">TAP — MEET THE COMPUTER</span>
+            </span>
+          </span>
+        </h1>
+      </div>
+      <p class="corner corner-c mono" data-i18n="hero.est">EST. 1984* — *FOUNDED 2024, BACKDATED FOR CREDIBILITY.</p>
+    </section>
+
+    <!-- PHONE (the app department — driven manually from the phone scene) -->
+    <section class="ov" id="ov-phone">
+      <div class="ov-top">
+        <p class="overline mono" data-i18n="phone.overline">INTER-OFFICE UPGRADE — DEPT. OF POCKET COMPUTING</p>
+        <h2 class="big-title" data-i18n="phone.title" data-i18n-html>The Future Called. <em>It&rsquo;s an App.</em></h2>
+        <p class="sub mono" data-i18n="phone.sub">PICK IT UP — EVERYTHING ON THIS SCREEN ACTUALLY WORKS. — MOBILE DIVISION</p>
+      </div>
+    </section>
+
+    <!-- HELLO (descent landing) -->
+    <section class="ov" id="ov-hello">
+      <h2 class="giant-word" data-i18n="word.hello">Hello.</h2>
+    </section>
+
+    <!-- ABOUT HEAD -->
+    <section class="ov" id="ov-about-head">
+      <div class="ov-center wide">
+        <p class="overline mono" data-i18n="about.overline">MEMORANDUM — TO WHOM IT MAY CONCERN</p>
+        <h2 class="big-title" data-i18n="about.title" data-i18n-html>Serious About Business.<br /><em>Suspiciously</em> Good at Websites.</h2>
+      </div>
+    </section>
+
+    <!-- ABOUT COPY -->
+    <section class="ov" id="ov-about-copy">
+      <div class="ov-center narrow">
+        <p class="about-p" data-i18n="about.p1">Benzersiz is a creative technology bureau. We design and engineer interactive experiences for organizations that mean business.</p>
+        <p class="about-p" data-i18n="about.p2">We believe in firm handshakes, firmer deadlines, and websites that load before the coffee gets cold.</p>
+        <p class="about-p" data-i18n="about.p3">We do not fix photocopiers. We do not reset passwords. We ship the future — on&nbsp;time, under&nbsp;budget, in&nbsp;triplicate.</p>
+      </div>
+      <div class="ticker" aria-hidden="true">
+        <div class="ticker-track">
+          <span data-i18n="about.ticker">SYNERGY ▲ +14.2%&ensp;·&ensp;LEVERAGE ▲ +9.8%&ensp;·&ensp;PARADIGM ▲ +40.1%&ensp;·&ensp;VERTICALS ▲ +7.7%&ensp;·&ensp;BUZZWORDS ▲ +120%&ensp;·&ensp;DOWNTIME ▼ −99.9%&ensp;·&ensp;HANDSHAKES ▲ FIRM&ensp;·&ensp;</span>
+          <span data-i18n="about.ticker">SYNERGY ▲ +14.2%&ensp;·&ensp;LEVERAGE ▲ +9.8%&ensp;·&ensp;PARADIGM ▲ +40.1%&ensp;·&ensp;VERTICALS ▲ +7.7%&ensp;·&ensp;BUZZWORDS ▲ +120%&ensp;·&ensp;DOWNTIME ▼ −99.9%&ensp;·&ensp;HANDSHAKES ▲ FIRM&ensp;·&ensp;</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLIENTS -->
+    <section class="ov" id="ov-clients">
+      <div class="ov-center">
+        <p class="overline mono" data-i18n="clients.overline">TRUSTED BY SERIOUS ORGANIZATIONS</p>
+        <ul class="client-wall">
+          <li>AXISMED</li><li>GALMED GROUP</li><li>OPAL GROUP</li>
+          <li>MEDLAB</li><li>TITAN CLINICS</li><li>AL ARYAF</li>
+          <li>LEVANT BRIDGE</li><li>AL HAMDIA</li><li data-i18n="clients.you">YOUR LOGO HERE?</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- COUPON -->
+    <section class="ov" id="ov-coupon">
+      <div class="ov-center">
+        <div class="coupon">
+          <span class="coupon-scissors" aria-hidden="true">✂</span>
+          <p class="coupon-no mono" data-i18n="coupon.no">VOUCHER № 001</p>
+          <p class="coupon-main" data-i18n="coupon.main">ONE (1) FREE CONSULTATION</p>
+          <p class="coupon-fine mono" data-i18n="coupon.fine" data-i18n-html>CUT ALONG THE DOTTED LINE. PRESENT AT YOUR NEAREST FAX MACHINE.<br />NO CASH VALUE. VOID WHERE PROHIBITED BY COMMON SENSE.</p>
+          <p class="coupon-hint mono" data-i18n="coupon.hint">✄ DRAG THE SCISSORS — CUT IT OUT FOR REAL.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- GOOD BUY (descent to the destruction dept.) -->
+    <section class="ov" id="ov-goodbuy">
+      <h2 class="giant-word em" data-i18n="word.goodbuy">Good buy.</h2>
+    </section>
+
+    <!-- SHRED -->
+    <section class="ov" id="ov-shred">
+      <div class="ov-top">
+        <h2 class="big-title" data-i18n="shred.title" data-i18n-html>Your Old Website? <em>Shred It.</em></h2>
+        <p class="sub mono" data-i18n="shred.sub">IT SERVED ITS TIME. IT WILL NOW BE PROFESSIONALLY DESTROYED. — UPGRADES&nbsp;DEPT.</p>
+      </div>
+    </section>
+
+    <!-- FLOPPY -->
+    <section class="ov" id="ov-floppy">
+      <div class="ov-top">
+        <p class="overline mono gold" data-i18n="floppy.overline">STILL NOT CONVINCED?</p>
+        <h2 class="big-title gold-title" data-i18n="floppy.title">Behold: The Golden&nbsp;Floppy.</h2>
+        <p class="sub mono" data-i18n="floppy.sub" data-i18n-html>1.44 MEGABYTES OF PURE COMMITMENT.<br />AWARDED TO CLIENTS WHO SIGN ON THE FIRST CALL.</p>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="ov" id="ov-contact">
+      <div class="contact-grid">
+        <h2 class="big-title contact-title" data-i18n="contact.title">Let&rsquo;s Interface.</h2>
+        <div class="contact-cols">
+          <div class="cc">
+            <p class="cc-label mono" data-i18n="contact.gen">GENERAL ENQUIRIES</p>
+            <a class="cc-big" href="mailto:hello@benzersizz.com">hello@benzersizz.com</a>
+            <p class="cc-note mono" data-i18n="contact.gen.note">FAXES ANSWERED IN ORDER OF AMBITION.</p>
+          </div>
+          <div class="cc">
+            <p class="cc-label mono" data-i18n="contact.biz">NEW BUSINESS</p>
+            <a class="cc-big" href="mailto:deals@benzersizz.com">deals@benzersizz.com</a>
+            <p class="cc-note mono" data-i18n="contact.biz.note" data-i18n-html>CALL BEFORE MIDNIGHT — SECOND WEBSITE FREE.*<br />*NOT REALLY.</p>
+          </div>
+          <div class="cc">
+            <p class="cc-label mono" data-i18n="contact.offices">OFFICES</p>
+            <p class="cc-big" data-i18n="contact.offices.big">Istanbul · Dubai · Damascus</p>
+            <p class="cc-note mono" data-i18n="contact.offices.note">THREE TIME ZONES OF UNINTERRUPTED PRODUCTIVITY.</p>
+          </div>
+          <div class="cc">
+            <p class="cc-label mono" data-i18n="contact.wa">DIRECT LINE</p>
+            <a class="cc-big" href="https://wa.me/905343388448?text=Hello%20BENZERSIZ%20—%20I%20want%20to%20book%20a%20call." target="_blank" rel="noopener">WhatsApp: +90 534 338 84 48</a>
+            <p class="cc-note mono" data-i18n="contact.wa.note">THE FASTEST FAX MACHINE EVER BUILT.</p>
+          </div>
+        </div>
+        <p class="signoff" data-i18n="contact.signoff" data-i18n-html>Yours in perpetuity,<br /><em>— The Board</em></p>
+      </div>
+      <footer class="footer-marquee" aria-hidden="true">
+        <div class="ticker-track slow">
+          <span data-i18n="footer.marquee">© BENZERSIZ 1984–2026 · ISTANBUL · DUBAI · DAMASCUS · ALL RIGHTS RESERVED · PRINTED IN TRIPLICATE · FORM 27B/6 · THIS WEBSITE IS ISO-CERTIFIED IN CONFIDENCE ·&ensp;</span>
+          <span data-i18n="footer.marquee">© BENZERSIZ 1984–2026 · ISTANBUL · DUBAI · DAMASCUS · ALL RIGHTS RESERVED · PRINTED IN TRIPLICATE · FORM 27B/6 · THIS WEBSITE IS ISO-CERTIFIED IN CONFIDENCE ·&ensp;</span>
+        </div>
+      </footer>
+    </section>
+
+  </main>
+
+  <div id="spacer" aria-hidden="true"></div>
+
+  <noscript>
+    <div class="noscript">
+      <h1>BENZERSIZ® — A Serious Business Technology Company</h1>
+      <p>This experience requires JavaScript. Kindly enable it, or send us a fax: hello@benzersizz.com</p>
+    </div>
+  </noscript>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

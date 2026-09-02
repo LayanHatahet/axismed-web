@@ -5,7 +5,7 @@ import { Save, RefreshCw } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import type { SiteSettings } from "@/lib/types";
 
-const tabs = ["General", "Contact", "Social", "SEO"] as const;
+const tabs = ["General", "Contact", "Social", "SEO", "Payment"] as const;
 type Tab = typeof tabs[number];
 
 function Field({
@@ -50,6 +50,9 @@ export default function AdminSettings() {
 
   const patchSEO = (key: keyof SiteSettings["seo"], value: string | string[]) =>
     setSettings((prev) => prev ? { ...prev, seo: { ...prev.seo, [key]: value } } : prev);
+
+  const patchPayment = <K extends keyof SiteSettings["paymentConfig"]>(key: K, value: SiteSettings["paymentConfig"][K]) =>
+    setSettings((prev) => prev ? { ...prev, paymentConfig: { ...prev.paymentConfig, [key]: value } } : prev);
 
   const handleSave = async () => {
     if (!settings) return;
@@ -157,6 +160,40 @@ export default function AdminSettings() {
                   rows={3}
                   className="w-full bg-bg-elevated border border-border focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors resize-none"
                 />
+              </div>
+            </div>
+          )}
+
+          {activeTab === "Payment" && (
+            <div className="glass glow-border rounded-2xl p-8 space-y-5">
+              <h2 className="font-display text-lg font-bold text-white mb-2">Payment Configuration</h2>
+              <Field
+                label="Currency"
+                value={settings.paymentConfig.currency}
+                onChange={(v) => patchPayment("currency", v)}
+                placeholder="USD"
+              />
+              <Field
+                label="Payment Gateway"
+                value={settings.paymentConfig.gateway}
+                onChange={(v) => patchPayment("gateway", v)}
+                placeholder="stripe"
+              />
+              <Field
+                label="Stripe Publishable Key"
+                value={settings.paymentConfig.stripePublishableKey ?? ""}
+                onChange={(v) => patchPayment("stripePublishableKey", v)}
+                placeholder="pk_live_..."
+              />
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => patchPayment("testMode", !settings.paymentConfig.testMode)}
+                  className={`w-11 h-6 rounded-full transition-colors ${settings.paymentConfig.testMode ? "bg-purple-500" : "bg-white/10"}`}
+                >
+                  <span className={`block w-4 h-4 bg-white rounded-full transition-transform mx-1 ${settings.paymentConfig.testMode ? "translate-x-5" : "translate-x-0"}`} />
+                </button>
+                <span className="text-sm text-text-secondary">Test mode</span>
               </div>
             </div>
           )}

@@ -5,14 +5,47 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import type { Course } from "@/lib/types";
 import { Clock, User, MapPin, Building2, Phone, Mail, DollarSign, Users, Tag, Image as ImageIcon, CalendarDays } from "lucide-react";
+import {
+  DEFAULT_CONTACT_PHONE, DEFAULT_CONTACT_EMAIL, DEFAULT_INCLUDED,
+  DEFAULT_PRICING_TIERS, DEFAULT_TRAVEL_INFO, DEFAULT_PAYMENT_INFO,
+  DEFAULT_SPONSORS_INTRO, DEFAULT_GALLERY_INTRO,
+} from "@/lib/data/courseDefaults";
 
 const tabs = ["Overview", "Agenda", "Faculty", "Sponsors", "Venue", "Fees", "Gallery"] as const;
 type Tab = typeof tabs[number];
 
 interface Props { course: Course }
 
+/** Renders body copy that may contain the {email} token, linking the address. */
+function CopyWithEmail({ text, email, className }: { text: string; email: string; className?: string }) {
+  const parts = text.split("{email}");
+  return (
+    <p className={className}>
+      {parts.map((part, i) => (
+        <span key={i}>
+          {part}
+          {i < parts.length - 1 && (
+            <a href={`mailto:${email}`} className="text-purple-400 hover:text-purple-300 transition-colors">
+              {email}
+            </a>
+          )}
+        </span>
+      ))}
+    </p>
+  );
+}
+
 export function CourseContent({ course }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("Overview");
+
+  const contactPhone  = course.contactPhone  || DEFAULT_CONTACT_PHONE;
+  const contactEmail  = course.contactEmail  || DEFAULT_CONTACT_EMAIL;
+  const included      = course.included?.length      ? course.included      : DEFAULT_INCLUDED;
+  const pricingTiers  = course.pricingTiers?.length  ? course.pricingTiers  : DEFAULT_PRICING_TIERS;
+  const travelInfo    = course.travelInfo    || DEFAULT_TRAVEL_INFO;
+  const paymentInfo   = course.paymentInfo   || DEFAULT_PAYMENT_INFO;
+  const sponsorsIntro = course.sponsorsIntro || DEFAULT_SPONSORS_INTRO;
+  const galleryIntro  = course.galleryIntro  || DEFAULT_GALLERY_INTRO;
 
   return (
     <div>
@@ -200,9 +233,7 @@ export function CourseContent({ course }: Props) {
           {activeTab === "Sponsors" && (
             <div className="glass glow-border rounded-2xl p-8">
               <h3 className="font-display text-xl font-bold text-white mb-2">Program Sponsors</h3>
-              <p className="text-text-muted text-sm mb-8">
-                This program is made possible through the support of leading medical device and healthcare companies.
-              </p>
+              <p className="text-text-muted text-sm mb-8">{sponsorsIntro}</p>
               {course.sponsors.length === 0 ? (
                 <SponsorsPlaceholder />
               ) : (
@@ -239,21 +270,15 @@ export function CourseContent({ course }: Props) {
               <div className="glass glow-border rounded-2xl overflow-hidden">
                 {/* Venue photo */}
                 <div className="relative h-56 bg-bg-elevated overflow-hidden">
-                  {/*
-                   * VENUE PHOTO PLACEHOLDER
-                   * Type: Architectural / interior photography
-                   * Mood: Premium, modern, prestigious — conveys quality and credibility
-                   * Composition: Wide-angle interior of conference hall, simulation lab, or surgical training center
-                   * Lighting: Professional event lighting — warm ambient + cool accent, dramatic depth
-                   * Environment: 5-star hotel conference facility, university simulation center, or purpose-built surgical training lab
-                   * Direction: Showcase the full space — ceiling height, seating arrangement, AV setup, premium finishes
-                   * Atmosphere: Conveys the professional caliber of the training environment
-                   */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-900/50 via-bg-base/30 to-bg-base/60 flex flex-col items-center justify-center gap-2">
-                    <MapPin className="w-8 h-8 text-purple-400/50" />
-                    <span className="text-white/30 text-xs font-medium tracking-wider uppercase">Venue Photo</span>
-                    <span className="text-white/20 text-[11px] text-center px-8">Premium surgical training facility · conference hall interior photography</span>
-                  </div>
+                  {course.venueImage ? (
+                    <Image src={course.venueImage} alt={course.location || "Venue"} fill className="object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-900/50 via-bg-base/30 to-bg-base/60 flex flex-col items-center justify-center gap-2">
+                      <MapPin className="w-8 h-8 text-purple-400/50" />
+                      <span className="text-white/30 text-xs font-medium tracking-wider uppercase">Venue Photo</span>
+                      <span className="text-white/20 text-[11px] text-center px-8">Premium surgical training facility · conference hall interior photography</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-8">
@@ -262,8 +287,8 @@ export function CourseContent({ course }: Props) {
                     {[
                       { icon: Building2, label: "Facility",   value: course.location || "To be confirmed" },
                       { icon: MapPin,    label: "City",        value: course.city },
-                      { icon: Phone,     label: "Inquiries",   value: "+971 50 189 7038" },
-                      { icon: Mail,      label: "Email",       value: "admin@theaxismed.com" },
+                      { icon: Phone,     label: "Inquiries",   value: contactPhone },
+                      { icon: Mail,      label: "Email",       value: contactEmail },
                     ].map(({ icon: Icon, label, value }) => (
                       <div key={label} className="flex items-start gap-4">
                         <div className="w-10 h-10 rounded-xl bg-purple-500/12 flex items-center justify-center shrink-0">
@@ -279,19 +304,25 @@ export function CourseContent({ course }: Props) {
 
                   {/* Map placeholder */}
                   <div className="mt-6 h-48 bg-bg-elevated rounded-xl border border-border flex items-center justify-center overflow-hidden relative">
-                    {/*
-                     * MAP PLACEHOLDER
-                     * Type: Interactive map embed or static map screenshot
-                     * Style: Dark-mode map (Mapbox dark, Google Maps dark theme)
-                     * Direction: Show venue pin with surrounding area context, zoom level ~15
-                     * Notes: Replace with actual Google Maps or Mapbox embed once venue is confirmed
-                     */}
-                    <div className="text-center">
-                      <MapPin className="w-8 h-8 text-purple-400/40 mx-auto mb-2" />
-                      <p className="text-text-dim text-sm">Interactive map · {course.city}</p>
-                      <p className="text-text-dim text-xs mt-1">Map will appear once venue is confirmed</p>
-                    </div>
-                    <div className="absolute inset-0 bg-grid opacity-30" />
+                    {course.venueMapEmbed ? (
+                      <iframe
+                        src={course.venueMapEmbed}
+                        title={`Map · ${course.location || course.city}`}
+                        className="absolute inset-0 w-full h-full border-0"
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        allowFullScreen
+                      />
+                    ) : (
+                      <>
+                        <div className="text-center">
+                          <MapPin className="w-8 h-8 text-purple-400/40 mx-auto mb-2" />
+                          <p className="text-text-dim text-sm">Interactive map · {course.city}</p>
+                          <p className="text-text-dim text-xs mt-1">Map will appear once venue is confirmed</p>
+                        </div>
+                        <div className="absolute inset-0 bg-grid opacity-30" />
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -299,14 +330,11 @@ export function CourseContent({ course }: Props) {
               {/* Travel info */}
               <div className="glass glow-border rounded-2xl p-6">
                 <h4 className="font-display font-bold text-white mb-4">Travel & Accommodation</h4>
-                <p className="text-text-secondary text-sm leading-relaxed">
-                  AxisMed partners with premium hotels near the venue for participant accommodation.
-                  Special rates are available for registered attendees. Contact us at{" "}
-                  <a href="mailto:admin@theaxismed.com" className="text-purple-400 hover:text-purple-300 transition-colors">
-                    admin@theaxismed.com
-                  </a>{" "}
-                  for hotel recommendations and group booking arrangements.
-                </p>
+                <CopyWithEmail
+                  text={travelInfo}
+                  email={contactEmail}
+                  className="text-text-secondary text-sm leading-relaxed"
+                />
               </div>
             </div>
           )}
@@ -329,14 +357,7 @@ export function CourseContent({ course }: Props) {
                 <div className="p-8">
                   <h3 className="font-display text-lg font-bold text-white mb-5">What&apos;s Included</h3>
                   <div className="space-y-3">
-                    {[
-                      "Full program attendance for all sessions",
-                      "Official AxisMed certificate of completion",
-                      "Program materials and course handbook",
-                      "Catering and refreshments throughout",
-                      "Access to AxisMed digital resource library",
-                      "Networking events with faculty and peers",
-                    ].map((item) => (
+                    {included.map((item) => (
                       <div key={item} className="flex items-start gap-3">
                         <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0 mt-0.5">
                           <div className="w-2 h-2 rounded-full bg-purple-400" />
@@ -350,13 +371,9 @@ export function CourseContent({ course }: Props) {
 
               {/* Pricing tiers */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {[
-                  { tier: "Early Bird",    price: Math.round(course.price * 0.85), note: "Register 60+ days before",   highlight: false },
-                  { tier: "Standard",      price: course.price,                    note: "Standard registration",       highlight: true  },
-                  { tier: "Group (3+)",    price: Math.round(course.price * 0.90), note: "3 or more participants",      highlight: false },
-                ].map(({ tier, price, note, highlight }) => (
+                {pricingTiers.map(({ label, percent, note, highlight }) => (
                   <div
-                    key={tier}
+                    key={label}
                     className={`rounded-2xl p-6 border transition-all ${
                       highlight
                         ? "bg-purple-500/12 border-purple-500/35 shadow-[0_0_24px_rgba(164,158,207,0.15)]"
@@ -366,9 +383,9 @@ export function CourseContent({ course }: Props) {
                     {highlight && (
                       <div className="text-xs text-purple-300 font-semibold uppercase tracking-wider mb-3">Most Common</div>
                     )}
-                    <div className="font-display text-sm font-semibold text-text-muted mb-2">{tier}</div>
+                    <div className="font-display text-sm font-semibold text-text-muted mb-2">{label}</div>
                     <div className="font-display text-3xl font-bold text-white mb-1">
-                      ${price.toLocaleString()}
+                      ${Math.round(course.price * (percent / 100)).toLocaleString()}
                     </div>
                     <div className="text-text-dim text-xs">{note}</div>
                   </div>
@@ -383,14 +400,11 @@ export function CourseContent({ course }: Props) {
                   </div>
                   <div>
                     <h4 className="font-display font-bold text-white mb-2">Payment & Invoicing</h4>
-                    <p className="text-text-secondary text-sm leading-relaxed">
-                      Payment is accepted via bank transfer or credit card. An official invoice and registration
-                      confirmation will be sent within 24 hours of registration. Group and institutional billing
-                      available upon request — contact{" "}
-                      <a href="mailto:admin@theaxismed.com" className="text-purple-400 hover:text-purple-300 transition-colors">
-                        admin@theaxismed.com
-                      </a>.
-                    </p>
+                    <CopyWithEmail
+                      text={paymentInfo}
+                      email={contactEmail}
+                      className="text-text-secondary text-sm leading-relaxed"
+                    />
                   </div>
                 </div>
               </div>
@@ -402,9 +416,7 @@ export function CourseContent({ course }: Props) {
             <div className="space-y-6">
               <div className="glass glow-border rounded-2xl p-6">
                 <h3 className="font-display text-xl font-bold text-white mb-2">Media & Gallery</h3>
-                <p className="text-text-muted text-sm mb-6">
-                  Photos and highlights from previous editions of this program.
-                </p>
+                <p className="text-text-muted text-sm mb-6">{galleryIntro}</p>
 
                 {course.gallery.length === 0 ? (
                   <GalleryPlaceholder />

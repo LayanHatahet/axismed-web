@@ -24,20 +24,32 @@ function StatusIcon({ status }: { status: Status }) {
   return <XCircle className="w-3.5 h-3.5 text-text-dim" />;
 }
 
-function DetailModal({ reg, onClose, onStatusChange, onDelete }: {
+function DetailModal({ reg, onClose, onStatusChange, onDelete, onNotesChange }: {
   reg: Registration;
   onClose: () => void;
   onStatusChange: (id: string, status: Status) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  onNotesChange: (id: string, notes: string) => Promise<void>;
 }) {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [notes, setNotes] = useState(reg.notes ?? "");
+  const [savingNotes, setSavingNotes] = useState(false);
+  const [notesSaved, setNotesSaved] = useState(false);
 
   const changeStatus = async (status: Status) => {
     setSaving(true);
     await onStatusChange(reg.id, status);
     setSaving(false);
     onClose();
+  };
+
+  const saveNotes = async () => {
+    setSavingNotes(true);
+    await onNotesChange(reg.id, notes);
+    setSavingNotes(false);
+    setNotesSaved(true);
+    setTimeout(() => setNotesSaved(false), 1500);
   };
 
   const handleDelete = async () => {
@@ -85,12 +97,24 @@ function DetailModal({ reg, onClose, onStatusChange, onDelete }: {
               <span className="text-sm text-white">{value || "—"}</span>
             </div>
           ))}
-          {reg.notes && (
-            <div className="flex gap-3">
-              <span className="text-xs text-text-dim w-24 shrink-0 mt-0.5">Notes</span>
-              <span className="text-sm text-text-secondary">{reg.notes}</span>
-            </div>
-          )}
+        </div>
+
+        <div className="mb-6">
+          <p className="text-xs text-text-dim mb-2">Notes</p>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={3}
+            placeholder="Internal notes about this registration…"
+            className="w-full bg-bg-elevated border border-border focus:border-purple-500/70 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-text-dim outline-none transition-colors resize-none"
+          />
+          <button
+            onClick={saveNotes}
+            disabled={savingNotes || notes === (reg.notes ?? "")}
+            className="mt-2 text-xs text-purple-400 hover:text-purple-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            {notesSaved ? "Saved!" : savingNotes ? "Saving…" : "Save Notes"}
+          </button>
         </div>
 
         <div className="mb-6">
@@ -155,6 +179,15 @@ export default function AdminRegistrations() {
   const deleteReg = async (id: string) => {
     await fetch(`/api/registrations/${id}`, { method: "DELETE" });
     setRegistrations((prev) => prev.filter((r) => r.id !== id));
+  };
+
+  const updateNotes = async (id: string, notes: string) => {
+    await fetch(`/api/registrations/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notes }),
+    });
+    setRegistrations((prev) => prev.map((r) => r.id === id ? { ...r, notes } : r));
   };
 
   const exportCSV = () => {
@@ -332,6 +365,7 @@ export default function AdminRegistrations() {
             onClose={() => setSelected(null)}
             onStatusChange={updateStatus}
             onDelete={deleteReg}
+            onNotesChange={updateNotes}
           />
         )}
       </AnimatePresence>
